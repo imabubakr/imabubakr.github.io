@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="projects.css">
+    <script src="script.js"></script>
+    <title>My Projects</title>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="resume.html">Resume</a>
+        <a href="projects.html" class="active" >Projects</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </header>
+    <main>
+      <section id="top">
+        <h1>Projects</h1>
+      </section>
+      <div class="project-container">
+        <div class="project">
+          <h2>Project 1</h2>
+          <div class="project-grid">
+            <div class="project-image">
+              <div class="slideshow">
+                <img src="project_photos/project1-1.JPG" alt="Project 1 Image 1" class="active">
+                <img src="project_photos/project1-2.JPG" alt="Project 1 Image 2">
+                <img src="project_photos/project1-3.JPG" alt="Project 1 Image 3">
+                <button class="prev" onclick="changeImage(this.parentNode, -1)">&#10094;</button>
+                <button class="next" onclick="changeImage(this.parentNode, 1)">&#10095;</button>
+              </div>
+            </div>
+            <div class="project-description">
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ullamcorper, massa ac sagittis fringilla, libero mauris aliquet mauris, vel imperdiet velit tellus vel nisi.</p>
+            </div>
+          </div>
+        </div>
+        <div class="project">
+          <h2>Project 2</h2>
+          <div class="project-grid">
+            <div class="project-image">
+              <div class="slideshow">
+                <img src="project_photos/project1-4.JPG" alt="Project 2 Image 1" class="active">
+                <img src="project_photos/project1-5.JPG" alt="Project 2 Image 2">
+                <img src="project_photos/project1-6.JPG" alt="Project 2 Image 3">
+                <button class="prev" onclick="changeImage(this.parentNode, -1)">&#10094;</button>
+                <button class="next" onclick="changeImage(this.parentNode, 1)">&#10095;</button>
+              </div>
+            </div>
+            <div class="project-description">
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ullamcorper, massa ac sagittis fringilla, libero mauris aliquet mauris, vel imperdiet velit tellus vel nisi.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      Copyright &copy; 2023 Your Name
+    </footer>
+  </body>
+</html>

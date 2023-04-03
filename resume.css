@@ -1,0 +1,229 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+.text {
+  text-align: center;
+  color: white;
+  font-size: 36px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Open Sans', Arial, sans-serif;
+  background-color: #f7f7f7;
+  height: 100%;
+}
+
+body {
+  margin-top: 100px; /* To push the page down*/
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  padding: 0 20px;
+  z-index: 10;
+}
+
+nav a {
+  text-decoration: none;
+  color: #333;
+  font-size: 18px;
+  padding: 10px 10px;
+  border-radius: 0;
+  transition: all 0.2s ease-in-out;
+  margin-right: 2px;
+}
+
+nav a:hover {
+  background-color: #c2c1c1;
+  color: #fff;
+}
+
+nav a.active {
+  background-color: #c2c1c1;
+  color: #fff;
+}
+
+main {
+  margin-top: 100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  margin-top: 100px;
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+footer {
+  position:fixed;
+  bottom:0;
+  background-color: #f7f7f7;
+  color: rgb(240, 239, 239);
+  text-align: center;
+  padding: 20px;
+  font-size: 15px;
+  opacity: 0.5; 
+  background-color: rgba(0, 0, 0, 0);
+  right: 0;
+}
+
+/* Add your resume-specific styles below this line */
+/* Style for resume section */
+#resume {
+  text-align: left;
+  padding: 20px 60px 20px 60px;
+  background-color: #f7f7f7;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #ccc4b9;
+  margin: 20px auto 20px auto;
+  max-width: 900px;
+}
+
+
+/* Style for top section */
+#top-section {
+  background-color: #f5f5f5;
+  padding: 5px;
+}
+
+/* Style for heading */
+#resume h2 {
+  font-size: 20px;
+  color: #333;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ddd;
+}
+
+/* Style for subheading */
+#resume h3 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
+  margin-top: 20px;
+  position: relative;
+}
+
+#resume h2,
+#resume h3 {
+  padding-top: 5px;
+  padding-bottom: 0px;
+}
+
+#resume h2 {
+  margin-bottom: 20px;
+}
+
+#resume h3 {
+  margin-top: 10px;
+}
+
+#resume h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -10px;
+  height: 1px;
+  width: 650px;
+  background-color: #ddd;
+}
+
+/* Style for bullet point text */
+#resume ul li {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+/* Style for dates */
+#resume .date {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+/* Style for descriptions */
+#resume .description {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Style for links */
+#resume a {
+  color: #0077cc;
+  text-decoration: none;
+  border-bottom: 2px solid #0077cc;
+}
+
+/* Use white space effectively */
+#resume h2,
+#resume h3 {
+  margin-top: 5px;
+}
+
+#resume ul {
+  margin-left: 20px;
+}
+
+#resume ul li {
+  margin-bottom: 5px;
+}
+
+#resume ul {
+  list-style: none;
+}
+
+/* Set max width and center the resume section */
+#resume {
+  margin: 10px auto;
+  max-width: 800px;
+}
+
+/* Media queries for responsive design */
+@media screen and (max-width: 600px) {
+  #top-section h1 {
+    font-size: 28px;
+  }
+
+  #top-section p {
+    font-size: 16px;
+  }
+
+  #resume h2 {
+    font-size: 22px;
+  }
+
+  #resume h3 {
+    font-size: 16px;
+  }
+
+  #resume ul li {
+    font-size: 14px;
+  }
+
+  #resume ul li::before {
+    font-size: 14px;
+  }
+}
+
+/* Decrease padding for h1 in top section */
+#top-section h1 {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}

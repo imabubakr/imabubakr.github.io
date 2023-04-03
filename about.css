@@ -1,0 +1,338 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+.text {
+  text-align: center;
+  color: white;
+  font-size: 36px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Open Sans', Arial, sans-serif;
+  background-color: #f7f7f7;
+  height: 100%;
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  padding: 0 20px;
+  z-index: 10;
+}
+
+nav a {
+  text-decoration: none;
+  color: #333;
+  font-size: 18px;
+  padding: 10px 10px;
+  border-radius: 0;
+  transition: all 0.2s ease-in-out;
+  margin-right: 2px;
+}
+
+nav a:hover {
+  background-color: #c2c1c1;
+  color: #fff;
+}
+
+nav a.active {
+  background-color: #c2c1c1;
+  color: #fff;
+}
+
+main {
+  margin-top: 100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  margin-top: 100px;
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+footer {
+  position:fixed;
+  bottom:0;
+  background-color: #f7f7f7;
+  color: rgb(240, 239, 239);
+  text-align: center;
+  padding: 20px;
+  font-size: 15px;
+  opacity: 0.5; 
+  background-color: rgba(0, 0, 0, 0);
+  right: 0;
+}
+
+#about {
+  margin-top: 100px;
+  width: 40%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+#about h2 {
+  margin-top: 100px;
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+#about p {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 30px;
+  color: #555;
+  text-align: justify;
+}
+
+
+button {
+  background-color: #b9b8b8;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 30px;
+}
+
+button:hover {
+  background-color: #efa22f;
+}
+
+@media all and (max-width: 991px) {
+}
+@media all and (max-width: 768px) {
+	.all-timelines::before {
+		right: unset;
+		top: 0;
+	}
+	.single-timeline:nth-child(2n) .timeline-text {
+		padding-left: 30px;
+		padding-right: 0;
+		text-align: left;
+	}
+	.single-timeline:nth-child(2n) .t-square {
+		left: -6px;
+		right: unset;
+	}
+	.timeline-blank {
+		display: none;
+	}
+	.timeline-text {
+		width: 100%;
+	}
+	.single-timeline:nth-child(even) .timeline-text span {
+		text-align: left !important;
+	}
+}
+@media all and (max-width: 575px) {
+}
+@media all and (max-width: 360px) {
+	.all-timelines::before {
+		top: 32px;
+	}
+}
+
+.collapse {
+  width: 37%; /* Set the width of the element */
+  margin: 0 auto; /* Set the top and bottom margin to 0 and the left and right margin to auto */
+}
+
+.collapse transition, ul li i:before, ul li i:after, p {
+  transition: all 0.25s ease-in-out;
+}
+
+.collapse flipIn, ul li, h1 {
+  animation: flipdown 0.5s ease both;
+}
+
+.collapse no-select, h2 {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.collapse html {
+  width: 100%;
+  height: 100%;
+  perspective: 900;
+  overflow-y: scroll;
+  background-color: #dce7eb;
+  font-family: "Titillium Web", sans-serif;
+  color: #f7f7f7;
+}
+
+.collapse body {
+  min-height: 0;
+  display: inline-block;
+  position: relative;
+  left: 50%;
+  margin: 90px 0;
+  transform: translate(-50%, 0);
+  box-shadow: 0 10px 0 0 #f7f7f7 inset;
+  background-color: #f7f7f7;
+  max-width: 450px;
+  padding: 30px;
+}
+@media (max-width: 550px) {
+  .collapse body {
+    box-sizing: border-box;
+    transform: translate(0, 0);
+    max-width: 100%;
+    min-height: 100%;
+    margin: 0;
+    left: 0;
+  }
+}
+
+.collapse h1, h2 {
+  color: #e2921a;
+}
+
+.collapse h1 {
+  text-transform: uppercase;
+  font-size: 36px;
+  line-height: 42px;
+  letter-spacing: 3px;
+  font-weight: 100;
+}
+
+.collapse h2 {
+  font-size: 26px;
+  line-height: 34px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  display: block;
+  background-color: #f7f7f7;
+  margin: 0;
+  cursor: pointer;
+}
+
+.collapse p {
+  color: rgba(48, 69, 92, 0.8);
+  font-size: 17px;
+  line-height: 26px;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  max-height: 800px;
+  opacity: 1;
+  transform: translate(0, 0);
+  margin-top: 14px;
+  z-index: 2;
+}
+
+.collapse ul {
+  list-style: none;
+  max-width: 770px;
+  margin: 0 auto;
+  perspective: 900;
+  padding: 0;
+}
+.collapse ul li {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  padding-bottom: 4px;
+  padding-top: 18px;
+  border-top: 1px dotted #dce7eb;
+}
+.collapse ul li:nth-of-type(1) {
+  animation-delay: 0.5s;
+}
+.collapse ul li:nth-of-type(2) {
+  animation-delay: 0.75s;
+}
+.collapse ul li:nth-of-type(3) {
+  animation-delay: 1s;
+}
+.collapse ul li:last-of-type {
+  padding-bottom: 0;
+}
+.collapse ul li i {
+  position: absolute;
+  transform: translate(-6px, 0);
+  margin-top: 16px;
+  right: 0;
+}
+.collapse ul li i:before, ul li i:after {
+  content: "";
+  position: absolute;
+  background-color: #e2921a;
+  width: 3px;
+  height: 9px;
+}
+.collapse ul li i:before {
+  transform: translate(-2px, 0) rotate(45deg);
+}
+.collapse ul li i:after {
+  transform: translate(2px, 0) rotate(-45deg);
+}
+.collapse ul li input[type=checkbox] {
+  position: absolute;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0;
+}
+.collapse ul li input[type=checkbox]:checked ~ p {
+  margin-top: 0;
+  max-height: 0;
+  opacity: 0;
+  transform: translate(0, 50%);
+}
+.collapse ul li input[type=checkbox]:checked ~ i:before {
+  transform: translate(2px, 0) rotate(45deg);
+}
+.collapse ul li input[type=checkbox]:checked ~ i:after {
+  transform: translate(-2px, 0) rotate(-45deg);
+}
+
+
+@keyframes flipdown {
+  0% {
+    opacity: 0;
+    transform-origin: top center;
+    transform: rotateX(-90deg);
+  }
+  5% {
+    opacity: 1;
+  }
+  80% {
+    transform: rotateX(8deg);
+  }
+  83% {
+    transform: rotateX(6deg);
+  }
+  92% {
+    transform: rotateX(-3deg);
+  }
+  100% {
+    transform-origin: top center;
+    transform: rotateX(0deg);
+  }
+}

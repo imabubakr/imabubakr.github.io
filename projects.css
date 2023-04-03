@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+.text {
+  text-align: center;
+  color: white;
+  font-size: 36px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Open Sans', Arial, sans-serif;
+  background-color: #f7f7f7;
+  height: 100%;
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  padding: 0 20px;
+  z-index: 10;
+}
+
+nav a {
+  text-decoration: none;
+  color: #333;
+  font-size: 18px;
+  padding: 10px 10px;
+  border-radius: 0;
+  transition: all 0.2s ease-in-out;
+  margin-right: 2px;
+}
+
+nav a:hover {
+  background-color: #c2c1c1;
+  color: #fff;
+}
+
+nav a.active {
+  background-color: #c2c1c1;
+  color: #fff;
+}
+
+main {
+  margin-top: 100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  margin-top: 100px;
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+footer {
+  position:fixed;
+  bottom:0;
+  background-color: #f7f7f7;
+  color: rgb(240, 239, 239);
+  text-align: center;
+  padding: 20px;
+  font-size: 15px;
+  opacity: 0.5; 
+  background-color: rgba(0, 0, 0, 0);
+  right: 0;
+}
+
+button {
+  background-color: #b9b8b8;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 30px;
+}
+
+button:hover {
+  background-color: #efa22f;
+}
+
+.project-container {
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 400px;
+  align-items: start;
+  width: 1200px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.project {
+  background-color: #f7f7f7;
+  padding: 20px;
+  text-align: center;
+}
+
+.project h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.project p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.slideshow {
+  position: relative;
+  margin-top: -30px;
+  width: 100%;
+  max-width: 700px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slideshow img {
+  width: 100%;
+  height: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.slideshow img.active {
+  opacity: 1;
+}
+
+.slideshow button {
+  position: absolute;
+  bottom: -470px;
+  transform: translateY(-50%);
+  background-color: transparent;
+  border: none;
+  color: #ce6666;
+  font-size: 24px;
+  cursor: pointer;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.slideshow button:hover {
+  opacity: 0.8;
+}
+
+.slideshow .prev {
+  left: 10px;
+}
+
+.slideshow .next {
+  right: 10px;
+}
+
+/* Decrease padding for h1 in top section */
+#top-section h1 {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 20px;
+  align-items: center;
+}
+
+.project-image {
+  grid-column: 1 / 2;
+}
+
+/* Hover effect new addition */
+.project-image:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease-in-out;
+}
+
+.project {
+  /* Your existing styles */
+  box-shadow: 0 0 0px rgba(0,0,0,0.2);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.project:hover {
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+
+
