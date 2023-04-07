@@ -64,19 +64,6 @@ h1 {
   letter-spacing: 3px;
 }
 
-footer {
-  position:fixed;
-  bottom:0;
-  background-color: #f7f7f7;
-  color: rgb(240, 239, 239);
-  text-align: center;
-  padding: 20px;
-  font-size: 15px;
-  opacity: 0.5; 
-  background-color: rgba(0, 0, 0, 0);
-  right: 0;
-}
-
 #about {
   margin-top: 100px;
   width: 40%;
@@ -153,7 +140,7 @@ button:hover {
 }
 
 .collapse {
-  width: 37%; /* Set the width of the element */
+  width: 25%; /* Set the width of the element */
   margin: 0 auto; /* Set the top and bottom margin to 0 and the left and right margin to auto */
 }
 
