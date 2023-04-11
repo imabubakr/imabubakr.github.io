@@ -304,32 +304,28 @@ button:hover {
 /* Media queries for responsive design */
 @media screen and (max-width: 600px) {
   .text {
-    font-size: 24px;
+    font-size: 28px;
+    margin: 0;
   }
-  
+
   h1 {
     font-size: 28px;
   }
-  
+
   #about {
     width: 80%;
   }
-  
+
   #about h2 {
     font-size: 28px;
   }
-  
+
   #about p {
-    font-size: 16px;
+    font-size: 18px;
   }
-  
+
   button {
-    font-size: 14px;
+    font-size: 18px;
   }
 }
 
-@media all and (max-width: 768px) {
-  .collapse {
-    width: 60%;
-  }
-}
