@@ -268,11 +268,11 @@ button:hover {
 
 /* Media queries for responsive design */
 @media screen and (max-width: 600px) {
-  #top-section h1 {
+  #h1 {
     font-size: 28px;
   }
 
-  #top-section p {
+  #p {
     font-size: 16px;
   }
 
