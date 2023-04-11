@@ -301,31 +301,29 @@ button:hover {
 }
 
 
-/* Media queries for responsive design */
 @media screen and (max-width: 600px) {
   .text {
-    font-size: 28px;
-    margin: 0;
+  font-size: 32px;
+  margin: 0 10px;
   }
-
+  
   h1 {
-    font-size: 28px;
+  font-size: 36px;
   }
-
+  
   #about {
-    width: 80%;
+  width: 90%;
   }
-
+  
   #about h2 {
-    font-size: 28px;
+  font-size: 32px;
   }
-
+  
   #about p {
-    font-size: 18px;
+  font-size: 20px;
   }
-
+  
   button {
-    font-size: 18px;
+  font-size: 20px;
   }
-}
-
+  }
