@@ -347,21 +347,6 @@ p {
 	text-align: right;
 }
 
-@media only screen and (max-width: 600px) {
-  body {
-  font-size: 14px;
-  }
-  h1 {
-  font-size: 24px;
-  }
-  #about h2 {
-  font-size: 24px;
-  }
-  #about p {
-  font-size: 16px;
-  }
-  }
-
 @media all and (max-width: 991px) {
 }
 @media all and (max-width: 768px) {
@@ -394,4 +379,41 @@ p {
 	.all-timelines::before {
 		top: 32px;
 	}
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+  .background-image {
+    height: calc(100vh - 50px);
+  }
+  #about {
+    width: 80%;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  .background-image {
+    height: calc(100vh - 50px);
+  }
+  #about {
+    width: 60%;
+  }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .background-image {
+    height: 100vh;
+  }
+  #about {
+    width: 50%;
+  }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  #about {
+    width: 40%;
+  }
 }
