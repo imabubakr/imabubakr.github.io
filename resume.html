@@ -9,14 +9,13 @@
       <nav>
         <a href="index.html">Home</a>
         <a href="about.html">About</a>
-        <a href="resume.html" class="active" >Resume</a>
-        <a href="projects.html">Projects</a>
-        <a href="contact.html">Contact</a>
+        <a href="resume.html" class="active" >CV</a>
+        <a href="projects.html">Skills</a>
       </nav>
     </header>
     <main>
       <section id="top"></section>
-      <h1>Resume</h1>
+      <h1>Curriculum Vitae</h1>
     </section>
       <div id="resume" class="section">
         <p>Muhammad Abu Bakar</p>
@@ -112,6 +111,50 @@
           </li>
         </ul>
       </div>
+      <div class="slideshow-container">
+        <img src="cer1.jpg">
+        <img src="cer2.jpg">
+        <img src="cer3.jpg">
+        <img src="cer4.jpg">
+        <img src="cer5.jpg">
+        <button id="prev-btn">Prev</button>
+        <button id="next-btn">Next</button>
+        <div id="slide-number"></div>
+      </div>      
+
+  <script>
+var images = document.querySelectorAll('.slideshow-container img');
+var prevBtn = document.querySelector('#prev-btn');
+var nextBtn = document.querySelector('#next-btn');
+var slideNumber = document.querySelector('#slide-number');
+var index = 0;
+
+// show initial image and slide number
+images[index].classList.add('active');
+slideNumber.innerHTML = (index + 1) + '/' + images.length;
+
+// add event listeners to buttons
+prevBtn.addEventListener('click', function() {
+  images[index].classList.remove('active');
+  index--;
+  if (index < 0) {
+    index = images.length - 1;
+  }
+  images[index].classList.add('active');
+  slideNumber.innerHTML = (index + 1) + '/' + images.length;
+});
+
+nextBtn.addEventListener('click', function() {
+  images[index].classList.remove('active');
+  index++;
+  if (index >= images.length) {
+    index = 0;
+  }
+  images[index].classList.add('active');
+  slideNumber.innerHTML = (index + 1) + '/' + images.length;
+});
+
+  </script>            
     </main>
     <footer>
       <div class="footer-container">

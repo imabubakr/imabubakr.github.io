@@ -145,6 +145,21 @@ function changeImage(slideshow, n) {
   images[nextIndex].classList.add('active');
 }
 
+function enlargeSlideshow() {
+  var slideshow = document.querySelector('.slideshow');
+  slideshow.classList.toggle('enlarged');
+
+  // Add an event listener to the close button to close the slideshow
+  var closeButton = slideshow.querySelector('.close-button');
+  closeButton.addEventListener('click', function() {
+    slideshow.classList.remove('enlarged');
+  });
+}
+
+
+
+
+
 
 
 

@@ -11,6 +11,8 @@ body {
   font-family: 'Open Sans', Arial, sans-serif;
   background-color: #f7f7f7;
   height: 100%;
+  line-height: 1.5;
+  color: rgb(110, 110, 110);
 }
 
 header {
@@ -52,6 +54,8 @@ main {
   margin-top: 100px;
   margin: 0 auto;
   text-align: center;
+  max-width: 1400px;
+  width: 100%;
 }
 
 h1 {
@@ -93,20 +97,24 @@ button:hover {
 }
 
 .project-container {
-  margin: auto;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 400px;
-  align-items: start;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 20px;
+  align-items: center;
   width: 1200px;
-  padding-top: 0;
-  padding-bottom: 0;
+  margin: auto;
+  margin-bottom: 60px;
 }
 
 .project {
-  background-color: #f7f7f7;
-  padding: 20px;
-  text-align: center;
+  width: 100%;
+  height: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.project-img {
+  margin-bottom: 60px;
 }
 
 .project h2 {
@@ -116,18 +124,18 @@ button:hover {
 
 .project p {
   font-size: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 
 .slideshow {
-  position: relative;
-  margin-top: -30px;
-  width: 100%;
+  position: absolute;
+  top: 20%;
+  transform: translateY(-50%);
+  right: 60%; /* or left: 200px; */
+  width: 50%; /* or 400px */
   max-width: 700px;
   height: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  z-index: 1;
 }
 
 .slideshow img {
@@ -146,22 +154,24 @@ button:hover {
 
 .slideshow button {
   position: absolute;
-  bottom: -470px;
+  top: 50%;
   transform: translateY(-50%);
   background-color: transparent;
-  border: none;
+  border: 1px solid #ce6666;
   color: #ce6666;
   font-size: 24px;
   cursor: pointer;
   transition: opacity 0.3s ease-in-out;
+  z-index: 2;
 }
 
 .slideshow button:hover {
   opacity: 0.8;
+  background-color: #ffffff;
 }
 
 .slideshow .prev {
-  left: 10px;
+  left: 130px;
 }
 
 .slideshow .next {
@@ -183,22 +193,67 @@ button:hover {
 
 .project-image {
   grid-column: 1 / 2;
+  top: 0;
+  left: 100;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-
-/* Hover effect new addition */
-.project-image:hover {
-  transform: scale(1.05);
-  transition: transform 0.3s ease-in-out;
-}
-
 .project {
   /* Your existing styles */
+  background-color: #f8f9fa;
   box-shadow: 0 0 0px rgba(0,0,0,0.2);
   transition: box-shadow 0.3s ease-in-out;
+  text-align: left;
+  font-size: 1.2rem;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
 }
 
-.project:hover {
-  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+.project h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
 }
 
+.project p {
+  margin-bottom: 1rem;
+}
 
+.project a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.project a:hover {
+  text-decoration: underline;
+}
+
+.slideshow.enlarged {
+  width: 90%;
+  height: 90%;
+  margin: 5% auto;
+  position: fixed;
+  top: 50%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+}
+
+.close-button {
+  background-color: #599deb; /* Orange background */
+  color: white; /* White text */
+  font-size: 24px; /* Larger font size */
+  border: none; /* Remove button border */
+  padding: 8px 16px; /* Add some padding to the button */
+  border-radius: 4px; /* Add border radius to the button */
+  cursor: pointer; /* Change cursor to pointer on hover */
+}
+
+.close-button:hover {
+  background-color: #1e3f64; /* Darker orange background on hover */
+}
