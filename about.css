@@ -301,26 +301,35 @@ button:hover {
 }
 
 
-@keyframes flipdown {
-  0% {
-    opacity: 0;
-    transform-origin: top center;
-    transform: rotateX(-90deg);
+/* Media queries for responsive design */
+@media screen and (max-width: 600px) {
+  .text {
+    font-size: 24px;
   }
-  5% {
-    opacity: 1;
+  
+  h1 {
+    font-size: 28px;
   }
-  80% {
-    transform: rotateX(8deg);
+  
+  #about {
+    width: 80%;
   }
-  83% {
-    transform: rotateX(6deg);
+  
+  #about h2 {
+    font-size: 28px;
   }
-  92% {
-    transform: rotateX(-3deg);
+  
+  #about p {
+    font-size: 16px;
   }
-  100% {
-    transform-origin: top center;
-    transform: rotateX(0deg);
+  
+  button {
+    font-size: 14px;
+  }
+}
+
+@media all and (max-width: 768px) {
+  .collapse {
+    width: 60%;
   }
 }
