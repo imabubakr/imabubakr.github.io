@@ -6,12 +6,9 @@
      <title>Home</title>
      <link rel="stylesheet" type="text/css" href="style.css">
      <link rel="stylesheet" type="text/css" href="about.css">
-     <!-- OpenLayers CSS CDN -->
-     <link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
-     <link rel="stylesheet" href="https://unpkg.com/ol-popup@4.0.0/src/ol-popup.css" />
+     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
      <!-- OpenLayers JavaScript CDN -->
-	   <script src="https://openlayers.org/en/v5.3.0/build/ol.js"></script>
-     <script src="https://unpkg.com/ol-popup@4.0.0"></script>
+     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script src="script.js"></script>
   </head>
   <body>
@@ -32,7 +29,7 @@
       </div>
     </main>
     <section id="about">
-      <h2>About me</h2>
+      <h2>Eindruck</h2>
       <p>I'm a passionate geospatial data professional with expertise in GIS and Remote Sensing. With a Master's degree in Geology and GIS & Remote Sensing, I've spent years analyzing, interpreting, and visualizing complex geographical data. My skills also extend to programming languages such as Python and MATLAB, which enable me to transform massive amounts of data into valuable insights. </p>
       <p>My enthusiasm for this field drives me to consistently deliver outstanding results and tackle new challenges. If you're looking for a skilled and motivated team member or freelance collaborator, I am confident that I can bring immense value to your organization or project.</p>
       <h3></h3>
@@ -98,55 +95,30 @@
           <img src="me.jpg" alt="Muhammad Abu Bakar">
         </div>
     </section>
-    <section id="kollapse">
-      <div class="collapse">
-        <ul>
-          <li>
-            <input type="checkbox" checked>
-            <i></i>
-            <h2>Personal Details</h2>
-            <p>Muhammad Abu Bakar
-            <br>Freiburg im Breisgau, Germany
-            <br>imabubakar@outlook.com
-            </p>
-          </li>
-          <li>
-            <input type="checkbox" checked>
-            <i></i>
-            <h2>Education</h2>
-            <p>
-              BSc in Geology<br>
-              Bahria University, Islamabad<br>
-              <br>
-              MSc in Geology<br>
-              University of Freiburg, Freiburg<br>
-              <br>
-              MSc in GIS and Remote Sensing<br>
-              University of Science & Technology, Islamabad<br>
-            </p>
-          </li>
-          <li>
-            <input type="checkbox" checked>
-            <i></i>
-            <h2>Experience</h2>
-            <p>My CV is available for review
-            </p>
-          </li>
-          <li>
-            <input type="checkbox" checked>
-            <i></i>
-            <h2>Skills</h2>
-            <p>
-              GIS & RS<br>
-              Python, Matlab, Spatial SQL<br>
-              Geodatabases<br>
-              Web-Development (moderate level) <br>
-            </p>
-          </li>
-        </ul>
+  </section>
+  <section id="slideshow">
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide"><img src="home1.jpg"></div>
+        <div class="swiper-slide"><img src="home2.gif"></div>
+        <div class="swiper-slide"><img src="home1.gif"></div>
+        <div class="swiper-slide"><img src="home4.jpg"></div>
       </div>
-    <div id="map" style="height: 500px; width: 100%; margin-top: 400px; margin: 0 auto; z-index: 999; padding-top: 50px;"></div>
-    <script src="script.js"></script>
+      <div class="swiper-pagination"></div>
+    </div>
+  </section>
+  <script>
+const swiper = new Swiper('.swiper-container', {
+loop: true,
+autoplay: {
+  delay: 5000,
+  disableOnInteraction: false,
+},
+noSwiping: true,
+noSwipingClass: 'swiper-slide-prev',
+slidesPerView: 'auto',
+});
+  </script> 
     <footer>
       <div class="footer-container">
         <div class="social-links">
