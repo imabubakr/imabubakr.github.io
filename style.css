@@ -354,23 +354,19 @@ p {
   }
   
   .background-image .content {
-    font-size: 24px;
-  }
-  
-  main {
-    margin-top: 80px;
+    font-size: 20px;
   }
   
   #about {
-    width: 80%;
+    width: 100%;
   }
   
   #about h2 {
-    font-size: 30px;
+    font-size: 20px;
   }
   
   #about p {
-    font-size: 16px;
+    font-size: 12px;
   }
   
   button {
@@ -378,7 +374,7 @@ p {
   }
   
   .personal-image {
-    margin-bottom: -50px;
+    margin-bottom: 0px;
   }
 }
 
