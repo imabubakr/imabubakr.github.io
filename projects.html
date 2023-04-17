@@ -2,7 +2,9 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="projects.css">
-    <script src="script.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <!-- Swiper JavaScript CDN -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <title>Skills</title>
   </head>
   <body>
@@ -23,18 +25,23 @@
         <div class="project">
           <h2>GIS & RS</h2>
           <div class="project-grid">
-            <div class="project-image">
-              <div class="slideshow">
-                <img src="project_photos/project1-1.JPG" alt="Project 1 Image 1" class="active">
-                <img src="project_photos/project1-2.JPG" alt="Project 1 Image 2">
-                <img src="project_photos/project1-3.JPG" alt="Project 1 Image 3">
-                <button class="close-button">&times;</button>
-                <button class="prev" onclick="changeImage(this.parentNode, -1)">&#10094;</button>
-                <button class="next" onclick="changeImage(this.parentNode, 1)">&#10095;</button>
+            <div class="swiper-container">
+              <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                  <img src="project_photos/project1-1.JPG" alt="Project 1 Image 1">
+                </div>
+                <div class="swiper-slide">
+                  <img src="project_photos/project1-2.JPG" alt="Project 1 Image 2">
+                </div>
+                <div class="swiper-slide">
+                  <img src="project_photos/project1-3.JPG" alt="Project 1 Image 3">
+                </div>
               </div>
-            </div>
+              <div class="swiper-pagination"></div>
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-button-next"></div>
+            </div>            
             <div class="project-description">
-              <button class="enlarge-button" onclick="enlargeSlideshow()">Enlarge Slideshow</button>
               <p>GIS (Geographic Information Systems) and RS (Remote Sensing) are powerful tools that can be used to analyze and visualize spatial data. With these skills, I am able to analyze and interpret geographical information to create detailed maps, conduct spatial analysis, and generate reports to support decision-making processes. I have experience using a range of GIS and RS software, such as ArcGIS, QGIS, and ENVI, and can integrate these tools with other data sources to gain a comprehensive understanding of spatial patterns and trends. Whether it's creating maps for planning purposes or analyzing satellite imagery to detect changes in land cover, my GIS and RS skills allow me to provide valuable insights and solutions for a variety of projects.</p>
             </div>
           </div>
@@ -95,6 +102,26 @@
         </div>
       </div>
     </main>
+    <script>
+      const swiper = new Swiper('.swiper-container', {
+        loop: true,
+        autoplay: {
+          delay: 5000,
+          disableOnInteraction: false,
+        },
+        noSwiping: true,
+        noSwipingClass: 'swiper-slide-prev',
+        slidesPerView: 'auto',
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+      });
+        </script>
     <footer>
       Copyright &copy; 2023 Your Name
     </footer>

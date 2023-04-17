@@ -257,3 +257,36 @@ button:hover {
 .close-button:hover {
   background-color: #1e3f64; /* Darker orange background on hover */
 }
+
+/* Swiper CSS */
+.swiper-container {
+  width: 100%;
+  height: 100%;
+}
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: #fff;
+  /* Center image horizontally */
+  display: flex;
+  justify-content: center;
+}
+.swiper-pagination {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  opacity: 0.5;
+  background-color: #000;
+  margin: 0 5px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.swiper-pagination-bullet-active {
+  opacity: 1;
+  background-color: #fff;
+}
