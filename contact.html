@@ -1,118 +1,148 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <link rel="stylesheet" type="text/css" href="skills.css">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <!-- Swiper JavaScript CDN -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <title>Contact Me</title>
   </head>
+
   <body>
     <header>
       <nav>
         <a href="index.html">Home</a>
         <a href="about.html">About</a>
         <a href="resume.html">CV</a>
-        <a href="contact.html" class="active" >Skills</a>
+        <a href="contact.html" class="active">Skills</a>
       </nav>
     </header>
     <main>
-      <section id="top"></section>
-      <h1>Skills</h1>
-      <div id="resume" class="section">
-      <div id="gis-rs" class="section">
-        <h2 class="section-heading">GIS & RS</h2>
-        <ul>
-          <p>GIS (Geographic Information Systems) and RS (Remote Sensing) are powerful tools that can be used to analyze and visualize spatial data. With these skills, I am able to analyze and interpret geographical information to create detailed maps, conduct spatial analysis, and generate reports to support decision-making processes. I have experience using a range of GIS and RS software, such as ArcGIS, QGIS, and ENVI, and can integrate these tools with other data sources to gain a comprehensive understanding of spatial patterns and trends. Whether it's creating maps for planning purposes or analyzing satellite imagery to detect changes in land cover, my GIS and RS skills allow me to provide valuable insights and solutions for a variety of projects.</p>
-        </ul>
-        <div class="slideshow-container">
-          <img src="cer1.jpg">
-          <img src="cer2.jpg">
-          <img src="cer3.jpg">
-          <img src="cer4.jpg">
-          <img src="cer5.jpg">
-          <button id="prev-btn">Prev</button>
-          <button id="next-btn">Next</button>
-          <div id="slide-number"></div>
-        </div> 
-        <div id="programming" class="section"></div>
-        <h2 class="section-heading">Programming</h2>
-        <ul>
-          <p>I am experienced with using Python for various data analysis tasks and have developed proficiency in using several popular Python libraries such as gdal, rasterio, pandas, scikit-learn, and PYSAL. I have also worked on several hobby projects that have allowed me to hone my machine learning skills in the geospatial domain. In addition to my data analysis skills, I have experience working with MATLAB for numerical modeling in the field of earth sciences.</p>
-        </ul>
-        <div class="slideshow-container">
-          <img src="cer1.jpg">
-          <img src="cer2.jpg">
-          <img src="cer3.jpg">
-          <img src="cer4.jpg">
-          <img src="cer5.jpg">
-          <button id="prev-btn">Prev</button>
-          <button id="next-btn">Next</button>
-          <div id="slide-number"></div>
+<section id="top"></section>
+<h1>Skills</h1>
+<div id="resume" class="section">
+  <div id="gis-rs" class="section">
+    <h2 class="section-heading">GIS & RS</h2>
+    <ul>
+      <p>GIS (Geographic Information Systems) and RS (Remote Sensing) are powerful tools that can be used to analyze and visualize spatial data. With these skills, I am able to analyze and interpret geographical information to create detailed maps, conduct spatial analysis, and generate reports to support decision-making processes. I have experience using a range of GIS and RS software, such as ArcGIS, QGIS, and ENVI, and can integrate these tools with other data sources to gain a comprehensive understanding of spatial patterns and trends. Whether it's creating maps for planning purposes or analyzing satellite imagery to detect changes in land cover, my GIS and RS skills allow me to provide valuable insights and solutions for a variety of projects.</p>
+    </ul>
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide">
+          <img src="glacier4.JPG">
+          <div class="caption">From land</div>
         </div>
-        <div id="geodatabases" class="section"></div>         
-        <h2 class="section-heading">Geodatabases</h2>
-        <ul>
-          <p>I am skilled in working with geospatial databases such as PostGIS and SQLite, and have experience utilizing Spatial SQL to query, analyze and manage data within these databases. I am also experienced in integrating these databases with popular GIS software such as QGIS, and have worked on several projects where I have updated data, designed and implemented basic spatial data models, and published data through GeoServer. Overall, I am confident in my ability to effectively manage and analyze spatial data using these tools.</p>
-        </ul>
-        <div class="slideshow-container">
-          <img src="cer1.jpg">
-          <img src="cer2.jpg">
-          <img src="cer3.jpg">
-          <img src="cer4.jpg">
-          <img src="cer5.jpg">
-          <button id="prev-btn">Prev</button>
-          <button id="next-btn">Next</button>
-          <div id="slide-number"></div>
-        </div> 
-        <div id="web" class="section"></div>
-        <h2 class="section-heading">Web-Development</h2>
-        <ul>
-          <p>My most recent interest lies in web development, though I am not yet proficient in this area. Nonetheless, I have been working on building my skills in HTML, CSS, and JavaScript, and have developed a basic understanding of website design principles. I am excited to continue learning and exploring this area of technology.</p>
-        </ul>
+        <div class="swiper-slide">
+          <img src="glacier1.JPG">
+          <div class="caption">Urban planning, QGIS enables efficient and accurate mapping of diverse geospatial data</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="glacier2.JPG">
+          <div class="caption">Visualizing and understanding spatial patterns with Geoda</div>
+        </div>
       </div>
-      <div class="slideshow-container">
-        <img src="cer1.jpg">
-        <img src="cer2.jpg">
-        <img src="cer3.jpg">
-        <img src="cer4.jpg">
-        <img src="cer5.jpg">
-        <button id="prev-btn">Prev</button>
-        <button id="next-btn">Next</button>
-        <div id="slide-number"></div>
-      </div>    
-      </div>  
-
-  <script>
-var images = document.querySelectorAll('.slideshow-container img');
-var prevBtn = document.querySelector('#prev-btn');
-var nextBtn = document.querySelector('#next-btn');
-var slideNumber = document.querySelector('#slide-number');
-var index = 0;
-
-// show initial image and slide number
-images[index].classList.add('active');
-slideNumber.innerHTML = (index + 1) + '/' + images.length;
-
-// add event listeners to buttons
-prevBtn.addEventListener('click', function() {
-  images[index].classList.remove('active');
-  index--;
-  if (index < 0) {
-    index = images.length - 1;
-  }
-  images[index].classList.add('active');
-  slideNumber.innerHTML = (index + 1) + '/' + images.length;
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-pagination swiper-pagination-gis"></div>
+    </div>
+  </div>
+  <div id="programming" class="section">
+    <h2 class="section-heading">Programming</h2>
+    <ul>
+      <p>I am experienced with using Python for various data analysis tasks and have developed proficiency in using several popular Python libraries such as gdal, rasterio, pandas, scikit-learn, and PYSAL. I have also worked on several hobby projects that have allowed me to hone my machine learning skills in the geospatial domain. In addition to my data analysis skills, I have experience working with MATLAB for numerical modeling in the field of earth sciences.</p>
+    </ul>
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide">
+          <img src="prog11.jpg">
+          <div class="caption">Geospatial data and machine learning to estimate forest biomass</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="prog3.gif">
+          <div class="caption">Mapping fire events with Sentinel 3's timeseries analysis</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="prog1.jpg">
+          <div class="caption">Simulating path of a landslide over real world topography</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="prog4.gif">
+          <div class="caption">Using the power of Google Earth Engine to accurately map flood-prone areas in real time</div>
+        </div>
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-pagination swiper-pagination-programming"></div>
+    </div>
+  </div>
+  <div id="geodatabases" class="section">
+    <h2 class="section-heading">Geodatabases</h2>
+    <ul>
+      <li>I am skilled in working with geospatial databases such as PostGIS and SQLite, and have experience utilizing Spatial SQL to query, analyze and manage data within these databases. I am also experienced in integrating these databases with popular GIS software such as QGIS, and have worked on several projects where I have updated data, designed and implemented basic spatial data models, and published data through GeoServer. Overall, I am confident in my ability to effectively manage and analyze spatial data using these tools.</li>
+    </ul>
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide">
+          <img src="cer1.jpg">
+          <div class="caption">Caption for image 1</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="cer2.jpg">
+          <div class="caption">Caption for image 1</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="cer3.jpg">
+          <div class="caption">Caption for image 1</div>
+        </div>
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+  <div id="web" class="section">
+    <h2 class="section-heading">Web-Development</h2>
+    <ul>
+      <p>My most recent interest lies in web development, though I am not yet proficient in this area. Nonetheless, I have been working on building my skills in HTML, CSS, and JavaScript, and have developed a basic understanding of website design principles. I am excited to continue learning and exploring this area of technology.</p>
+    </ul>
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide">
+          <img src="cer1.jpg">
+          <div class="caption">Caption for image 1</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="cer2.jpg">
+          <div class="caption">Caption for image 1</div>
+        </div>
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+</div>
+<script>
+var swiper = new Swiper('.swiper-container', {
+  slidesPerView: 1,
+  spaceBetween: 20,
+  loop: true,
+  pagination: {
+    el: '.swiper-pagination',
+    clickable: true,
+  },
+  autoplay: {
+    delay: 5000,
+    disableOnInteraction: false,
+  },
+  navigation: {
+    nextEl: false,
+    prevEl: false,
+  },
 });
+</script>
 
-nextBtn.addEventListener('click', function() {
-  images[index].classList.remove('active');
-  index++;
-  if (index >= images.length) {
-    index = 0;
-  }
-  images[index].classList.add('active');
-  slideNumber.innerHTML = (index + 1) + '/' + images.length;
-});
-
-  </script>            
     </main>
     <footer>
       <div class="footer-container">
@@ -122,6 +152,8 @@ nextBtn.addEventListener('click', function() {
           <a href="https://maptransfer.de/uber/" target="_blank"><button class="btn">maptransfer</button></a>
           <a href="imabubakar@outlook.com"><button class="btn">Email</button></a>
         </div>
+      </div>
     </footer>
   </body>
+
 </html>

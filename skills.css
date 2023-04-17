@@ -211,35 +211,56 @@ footer {
   line-height: 1.7;
 }
 
-.slideshow-container {
-  position: relative;
+.swiper-container {
   width: 100%;
-  height: 1000px;
-  overflow: hidden;
-  margin: 0 auto;
+  position: relative; /* Add this to enable positioning of slides */
+}
+
+.swiper-slide {
   text-align: center;
-  padding-top: 30px;
+  font-size: 18px;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute; /* Add this to position the slides */
+  left: 0; /* Set to 0 by default to position the active slide */
+  top: 0; /* Set to 0 by default to position the active slide */
+  width: 100%; /* Set to 100% to occupy full container width */
+  height: 100%; /* Set to 100% to occupy full container height */
+  opacity: 0; /* Hide inactive slides by default */
+  transition: opacity 0.5s ease-in-out; /* Add a fade transition effect */
 }
 
+.swiper-slide-active {
+  opacity: 1; /* Show active slide */
+}
 
-.slideshow-container img {
+.swiper-pagination {
   position: absolute;
-  top: 0;
-  left: -12%;
-  width: 130%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
-  transform: scale(0.7); /* adjust the scale value as needed */
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1; /* Add this to position pagination above the slides */
+}
+
+.swiper-slide img {
+  max-width: 80%;
+  max-height: 40vh; /* Set a maximum height for the images */
+  width: auto;
+  height: auto;
+  object-fit: contain; /* Scale the images while maintaining aspect ratio */
+  transition: all 0.3s ease-in-out; /* Add a smooth transition effect */
+}
+
+.swiper-slide img:hover, .swiper-slide img:focus {
+  transform: scale(1.8); /* Scale up the image on hover or focus */
+  z-index: 1; /* Bring the image to the top */
 }
 
 
-.slideshow-container img.active {
-  opacity: 1;
-}
-
-#slide-number {
-  margin-top: 10px;
+.swiper-button-next, .swiper-button-prev {
+  display: none !important;
 }
 
 
