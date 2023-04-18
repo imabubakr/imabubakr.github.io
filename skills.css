@@ -292,6 +292,18 @@ footer {
   }
 }
 
+@media (max-width: 767px) {
+  .swiper-container {
+    width: 90%;
+    margin: 0 auto;
+  }
+  
+  .swiper-slide {
+    font-size: 12px;
+  }
+}
+
+
 /* Decrease padding for h1 in top section */
 #top-section h1 {
   padding-top: 10px;
