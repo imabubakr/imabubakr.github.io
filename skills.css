@@ -136,7 +136,7 @@ footer {
 
 #resume h2,
 #resume h3 {
-  padding-top: 5px;
+  padding-top: 40px;
   padding-bottom: 0px;
 }
 
@@ -218,7 +218,7 @@ footer {
 
 .swiper-slide {
   text-align: center;
-  font-size: 18px;
+  font-size: 14px;
   background: #fff;
   display: flex;
   justify-content: center;
@@ -254,7 +254,7 @@ footer {
 }
 
 .swiper-slide img:hover, .swiper-slide img:focus {
-  transform: scale(1.8); /* Scale up the image on hover or focus */
+  transform: scale(1.6); /* Scale up the image on hover or focus */
   z-index: 1; /* Bring the image to the top */
 }
 
