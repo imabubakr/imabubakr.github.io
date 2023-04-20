@@ -283,123 +283,21 @@ p {
 	text-align: right;
 }
 
-
-/* Small devices (phones) */
-@media only screen and (max-width: 600px) {
-  .text {
-    font-size: 24px;
+@media only screen and (max-width: 767px) {
+	/* Adjust the font sizes for smartphones */
+	body {
+	  font-size: 14px;
+	}
+	
+	/* Adjust the margins and padding for smartphones */
+	.container {
+	  margin: 0;
+	  padding: 10px;
+	}
+	
+	/* Hide elements that don't fit well on smartphones */
+	.desktop-only {
+	  display: none;
+	}
   }
   
-  header {
-    height: 70px;
-  }
-  
-  nav a {
-    font-size: 16px;
-    padding: 5px 5px;
-  }
-  
-  img {
-    width: 200px;
-    height: 200px;
-  }
-  
-  .timeline-blank {
-    width: 100%;
-  }
-  
-  .timeline-text {
-    width: 100%;
-    padding-left: 0;
-  }
-}
-
-/* Medium devices (tablets) */
-@media only screen and (min-width: 600px) and (max-width: 992px) {
-  .text {
-    font-size: 30px;
-  }
-  
-  header {
-    height: 70px;
-  }
-  
-  nav a {
-    font-size: 18px;
-    padding: 8px 8px;
-  }
-  
-  img {
-    width: 250px;
-    height: 250px;
-  }
-  
-  .timeline-blank {
-    width: 100%;
-  }
-  
-  .timeline-text {
-    width: 100%;
-    padding-left: 0;
-  }
-}
-
-/* Media queries for timeline section */
-
-@media screen and (max-width: 768px) {
-  .single-timeline {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0;
-  }
-  
-  .timeline-blank {
-    width: 5px;
-    height: 100%;
-    margin-right: 0;
-  }
-  
-  .timeline-text {
-    margin: 20px 0;
-    text-align: center;
-  }
-  
-  .t-square {
-    margin: 0;
-  }
-  
-  .personal-image {
-    margin-top: 30px;
-    text-align: center;
-  }
-}
-
-@media screen and (min-width: 769px) and (max-width: 1024px) {
-  .single-timeline {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0;
-  }
-  
-  .timeline-blank {
-    width: 5px;
-    height: 100%;
-    margin-right: 0;
-  }
-  
-  .timeline-text {
-    margin: 20px 0;
-    text-align: center;
-  }
-  
-  .t-square {
-    margin: 0;
-  }
-  
-  .personal-image {
-    margin-top: 30px;
-    text-align: center;
-  }
-}
