@@ -283,24 +283,26 @@ p {
 	text-align: right;
 }
 
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 600px) {
 	/* Adjust the font sizes for smartphones */
 	body {
-	  font-size: 14px;
+	  font-size: 16px;
 	}
+
+	#about p {
+		font-size: 18px;
+		max-width: 700px;
+		line-height: 1.5;
+		margin-bottom: 30px;
+		color: #555;
+		text-align: justify;
+	  }
 	
 	/* Adjust the margins and padding for smartphones */
 	.container {
 	  margin: 0;
 	  padding: 10px;
 	}
-
-	.content {
-		width: 800px;
-		margin-left: auto;
-		margin-right: auto;
-	 }
-	 
 	
 	/* Hide elements that don't fit well on smartphones */
 	.desktop-only {
