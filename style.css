@@ -294,6 +294,13 @@ p {
 	  margin: 0;
 	  padding: 10px;
 	}
+
+	.content {
+		width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+	 }
+	 
 	
 	/* Hide elements that don't fit well on smartphones */
 	.desktop-only {
