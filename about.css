@@ -273,8 +273,13 @@ button:hover {
   }
 
   #p {
-    font-size: 16px;
-  }
+		font-size: 18px;
+		max-width: 700px;
+		line-height: 1.5;
+		margin-bottom: 30px;
+		color: #555;
+		text-align: justify;
+	  }
 
   #h2 {
     font-size: 22px;
