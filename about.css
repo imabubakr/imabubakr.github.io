@@ -67,10 +67,21 @@ h1 {
 
 #about {
   margin-top: 100px;
-  width: 50%;
+  width: 40%;
   margin: 0 auto;
   text-align: center;
 }
+
+@media only screen and (max-width: 768px) {
+  #about {
+    width: 60%;
+  }
+  #about p {
+    font-size: 22px;
+  }
+}
+
+
 
 #about h2 {
   margin-top: 100px;
@@ -270,13 +281,6 @@ button:hover {
 @media screen and (max-width: 600px) {
   #h1 {
     font-size: 28px;
-  }
-
-  #about {
-    margin-top: 100px;
-    width: 60%;
-    margin: 0 auto;
-    text-align: center;
   }
 
   #p {
