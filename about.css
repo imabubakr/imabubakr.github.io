@@ -72,17 +72,6 @@ h1 {
   text-align: center;
 }
 
-@media only screen and (max-width: 768px) {
-  #about {
-    width: 60%;
-  }
-  #about p {
-    font-size: 22px;
-  }
-}
-
-
-
 #about h2 {
   margin-top: 100px;
   font-size: 36px;
@@ -278,9 +267,17 @@ button:hover {
 }
 
 /* Media queries for responsive design */
+
 @media screen and (max-width: 600px) {
   #h1 {
     font-size: 28px;
+  }
+
+  #about {
+    width: 60%;
+  }
+  #about p {
+    font-size: 22px;
   }
 
   #p {
