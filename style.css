@@ -284,8 +284,44 @@ p {
 }
 
 
-@media only screen and (max-width: 767px) {
+@media (max-width: 768px) {
+	header {
+	display: block;
+	position: static;
+	}
+	nav {
+	display: none;
+	}
+	nav a {
+	display: block;
+	text-align: center;
+	padding: 10px 0;
+	margin: 0;
+	background-color: #c2c1c1;
+	color: #fff;
+	}
+	nav a:hover {
+	background-color: #b9b8b8;
+	color: #333;
+	}
+	nav a.active {
+	background-color: #b9b8b8;
+	color: #333;
+	}
 	.background-image {
-	background-image: none;
+	height: auto;
+	}
+	.background-image .content {
+	position: static;
+	transform: none;
+	width: 100%;
+	padding: 20px;
+	background-color: rgba(0,0,0,0.5);
+	}
+	.text {
+	font-size: 24px;
+	}
+	.personal-image {
+	margin-bottom: -30px;
 	}
 	}
