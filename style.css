@@ -284,56 +284,14 @@ p {
 }
 
 
-@media (max-width: 768px) {
-	header {
-	display: block;
-	position: static;
-	}
-	nav {
-	display: none;
-	}
-	nav a {
-	display: block;
-	text-align: center;
-	padding: 10px 0;
-	margin: 0;
-	background-color: #c2c1c1;
-	color: #fff;
-	}
-	nav a:hover {
-	background-color: #b9b8b8;
-	color: #333;
-	}
-	nav a.active {
-	background-color: #b9b8b8;
-	color: #333;
-	}
-	.background-image {
-	height: auto;
-	}
-	.background-image .content {
-	position: static;
-	transform: none;
-	width: 100%;
-	padding: 20px;
-	background-color: rgba(0,0,0,0.5);
-	}
-	.text {
-	font-size: 24px;
-	}
-	.personal-image {
-	margin-bottom: -30px;
-	}
-	}
-
 	@media screen and (max-width: 600px) {
 		#h1 {
 		  font-size: 28px;
 		}
 	  
 		#p {
-			  font-size: 20px;
-			  max-width: 1000px;
+			  font-size: 18px;
+			  max-width: 700px;
 			  line-height: 1.5;
 			  margin-bottom: 30px;
 			  color: #555;
