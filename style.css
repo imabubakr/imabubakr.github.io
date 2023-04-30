@@ -283,30 +283,38 @@ p {
 	text-align: right;
 }
 
-@media only screen and (max-width: 600px) {
-	/* Adjust the font sizes for smartphones */
-	body {
-	  font-size: 16px;
+@media only screen and (max-width: 768px) {
+	/* Styles for mobile devices */
+  
+	.background-image {
+	  height: 50vh;
 	}
-
-	#p {
-		font-size: 18px;
-		max-width: 700px;
-		line-height: 1.5;
-		margin-bottom: 30px;
-		color: #555;
-		text-align: justify;
-	  }
-	
-	/* Adjust the margins and padding for smartphones */
-	.container {
-	  margin: 0;
-	  padding: 10px;
+  
+	.text {
+	  font-size: 24px;
 	}
-	
-	/* Hide elements that don't fit well on smartphones */
-	.desktop-only {
-	  display: none;
+  
+	img {
+	  width: 100%;
+	  height: auto;
+	}
+  
+	.personal-image {
+	  margin-bottom: 0;
+	}
+  
+	.timeline-blank,
+	.timeline-text {
+	  width: 100%;
+	  padding-left: 0;
+	}
+  
+	.timeline-text h6 {
+	  font-size: 1.1rem;
+	}
+  
+	.timeline-text span {
+	  font-size: 0.9rem;
 	}
   }
   
