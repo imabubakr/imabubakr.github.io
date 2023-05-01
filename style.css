@@ -94,20 +94,42 @@ h1 {
 	letter-spacing: 3px;
 }
 
-footer {
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	width: 98%;
-	text-align: right;
+.footer-container {
+	background-color: #d1d1d1;
 	padding: 20px;
-	font-size: 15px;
-	opacity: 0.7;
-	color: #333;
-}
+  }
+  
+  .social-links {
+	display: flex;
+	justify-content: center;
+  }
+  
+  .social-links a {
+	display: inline-block;
+	margin: 0 10px;
+	text-decoration: none;
+	font-size: 16px;
+	padding: 10px 20px;
+	border-radius: 5px;
+	transition: all 0.2s ease-in-out;
+  }
+  
+  .footer-text {
+	margin-top: -60px;
+	font-size: 11px;
+  }
+  
+  .footer-text a {
+	color: #fff;
+	text-decoration: none;
+  }
+  
+  .footer-text a:hover {
+	text-decoration: underline;
+  }
 
 button {
-	background-color: #b9b8b8;
+	background-color: #d1d1d1;
 	color: white;
 	padding: 10px 20px;
 	border: none;
@@ -284,34 +306,4 @@ p {
 }
 
 
-	@media screen and (max-width: 600px) {
-		#h1 {
-		  font-size: 28px;
-		}
-	  
-		#p {
-			  font-size: 18px;
-			  max-width: 700px;
-			  line-height: 1.5;
-			  margin-bottom: 30px;
-			  color: #555;
-			  text-align: justify;
-			}
-	  
-		#h2 {
-		  font-size: 22px;
-		}
-	  
-		#h3 {
-		  font-size: 16px;
-		}
-	  
-		#ul li {
-		  font-size: 14px;
-		}
-	  
-		#ul li::before {
-		  font-size: 14px;
-		}
-	  }
 	  

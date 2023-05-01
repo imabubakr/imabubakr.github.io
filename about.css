@@ -91,8 +91,42 @@ h1 {
 }
 
 
+.footer-container {
+  background-color: #d1d1d1;
+  padding: 20px;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+}
+
+.social-links a {
+  display: inline-block;
+  margin: 0 10px;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  transition: all 0.2s ease-in-out;
+}
+
+.footer-text {
+  margin-top: -60px;
+  font-size: 11px;
+}
+
+.footer-text a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer-text a:hover {
+  text-decoration: underline;
+}
+
 button {
-  background-color: #b9b8b8;
+  background-color: #d1d1d1;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -267,6 +301,8 @@ button:hover {
 }
 
 /* Media queries for responsive design */
+
+
 
 @media screen and (max-width: 600px) {
   #h1 {
