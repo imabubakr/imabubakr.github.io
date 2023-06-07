@@ -133,7 +133,7 @@ button:hover {
   background-color: #f7f7f7;
   border-radius: 5px;
   margin: 20px auto 20px auto;
-  max-width: 900px;
+  max-width: 1200px;
 }
 
 
@@ -246,7 +246,7 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .swiper-slide {
@@ -297,7 +297,7 @@ button:hover {
 }
 
 .swiper-slide img {
-  max-width: 80%;
+  max-width: 100%;
   max-height: 40vh;
   width: auto;
   height: auto;
@@ -305,9 +305,14 @@ button:hover {
   transition: all 0.3s ease-in-out;
 }
 
-.swiper-slide img:hover, .swiper-slide img:focus {
-  transform: scale(1.7);
+
+
+.swiper-slide img:hover,
+.swiper-slide img:focus {
+  transform: scale(1.7); /* Increase the scale value to enlarge the image more */
   z-index: 1;
+  max-width: 100%; /* Ensure the enlarged image fits the container */
+  max-height: 100%; /* Ensure the enlarged image fits the container */
 }
 
 .swiper-button-next, .swiper-button-prev {
