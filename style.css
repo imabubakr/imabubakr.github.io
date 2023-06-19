@@ -310,5 +310,103 @@ p {
 	text-align: right;
 }
 
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+	.background-image .content {
+		font-size: 24px;
+	}
 
-	  
+	h1 {
+		font-size: 28px;
+	}
+
+	.container {
+		height: 40vh;
+	}
+
+	img {
+		width: 200px;
+		height: 200px;
+	}
+
+	.personal-image {
+		padding-top: 20px;
+		padding-bottom: 20px;
+		margin-bottom: -50px;
+	}
+
+	.footer-text {
+		font-size: 10px;
+	}
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+	.background-image .content {
+		font-size: 30px;
+	}
+
+	h1 {
+		font-size: 32px;
+	}
+
+	.container {
+		height: 30vh;
+	}
+
+	img {
+		width: 230px;
+		height: 230px;
+	}
+
+	.personal-image {
+		padding-top: 10px;
+		padding-bottom: 10px;
+		margin-bottom: -30px;
+	}
+
+	.footer-text {
+		font-size: 11px;
+	}
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+	.background-image .content {
+		font-size: 36px;
+	}
+
+	h1 {
+		font-size: 36px;
+	}
+
+	.container {
+		height: 25vh;
+	}
+
+	img {
+		width: 270px;
+		height: 270px;
+	}
+
+	.personal-image {
+		padding-top: 30px;
+		padding-bottom: 30px;
+		margin-bottom: -70px;
+	}
+
+	.footer-text {
+		font-size: 12px;
+	}
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+	.container {
+		max-width: 960px;
+	}
+
+	.personal-image {
+		margin-bottom: -100px;
+	}
+}

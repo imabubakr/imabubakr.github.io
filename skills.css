@@ -12,7 +12,9 @@ body {
   background-color: #f7f7f7;
   height: 100%;
   color: rgb(110, 110, 110);
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
+
 
 body {
   margin-top: 100px; /* To push the page down*/
@@ -145,7 +147,7 @@ button:hover {
 
 /* Style for heading */
 #resume h2 {
-  font-size: 25px;
+  font-size: 30px;
   color: rgb(110, 110, 110);;
   margin-top: 40px;
   margin-bottom: 20px;
@@ -241,13 +243,17 @@ button:hover {
 
 .swiper-container {
   width: 100%;
+  max-width: 1200px;
   position: relative;
   height: 48vh;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: visible;
+  margin-top: 20px; /* Adjust the margin as desired */
 }
+
+
 
 .swiper-slide {
   text-align: center;
@@ -264,7 +270,20 @@ button:hover {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   padding-top: 20px;
+  z-index: 1; /* Add this property to ensure the slide is on top */
 }
+
+.swiper-slide img {
+  max-width: 100%;
+  max-height: 40vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: all 0.3s ease-in-out;
+  position: relative; /* Add this property */
+  z-index: 1; /* Add this property to ensure the image is on top */
+}
+
 
 .swiper-slide-active {
   opacity: 1;
@@ -296,16 +315,6 @@ button:hover {
   transform: scale(1.2);
 }
 
-.swiper-slide img {
-  max-width: 100%;
-  max-height: 40vh;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  transition: all 0.3s ease-in-out;
-}
-
-
 
 .swiper-slide img:hover,
 .swiper-slide img:focus {
@@ -320,49 +329,138 @@ button:hover {
 }
 
 
-/* Media queries for responsive design */
-@media screen and (max-width: 600px) {
-  #top-section h1 {
-    font-size: 28px;
-  }
-
-  #top-section p {
-    font-size: 16px;
-  }
-
-  #resume h2 {
-    font-size: 22px;
-  }
-
-  #resume h3 {
-    font-size: 16px;
-  }
-
-  #resume ul li {
-    font-size: 14px;
-  }
-
-  #resume ul li::before {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 767px) {
-  .swiper-container {
-    width: 90%;
-    margin: 0 auto;
-  }
-  
-  .swiper-slide {
-    font-size: 12px;
-  }
-}
-
-
 /* Decrease padding for h1 in top section */
 #top-section h1 {
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+  #resume {
+    padding: 10px 30px 10px 30px;
+  }
+
+  #resume h2 {
+    font-size: 24px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+  }
+
+  #resume h3 {
+    font-size: 14px;
+    margin-top: 15px;
+  }
+
+  #resume ul li {
+    font-size: 13px;
+    margin-bottom: 3px;
+  }
+
+  #resume .date {
+    font-size: 14px;
+  }
+
+  #resume .description {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  #resume {
+    padding: 15px 40px 15px 40px;
+  }
+
+  #resume h2 {
+    font-size: 26px;
+    margin-top: 35px;
+    margin-bottom: 20px;
+  }
+
+  #resume h3 {
+    font-size: 16px;
+    margin-top: 25px;
+  }
+
+  #resume ul li {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  #resume .date {
+    font-size: 15px;
+  }
+
+  #resume .description {
+    font-size: 15px;
+    margin-bottom: 7px;
+  }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  #resume {
+    padding: 20px 60px 20px 60px;
+  }
+
+  #resume h2 {
+    font-size: 30px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+  }
+
+  #resume h3 {
+    font-size: 16px;
+    margin-top: 20px;
+  }
+
+  #resume ul li {
+    font-size: 15px;
+    margin-bottom: 5px;
+  }
+
+  #resume .date {
+    font-size: 16px;
+  }
+
+  #resume .description {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  #resume {
+    padding: 20px 80px 20px 80px;
+  }
+
+  #resume h2 {
+    font-size: 36px;
+    margin-top: 50px;
+    margin-bottom: 30px;
+  }
+
+  #resume h3 {
+    font-size: 18px;
+    margin-top: 30px;
+  }
+
+  #resume ul li {
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  #resume .date {
+    font-size: 18px;
+  }
+
+  #resume .description {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
 }
 
 
