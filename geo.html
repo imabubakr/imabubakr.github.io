@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Web GIS App</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" type="text/css" href="projects.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://openlayers.org/en/v6.13.0/css/ol.css" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.css" type="text/css">
+    <style>
+      #map {
+        width: 100%;
+        height: 100%;
+      }
+
+
+      .options {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 4px;
+        z-index: 1;
+      }
+
+      #tooltip {
+        display: none;
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 9999;
+      }
+
+      .ol-button i {
+        color: inherit;
+      }
+
+      .ol-notification i {
+        color: #fff;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="map" style="width:100%; height:990px;"></div>
+    <div class="options">
+      <div class="info"></div>
+      Export:<br />
+      <textarea id="info" style="width:25em; height:10em"></textarea>
+    </div>
+
+    <script src="https://openlayers.org/en/v6.13.0/build/ol.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.js"></script>
+    <script>
+      // Initialize the map
+      const map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM(),
+          }),
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([7.847809, 47.992878]),
+          zoom: 13,
+        }),
+      });
+
+      // Initialize an overlay for tooltips
+      const overlay = new ol.Overlay({
+        element: document.getElementById('tooltip'),
+        positioning: 'bottom-center',
+        offset: [0, -10],
+      });
+      map.addOverlay(overlay);
+
+      // Create a vector layer for the source of the editbar
+      const vector = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+      });
+      map.addLayer(vector);
+
+      // Create the layer switcher control
+      //const layerSwitcher = new ol.control.LayerSwitcher();
+
+      // Create the full screen control
+      const fullScreen = new ol.control.FullScreen();
+
+
+      //Clear all drawn shapes
+      function clearFeatures() {
+        vector.getSource().clear();
+      }
+
+      //add the clear button
+      const clearButton = new ol.control.Button({
+        html: '<i class="fa fa-trash"></i>',
+        title: 'Clear',
+        handleClick: clearFeatures,
+      });
+
+      // Add the editbar
+      const select = new ol.interaction.Select({
+        title: 'Sélection'
+      });
+      select.set('title', 'Sélection');
+
+      const edit = new ol.control.EditBar({
+        interactions: {
+          Select: {
+            title: 'Select',
+            interaction: select
+          },
+          DrawPoint: 'Draw Point',
+          DrawLine: 'Draw Line',
+          DrawPolygon: 'Draw Polygon',
+          ModifySelect: 'Modify Select',
+          DrawHole: 'Draw Hole',
+          DrawRegular: {
+            title: 'Draw Regular',
+            ptsLabel: 'Pts',
+            circleLabel: 'Circle'
+          }
+        },
+        source: vector.getSource()
+      });
+
+      // Add the controls to the control bar
+      const controlBar = new ol.control.Bar({
+        controls: [
+          fullScreen,
+          clearButton,
+          edit,
+          //layerSwitcher,
+          // Add more controls here if needed
+        ],
+      });
+
+      // Add the control bar to the map using map's getControls() and addControl() method
+      map.getControls().push(controlBar);
+
+      // Add a tooltip
+      var tooltip = new ol.Overlay.Tooltip();
+      map.addOverlay(tooltip);
+
+      edit.getInteraction('Select').on('select', function(e) {
+        if (this.getFeatures().getLength()) {
+          tooltip.setInfo('Drag points on features to edit...');
+        } else tooltip.setInfo();
+      });
+      edit.getInteraction('Select').on('change:active', function(e) {
+        tooltip.setInfo('');
+      });
+      edit.getInteraction('ModifySelect').on('modifystart', function(e) {
+        if (e.features.length === 1) tooltip.setFeature(e.features[0]);
+      });
+      edit.getInteraction('ModifySelect').on('modifyend', function(e) {
+        tooltip.setFeature();
+      });
+      edit.getInteraction('DrawPoint').on('change:active', function(e) {
+        tooltip.setInfo(e.oldValue ? '' : 'Click map to place a point...');
+      });
+      edit.getInteraction('DrawLine').on(['change:active', 'drawend'], function(e) {
+        tooltip.setFeature();
+        tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing line...');
+      });
+      edit.getInteraction('DrawLine').on('drawstart', function(e) {
+        tooltip.setFeature(e.feature);
+        tooltip.setInfo('Click to continue drawing line...');
+      });
+      edit.getInteraction('DrawPolygon').on('drawstart', function(e) {
+        tooltip.setFeature(e.feature);
+        tooltip.setInfo('Click to continue drawing shape...');
+      });
+      edit.getInteraction('DrawPolygon').on(['change:active', 'drawend'], function(e) {
+        tooltip.setFeature();
+        tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing shape...');
+      });
+      edit.getInteraction('DrawHole').on('drawstart', function(e) {
+        tooltip.setFeature(e.feature);
+        tooltip.setInfo('Click to continue drawing hole...');
+      });
+      edit.getInteraction('DrawHole').on(['change:active', 'drawend'], function(e) {
+        tooltip.setFeature();
+        tooltip.setInfo(e.oldValue ? '' : 'Click polygon to start drawing hole...');
+      });
+      edit.getInteraction('DrawRegular').on('drawstart', function(e) {
+        tooltip.setFeature(e.feature);
+        tooltip.setInfo('Move and click map to finish drawing...');
+      });
+      edit.getInteraction('DrawRegular').on(['change:active', 'drawend'], function(e) {
+        tooltip.setFeature();
+        tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing shape...');
+      });
+
+      // Add the pencil sketch filter
+      const pencil = new ol.filter.PencilSketch({
+        intensity: 0.8,
+        blur: 8,
+        color: false,
+      });
+
+      map.getLayers().forEach(function(layer) {
+        if (layer instanceof ol.layer.Image || layer instanceof ol.layer.Tile) {
+          layer.addFilter(pencil);
+        }
+      });
+
+      // Add the save functionality
+      const save = new ol.control.Button({
+        html: '<i class="fa fa-download"></i>',
+        title: 'Save',
+        handleClick: function() {
+          const features = vector.getSource().getFeatures();
+          const format = new ol.format.GeoJSON();
+          const geoJSON = format.writeFeaturesObject(features); // Use writeFeaturesObject instead of writeFeatures
+          const jsonString = JSON.stringify(geoJSON);
+          document.getElementById('info').value = jsonString;
+        },
+      });
+
+      // Add the save button to the control bar
+      controlBar.addControl(save);
+
+    </script>
+  </body>
