@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Web GIS App</title>
     <!-- FontAwesome -->
-    <link rel="stylesheet" type="text/css" href="projects.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://openlayers.org/en/v6.13.0/css/ol.css" type="text/css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.css" type="text/css">
@@ -15,7 +14,6 @@
         width: 100%;
         height: 100%;
       }
-
 
       .options {
         position: absolute;
@@ -88,19 +86,15 @@
       });
       map.addLayer(vector);
 
-      // Create the layer switcher control
-      //const layerSwitcher = new ol.control.LayerSwitcher();
-
       // Create the full screen control
       const fullScreen = new ol.control.FullScreen();
 
-
-      //Clear all drawn shapes
+      // Clear all drawn shapes
       function clearFeatures() {
         vector.getSource().clear();
       }
 
-      //add the clear button
+      // Add the clear button
       const clearButton = new ol.control.Button({
         html: '<i class="fa fa-trash"></i>',
         title: 'Clear',
@@ -109,7 +103,7 @@
 
       // Add the editbar
       const select = new ol.interaction.Select({
-        title: 'Sélection'
+        title: 'Sélection',
       });
       select.set('title', 'Sélection');
 
@@ -117,7 +111,7 @@
         interactions: {
           Select: {
             title: 'Select',
-            interaction: select
+            interaction: select,
           },
           DrawPoint: 'Draw Point',
           DrawLine: 'Draw Line',
@@ -127,10 +121,10 @@
           DrawRegular: {
             title: 'Draw Regular',
             ptsLabel: 'Pts',
-            circleLabel: 'Circle'
-          }
+            circleLabel: 'Circle',
+          },
         },
-        source: vector.getSource()
+        source: vector.getSource(),
       });
 
       // Add the controls to the control bar
@@ -139,7 +133,6 @@
           fullScreen,
           clearButton,
           edit,
-          //layerSwitcher,
           // Add more controls here if needed
         ],
       });
@@ -162,7 +155,7 @@
       edit.getInteraction('ModifySelect').on('modifystart', function(e) {
         if (e.features.length === 1) tooltip.setFeature(e.features[0]);
       });
-      edit.getInteraction('ModifySelect').on('modifyend', function(e) {
+      edit.getInteraction('ModifySelect').on('modifyend', function() {
         tooltip.setFeature();
       });
       edit.getInteraction('DrawPoint').on('change:active', function(e) {
@@ -182,7 +175,7 @@
       });
       edit.getInteraction('DrawPolygon').on(['change:active', 'drawend'], function(e) {
         tooltip.setFeature();
-        tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing shape...');
+        tooltip.setInfo(e.oldValue ? '' : 'Click map tostart drawing shape...');
       });
       edit.getInteraction('DrawHole').on('drawstart', function(e) {
         tooltip.setFeature(e.feature);
@@ -251,3 +244,5 @@
 
     </script>
   </body>
+
+</html>
