@@ -220,9 +220,28 @@
         title: 'Save',
         handleClick: function() {
           const features = vector.getSource().getFeatures();
-          const format = new ol.format.GeoJSON();
-          const geoJSON = format.writeFeaturesObject(features); // Use writeFeaturesObject instead of writeFeatures
-          const jsonString = JSON.stringify(geoJSON);
+          const geojsonObject = {
+            type: 'FeatureCollection',
+            features: [],
+          };
+
+          features.forEach(function(feature) {
+            const geometry = feature.getGeometry();
+            const coordinates = geometry.clone().transform('EPSG:3857', 'EPSG:4326').getCoordinates();
+
+            const featureObject = {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: geometry.getType(),
+                coordinates: coordinates,
+              },
+            };
+
+            geojsonObject.features.push(featureObject);
+          });
+
+          const jsonString = JSON.stringify(geojsonObject);
           document.getElementById('info').value = jsonString;
         },
       });
