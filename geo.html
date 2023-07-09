@@ -55,6 +55,11 @@
       <textarea id="info" style="width:25em; height:10em"></textarea>
     </div>
 
+    <div class="file-upload">
+      <input type="file" id="file-input" style="display: none;">
+      <button id="open-file-button" title="Open File"><i class="fa fa-upload"></i></button>
+    </div>
+
     <script src="https://openlayers.org/en/v6.13.0/build/ol.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.js"></script>
     <script>
@@ -87,7 +92,7 @@
       map.addLayer(vector);
 
       // Create the full screen control
-      const fullScreen = new ol.control.FullScreen();
+      //const fullScreen = new ol.control.FullScreen();
 
       // Clear all drawn shapes
       function clearFeatures() {
@@ -130,7 +135,7 @@
       // Add the controls to the control bar
       const controlBar = new ol.control.Bar({
         controls: [
-          fullScreen,
+          //fullScreen,
           clearButton,
           edit,
           // Add more controls here if needed
@@ -210,7 +215,7 @@
       // Add the save functionality
       const save = new ol.control.Button({
         html: '<i class="fa fa-download"></i>',
-        title: 'Save',
+        title: 'Export as GeoJSON',
         handleClick: function() {
           const features = vector.getSource().getFeatures();
           const geojsonObject = {
@@ -241,6 +246,138 @@
 
       // Add the save button to the control bar
       controlBar.addControl(save);
+
+      function exportToKML() {
+        const features = vector.getSource().getFeatures();
+        const kmlFormat = new ol.format.KML();
+        const kml = kmlFormat.writeFeatures(features, {
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:3857',
+        });
+        downloadFile(kml, 'data.kml', 'application/vnd.google-earth.kml+xml');
+      }
+
+      function exportToCSV() {
+        const features = vector.getSource().getFeatures();
+        let csv = 'longitude,latitude\n';
+
+        features.forEach(function(feature) {
+          const geometry = feature.getGeometry();
+
+          if (geometry instanceof ol.geom.Point) {
+            const coordinate = geometry.getCoordinates();
+            csv += coordinate[0] + ',' + coordinate[1] + '\n';
+          } else if (geometry instanceof ol.geom.LineString || geometry instanceof ol.geom.Polygon) {
+            const coordinates = geometry.getCoordinates();
+            coordinates.forEach(function(coordinate) {
+              csv += coordinate[0] + ',' + coordinate[1] + '\n';
+            });
+          }
+        });
+
+        downloadFile(csv, 'data.csv', 'text/csv');
+      }
+
+
+      function downloadFile(content, fileName, mimeType) {
+        const blob = new Blob([content], {
+          type: mimeType
+        });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+
+        URL.revokeObjectURL(url);
+      }
+
+      const exportKMLButton = new ol.control.Button({
+        html: '<i class="fa fa-download"></i>',
+        title: 'Export as KML',
+        handleClick: exportToKML,
+      });
+
+      const exportCSVButton = new ol.control.Button({
+        html: '<i class="fa fa-download"></i>',
+        title: 'Export as CSV',
+        handleClick: exportToCSV,
+      });
+
+      controlBar.addControl(exportKMLButton);
+      controlBar.addControl(exportCSVButton);
+
+      // ...
+
+      function displayGeoJSON(geojson) {
+        const features = new ol.format.GeoJSON().readFeatures(geojson, {
+          dataProjection: 'EPSG:4326',
+          featureProjection: map.getView().getProjection(),
+        });
+
+        vector.getSource().clear();
+        vector.getSource().addFeatures(features);
+
+        // Fit the map view to the extent of the features
+        const extent = vector.getSource().getExtent();
+        map.getView().fit(extent, {
+          padding: [50, 50, 50, 50]
+        });
+      }
+
+      function displayKML(kml) {
+        const features = new ol.format.KML().readFeatures(kml, {
+          dataProjection: 'EPSG:4326',
+          featureProjection: map.getView().getProjection(),
+        });
+
+        vector.getSource().clear();
+        vector.getSource().addFeatures(features);
+
+        // Fit the map view to the extent of the features
+        const extent = vector.getSource().getExtent();
+        map.getView().fit(extent, {
+          padding: [50, 50, 50, 50]
+        });
+      }
+
+      function handleFileUpload(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+          const content = event.target.result;
+          const fileName = file.name.toLowerCase();
+
+          if (fileName.endsWith('.geojson')) {
+            const geojson = JSON.parse(content);
+            displayGeoJSON(geojson);
+          } else if (fileName.endsWith('.kml')) {
+            const kml = content;
+            displayKML(kml);
+          } else {
+            alert('Unsupported file format. Please upload GeoJSON or KML files.');
+          }
+        };
+
+        reader.readAsText(file);
+      }
+
+      const fileInput = document.getElementById('file-input');
+      fileInput.addEventListener('change', handleFileUpload);
+
+      function openFile() {
+        fileInput.click();
+      }
+
+      const openFileButton = new ol.control.Button({
+        html: '<i class="fa fa-upload"></i>',
+        title: 'Open File',
+        handleClick: openFile,
+      });
+
+      controlBar.addControl(openFileButton);
 
     </script>
   </body>
