@@ -1,611 +1,738 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Geo Craft</title>
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://openlayers.org/en/v6.13.0/css/ol.css" type="text/css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.css" type="text/css">
-  <style>
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-
-    .options {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 10px;
-      border-radius: 4px;
-      z-index: 1;
-    }
-
-    #tooltip {
-      display: none;
-      position: absolute;
-      background-color: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      z-index: 9999;
-    }
-
-    .ol-button i {
-      color: inherit;
-    }
-
-    .ol-notification i {
-      color: #fff;
-    }
-
-    .search {
-      position: absolute;
-      top: 18px;
-      left: 60px;
-      z-index: 1;
-    }
-
-    .search input[type="text"] {
-      width: 200px;
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .search button {
-      margin-left: 5px;
-      padding: 5px;
-      background-color: #f8f8f8;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .file-upload {
-      position: absolute;
-      top: 18px;
-      left: 280px;
-      z-index: 1;
-    }
-
-    .file-upload input[type="file"] {
-      display: none;
-    }
-
-    .attribute-table {
-      position: absolute;
-      top: 200px;
-      right: 60px;
-      z-index: 1;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 10px;
-      border-radius: 4px;
-    }
-
-    .attribute-table table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    .attribute-table th,
-    .attribute-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-
-    .attribute-table th {
-      background-color: #f2f2f2;
-    }
-
-    .add-row-button,
-    .add-column-button {
-      margin-top: 5px;
-      padding: 5px;
-      background-color: #f8f8f8;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="map" style="width: 100%; height: 990px;"></div>
-  
-  <div class="options">
-    <div class="info"></div>
-    Export:<br />
-    <textarea id="info" style="width: 25em; height: 10em"></textarea>
-  </div>
-  
-    <div class="attribute-table">
-    <table id="attribute-table">
-      <thead>
-        <tr>
-          <th contenteditable="true">Attribute 1</th>
-          <th contenteditable="true">Attribute 2</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Existing rows will be added here dynamically -->
-      </tbody>
-    </table>
-    <button id="add-row-button" class="add-row-button" title="Add Row"><i class="fa fa-plus"></i> Add Row</button>
-    <button id="add-column-button" class="add-column-button" title="Add Column"><i class="fa fa-plus"></i> Add Column</button>
-    <button id="save-button" title="Save Attributes"><i class="fa fa-save"></i> Save</button>
-  </div>
-
-  <div class="search">
-    <input type="text" id="search-input" placeholder="Search location">
-    <button id="search-button" title="Search"><i class="fa fa-search"></i></button>
-  </div>
-
-  <div class="file-upload">
-    <input type="file" id="file-input" style="display: none;">
-  </div>
-
-  <script src="https://openlayers.org/en/v6.13.0/build/ol.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.js"></script>
-  <script>
-    // Initialize the map
-    const map = new ol.Map({
-      target: 'map',
-      layers: [
-        new ol.layer.Tile({
-          source: new ol.source.OSM(),
-        }),
-      ],
-      view: new ol.View({
-        center: ol.proj.fromLonLat([7.847809, 47.992878]),
-        zoom: 13,
-      }),
-    });
-
-    // Initialize an overlay for tooltips
-    const overlay = new ol.Overlay({
-      element: document.getElementById('tooltip'),
-      positioning: 'bottom-center',
-      offset: [0, -10],
-    });
-    map.addOverlay(overlay);
-
-    // Create a vector layer for the source of the editbar
-    const vector = new ol.layer.Vector({
-      source: new ol.source.Vector(),
-    });
-    map.addLayer(vector);
-
-    // Create the full screen control
-    //const fullScreen = new ol.control.FullScreen();
-
-    // Clear all drawn shapes
-    function clearFeatures() {
-      vector.getSource().clear();
-    }
-
-    // Add the clear button
-    const clearButton = new ol.control.Button({
-      html: '<i class="fa fa-trash"></i>',
-      title: 'Clear',
-      handleClick: clearFeatures,
-    });
-
-    // Add the editbar
-    const select = new ol.interaction.Select({
-      title: 'Sélection',
-    });
-    select.set('title', 'Sélection');
-
-    const edit = new ol.control.EditBar({
-      interactions: {
-        Select: {
-          title: 'Select',
-          interaction: select,
-        },
-        DrawPoint: 'Draw Point',
-        DrawLine: 'Draw Line',
-        DrawPolygon: 'Draw Polygon',
-        ModifySelect: 'Modify Select',
-        DrawHole: 'Draw Hole',
-        DrawRegular: {
-          title: 'Draw Regular',
-          ptsLabel: 'Pts',
-          circleLabel: 'Circle',
-        },
-      },
-      source: vector.getSource(),
-    });
-
-    // Add the controls to the control bar
-    const controlBar = new ol.control.Bar({
-      controls: [
-        //fullScreen,
-        clearButton,
-        edit,
-        // Add more controls here if needed
-      ],
-    });
-
-    // Add the control bar to the map using map's getControls() and addControl() method
-    map.getControls().push(controlBar);
-
-    // Add a tooltip
-    var tooltip = new ol.Overlay.Tooltip();
-    map.addOverlay(tooltip);
-
-    edit.getInteraction('Select').on('select', function (e) {
-      if (this.getFeatures().getLength()) {
-        tooltip.setInfo('Drag points on features to edit...');
-      } else tooltip.setInfo();
-    });
-    edit.getInteraction('Select').on('change:active', function (e) {
-      tooltip.setInfo('');
-    });
-    edit.getInteraction('ModifySelect').on('modifystart', function (e) {
-      if (e.features.length === 1) tooltip.setFeature(e.features[0]);
-    });
-    edit.getInteraction('ModifySelect').on('modifyend', function () {
-      tooltip.setFeature();
-    });
-    edit.getInteraction('DrawPoint').on('change:active', function (e) {
-      tooltip.setInfo(e.oldValue ? '' : 'Click map to place a point...');
-    });
-    edit.getInteraction('DrawLine').on(['change:active', 'drawend'], function (e) {
-      tooltip.setFeature();
-      tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing line...');
-    });
-    edit.getInteraction('DrawLine').on('drawstart', function (e) {
-      tooltip.setFeature(e.feature);
-      tooltip.setInfo('Click to continue drawing line...');
-    });
-    edit.getInteraction('DrawPolygon').on('drawstart', function (e) {
-      tooltip.setFeature(e.feature);
-      tooltip.setInfo('Click to continue drawing shape...');
-    });
-    edit.getInteraction('DrawPolygon').on(['change:active', 'drawend'], function (e) {
-      tooltip.setFeature();
-      tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing shape...');
-    });
-    edit.getInteraction('DrawHole').on('drawstart', function (e) {
-      tooltip.setFeature(e.feature);
-      tooltip.setInfo('Click to continue drawing hole...');
-    });
-    edit.getInteraction('DrawHole').on(['change:active', 'drawend'], function (e) {
-      tooltip.setFeature();
-    });
-    edit.getInteraction('DrawRegular').on('drawstart', function (e) {
-      tooltip.setFeature(e.feature);
-      tooltip.setInfo('Move and click map to finish drawing...');
-    });
-    edit.getInteraction('DrawRegular').on(['change:active', 'drawend'], function (e) {
-      tooltip.setFeature();
-      tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing shape...');
-    });
-
-    // Add the pencil sketch filter
-    const pencil = new ol.filter.PencilSketch({
-      intensity: 0.8,
-      blur: 8,
-      color: false,
-    });
-
-    map.getLayers().forEach(function (layer) {
-      if (layer instanceof ol.layer.Image || layer instanceof ol.layer.Tile) {
-        layer.addFilter(pencil);
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geo Craft</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://openlayers.org/en/v6.13.0/css/ol.css" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.css" type="text/css">
+    <style>
+      #map {
+        width: 100%;
+        height: 100%;
       }
-    });
 
-    // Add the save functionality
-    const save = new ol.control.Button({
-      html: '<i class="fa fa-download"></i>',
-      title: 'Export as GeoJSON',
-      handleClick: function () {
-        const features = vector.getSource().getFeatures();
-        const geojsonObject = {
-          type: 'FeatureCollection',
-          features: [],
-        };
+      .options {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 4px;
+        z-index: 1;
+      }
 
-        features.forEach(function (feature) {
-          const geometry = feature.getGeometry();
-          const coordinates = geometry.clone().transform('EPSG:3857', 'EPSG:4326').getCoordinates();
+      #tooltip {
+        display: none;
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 9999;
+      }
 
-          const featureObject = {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: geometry.getType(),
-              coordinates: coordinates,
-            },
+      .ol-button i {
+        color: inherit;
+      }
+
+      .ol-notification i {
+        color: #fff;
+      }
+
+      .search {
+        position: absolute;
+        top: 18px;
+        left: 60px;
+        z-index: 1;
+      }
+
+      .search input[type="text"] {
+        width: 200px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .search button {
+        margin-left: 5px;
+        padding: 5px;
+        background-color: #f8f8f8;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .file-upload {
+        position: absolute;
+        top: 18px;
+        left: 280px;
+        z-index: 1;
+      }
+
+      .file-upload input[type="file"] {
+        display: none;
+      }
+
+      .attribute-table {
+        position: absolute;
+        top: 200px;
+        right: 60px;
+        z-index: 1;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 4px;
+      }
+
+      .attribute-table table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      .attribute-table th,
+      .attribute-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+
+      .attribute-table th {
+        background-color: #f2f2f2;
+      }
+
+      .add-row-button,
+      .add-column-button {
+        margin-top: 5px;
+        padding: 5px;
+        background-color: #f8f8f8;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .attribute-table tr.highlight {
+        background-color: yellow;
+      }
+
+      .saved-row {
+        background-color: lightgreen !important;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="map" style="width: 100%; height: 990px;"></div>
+
+    <div class="options">
+      <div class="info"></div>
+      Export:<br />
+      <textarea id="info" style="width: 25em; height: 10em"></textarea>
+    </div>
+
+    <div class="attribute-table">
+      <table id="attribute-table">
+        <thead>
+          <tr>
+            <th contenteditable="true">Attribute 1</th>
+            <th contenteditable="true">Attribute 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Existing rows will be added here dynamically -->
+        </tbody>
+      </table>
+      <button id="add-row-button" class="add-row-button" title="Add Row"><i class="fa fa-plus"></i> Add Row</button>
+      <button id="add-column-button" class="add-column-button" title="Add Column"><i class="fa fa-plus"></i> Add Column</button>
+      <button id="save-button" title="Save Attributes"><i class="fa fa-save"></i> Save</button>
+    </div>
+
+    <div class="search">
+      <input type="text" id="search-input" placeholder="Search location">
+      <button id="search-button" title="Search"><i class="fa fa-search"></i></button>
+    </div>
+
+    <div class="file-upload">
+      <input type="file" id="file-input" style="display: none;">
+    </div>
+
+    <script src="https://openlayers.org/en/v6.13.0/build/ol.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.js"></script>
+    <script>
+      // Initialize the map
+      const map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM(),
+          }),
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([7.847809, 47.992878]),
+          zoom: 13,
+        }),
+      });
+
+      // Initialize an overlay for tooltips
+      const overlay = new ol.Overlay({
+        element: document.getElementById('tooltip'),
+        positioning: 'bottom-center',
+        offset: [0, -10],
+      });
+      map.addOverlay(overlay);
+
+      // Create a vector layer for the source of the editbar
+      const vector = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+      });
+      map.addLayer(vector);
+
+      // Create the full screen control
+      //const fullScreen = new ol.control.FullScreen();
+
+      // Clear all drawn shapes
+      function clearFeatures() {
+        vector.getSource().clear();
+      }
+
+      // Add the clear button
+      const clearButton = new ol.control.Button({
+        html: '<i class="fa fa-trash"></i>',
+        title: 'Clear',
+        handleClick: clearFeatures,
+      });
+
+      // Add the editbar
+      const select = new ol.interaction.Select({
+        title: 'Sélection',
+      });
+      select.set('title', 'Sélection');
+
+      const edit = new ol.control.EditBar({
+        interactions: {
+          Select: {
+            title: 'Select',
+            interaction: select,
+          },
+          DrawPoint: 'Draw Point',
+          DrawLine: 'Draw Line',
+          DrawPolygon: 'Draw Polygon',
+          ModifySelect: 'Modify Select',
+          DrawHole: 'Draw Hole',
+          DrawRegular: {
+            title: 'Draw Regular',
+            ptsLabel: 'Pts',
+            circleLabel: 'Circle',
+          },
+        },
+        source: vector.getSource(),
+      });
+
+      // Add the controls to the control bar
+      const controlBar = new ol.control.Bar({
+        controls: [
+          //fullScreen,
+          clearButton,
+          edit,
+          // Add more controls here if needed
+        ],
+      });
+
+      // Add the control bar to the map using map's getControls() and addControl() method
+      map.getControls().push(controlBar);
+
+      // Add a tooltip
+      var tooltip = new ol.Overlay.Tooltip();
+      map.addOverlay(tooltip);
+
+      edit.getInteraction('Select').on('select', function(e) {
+        if (this.getFeatures().getLength()) {
+          tooltip.setInfo('Drag points on features to edit...');
+        } else tooltip.setInfo();
+      });
+      edit.getInteraction('Select').on('change:active', function(e) {
+        tooltip.setInfo('');
+      });
+      edit.getInteraction('ModifySelect').on('modifystart', function(e) {
+        if (e.features.length === 1) tooltip.setFeature(e.features[0]);
+      });
+      edit.getInteraction('ModifySelect').on('modifyend', function() {
+        tooltip.setFeature();
+      });
+      edit.getInteraction('DrawPoint').on('change:active', function(e) {
+        tooltip.setInfo(e.oldValue ? '' : 'Click map to place a point...');
+      });
+      edit.getInteraction('DrawLine').on(['change:active', 'drawend'], function(e) {
+        tooltip.setFeature();
+        tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing line...');
+      });
+      edit.getInteraction('DrawLine').on('drawstart', function(e) {
+        tooltip.setFeature(e.feature);
+        tooltip.setInfo('Click to continue drawing line...');
+      });
+      edit.getInteraction('DrawPolygon').on('drawstart', function(e) {
+        tooltip.setFeature(e.feature);
+        tooltip.setInfo('Click to continue drawing shape...');
+      });
+      edit.getInteraction('DrawPolygon').on(['change:active', 'drawend'], function(e) {
+        tooltip.setFeature();
+        tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing shape...');
+      });
+      edit.getInteraction('DrawHole').on('drawstart', function(e) {
+        tooltip.setFeature(e.feature);
+        tooltip.setInfo('Click to continue drawing hole...');
+      });
+      edit.getInteraction('DrawHole').on(['change:active', 'drawend'], function(e) {
+        tooltip.setFeature();
+      });
+      edit.getInteraction('DrawRegular').on('drawstart', function(e) {
+        tooltip.setFeature(e.feature);
+        tooltip.setInfo('Move and click map to finish drawing...');
+      });
+      edit.getInteraction('DrawRegular').on(['change:active', 'drawend'], function(e) {
+        tooltip.setFeature();
+        tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing shape...');
+      });
+
+      // Add the pencil sketch filter
+      const pencil = new ol.filter.PencilSketch({
+        intensity: 0.8,
+        blur: 8,
+        color: false,
+      });
+
+      map.getLayers().forEach(function(layer) {
+        if (layer instanceof ol.layer.Image || layer instanceof ol.layer.Tile) {
+          layer.addFilter(pencil);
+        }
+      });
+
+      // Add the save functionality
+      const save = new ol.control.Button({
+        html: '<i class="fa fa-download"></i>',
+        title: 'Export as GeoJSON',
+        handleClick: function() {
+          const features = vector.getSource().getFeatures();
+          const geojsonObject = {
+            type: 'FeatureCollection',
+            features: [],
           };
 
-          // Get attribute information from the feature
-          const attributeInfo = feature.getProperties();
-          delete attributeInfo.geometry; // Remove the geometry property
+          features.forEach(function(feature) {
+            const geometry = feature.getGeometry();
+            const coordinates = geometry.getCoordinates();
 
-          featureObject.properties = attributeInfo;
-          geojsonObject.features.push(featureObject);
+            const featureObject = {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: geometry.getType(),
+                coordinates: coordinates,
+              },
+            };
+
+            // Get attribute information from the feature
+            const attributeInfo = feature.getProperties();
+            delete attributeInfo.geometry; // Remove the geometry property
+
+            featureObject.properties = attributeInfo;
+            geojsonObject.features.push(featureObject);
+          });
+
+          const jsonString = JSON.stringify(geojsonObject);
+          document.getElementById('info').value = jsonString;
+        },
+      });
+
+      // Add the save button to the control bar
+      controlBar.addControl(save);
+
+      function exportToKML() {
+        const features = vector.getSource().getFeatures();
+        const kmlFormat = new ol.format.KML();
+        const kml = kmlFormat.writeFeatures(features, {
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:3857',
         });
-
-        const jsonString = JSON.stringify(geojsonObject);
-        document.getElementById('info').value = jsonString;
-      },
-    });
-
-    // Add the save button to the control bar
-    controlBar.addControl(save);
-
-    function exportToKML() {
-      const features = vector.getSource().getFeatures();
-      const kmlFormat = new ol.format.KML();
-      const kml = kmlFormat.writeFeatures(features, {
-        dataProjection: 'EPSG:4326',
-        featureProjection: 'EPSG:3857',
-      });
-      downloadFile(kml, 'data.kml', 'application/vnd.google-earth.kml+xml');
-    }
-
-    function exportToCSV() {
-      const features = vector.getSource().getFeatures();
-      let csv = '';
-
-      // Get the column names
-      const tableHead = document.getElementById('attribute-table').getElementsByTagName('thead')[0];
-      const columnNames = Array.from(tableHead.getElementsByTagName('th')).map(th => th.textContent.trim());
-      csv += columnNames.join(',') + '\n';
-
-      features.forEach(function (feature) {
-        const properties = feature.getProperties();
-        const attributeValues = columnNames.map(columnName => properties[columnName] || '');
-
-        csv += attributeValues.join(',') + '\n';
-      });
-
-      downloadFile(csv, 'data.csv', 'text/csv');
-    }
-
-    function downloadFile(content, fileName, mimeType) {
-      const blob = new Blob([content], {
-        type: mimeType
-      });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      link.click();
-
-      URL.revokeObjectURL(url);
-    }
-
-    const exportKMLButton = new ol.control.Button({
-      html: '<i class="fa fa-download"></i>',
-      title: 'Export as KML',
-      handleClick: exportToKML,
-    });
-
-    const exportCSVButton = new ol.control.Button({
-      html: '<i class="fa fa-download"></i>',
-      title: 'Export as CSV',
-      handleClick: exportToCSV,
-    });
-
-    controlBar.addControl(exportKMLButton);
-    controlBar.addControl(exportCSVButton);
-
-    // ...
-
-    function displayGeoJSON(geojson) {
-      const features = new ol.format.GeoJSON().readFeatures(geojson, {
-        dataProjection: 'EPSG:4326',
-        featureProjection: map.getView().getProjection(),
-      });
-
-      vector.getSource().clear();
-      vector.getSource().addFeatures(features);
-
-      const attributeTable = document.getElementById('attribute-table');
-      attributeTable.innerHTML = '';
-
-      const thead = document.createElement('thead');
-      const tr = document.createElement('tr');
-
-      // Get the column names from the GeoJSON properties
-      const properties = features[0].getProperties();
-      const columnNames = Object.keys(properties).filter(prop => prop !== 'geometry');
-
-      columnNames.forEach(columnName => {
-        const th = document.createElement('th');
-        th.contentEditable = 'true';
-        th.textContent = columnName;
-        tr.appendChild(th);
-      });
-
-      thead.appendChild(tr);
-      attributeTable.appendChild(thead);
-    }
-
-    function displayKML(kml) {
-      const features = new ol.format.KML().readFeatures(kml, {
-        dataProjection: 'EPSG:4326',
-        featureProjection: map.getView().getProjection(),
-      });
-
-      vector.getSource().clear();
-      vector.getSource().addFeatures(features);
-
-      const attributeTable = document.getElementById('attribute-table');
-      attributeTable.innerHTML = '';
-
-      const thead = document.createElement('thead');
-      const tr = document.createElement('tr');
-
-      // Get the column names from the KML properties
-      const properties = features[0].getProperties();
-      const columnNames = Object.keys(properties).filter(prop => prop !== 'geometry' && prop !== 'styleUrl');
-
-      columnNames.forEach(columnName => {
-        const th = document.createElement('th');
-        th.contentEditable = 'true';
-        th.textContent = columnName;
-        tr.appendChild(th);
-      });
-
-      thead.appendChild(tr);
-      attributeTable.appendChild(thead);
-    }
-
-    function handleFileUpload(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-
-      reader.onload = function (event) {
-        const content = event.target.result;
-        const fileName = file.name.toLowerCase();
-
-        if (fileName.endsWith('.geojson')) {
-          const geojson = JSON.parse(content);
-          displayGeoJSON(geojson);
-        } else if (fileName.endsWith('.kml')) {
-          const kml = content;
-          displayKML(kml);
-        } else {
-          alert('Unsupported file format. Please upload GeoJSON or KML files.');
-        }
-      };
-
-      reader.readAsText(file);
-    }
-
-    const fileInput = document.getElementById('file-input');
-    fileInput.addEventListener('change', handleFileUpload);
-
-    function openFile() {
-      fileInput.click();
-    }
-
-    const openFileButton = new ol.control.Button({
-      html: '<i class="fa fa-upload"></i>',
-      title: 'Open File',
-      handleClick: openFile,
-    });
-
-    controlBar.addControl(openFileButton);
-
-    // Geocoding service URL
-    const geocodeUrl = 'https://nominatim.openstreetmap.org/search?format=json&q=';
-
-    // Handle search button click event
-    document.getElementById('search-button').addEventListener('click', function () {
-      const searchInput = document.getElementById('search-input');
-      const query = searchInput.value.trim();
-
-      if (query === '') {
-        alert('Please enter a location to search.');
-        return;
+        downloadFile(kml, 'data.kml', 'application/vnd.google-earth.kml+xml');
       }
 
-      // Construct the geocoding service URL
-      const url = geocodeUrl + encodeURIComponent(query);
+      function exportToCSV() {
+        const features = vector.getSource().getFeatures();
+        let csv = '';
 
-      // Send a GET request to the geocoding service
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          if (data.length > 0) {
-            const result = data[0];
-            const latitude = parseFloat(result.lat);
-            const longitude = parseFloat(result.lon);
+        // Get the column names
+        const tableHead = document.getElementById('attribute-table').getElementsByTagName('thead')[0];
+        const columnNames = Array.from(tableHead.getElementsByTagName('th')).map(th => th.textContent.trim());
 
-            // Center the map view on the search result
-            map.getView().setCenter(ol.proj.fromLonLat([longitude, latitude]));
-            map.getView().setZoom(13);
+        // Add coordinates column names
+        columnNames.push('Longitude', 'Latitude');
+
+        csv += columnNames.join(',') + '\n';
+
+        features.forEach(function(feature) {
+          const properties = feature.getProperties();
+          const attributeValues = columnNames.map(columnName => {
+            if (columnName === 'Longitude') {
+              const coordinates = feature.getGeometry().getCoordinates();
+              return ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326')[0];
+            } else if (columnName === 'Latitude') {
+              const coordinates = feature.getGeometry().getCoordinates();
+              return ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326')[1];
+            } else {
+              return properties[columnName] || '';
+            }
+          });
+
+          csv += attributeValues.join(',') + '\n';
+        });
+
+        downloadFile(csv, 'data.csv', 'text/csv');
+      }
+
+      function downloadFile(content, fileName, mimeType) {
+        const blob = new Blob([content], {
+          type: mimeType
+        });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+
+        URL.revokeObjectURL(url);
+      }
+
+      const exportKMLButton = new ol.control.Button({
+        html: '<i class="fa fa-download"></i>',
+        title: 'Export as KML',
+        handleClick: exportToKML,
+      });
+
+      const exportCSVButton = new ol.control.Button({
+        html: '<i class="fa fa-download"></i>',
+        title: 'Export as CSV',
+        handleClick: exportToCSV,
+      });
+
+      controlBar.addControl(exportKMLButton);
+      controlBar.addControl(exportCSVButton);
+
+      // ...
+
+      function displayGeoJSON(geojson) {
+        const features = new ol.format.GeoJSON().readFeatures(geojson, {
+          dataProjection: 'EPSG:4326',
+          featureProjection: map.getView().getProjection(),
+        });
+
+        vector.getSource().clear();
+        vector.getSource().addFeatures(features);
+
+        const attributeTable = document.getElementById('attribute-table');
+        attributeTable.innerHTML = '';
+
+        const thead = document.createElement('thead');
+        const tr = document.createElement('tr');
+
+        // Get the column names from the GeoJSON properties
+        const properties = features[0].getProperties();
+        const columnNames = Object.keys(properties).filter(prop => prop !== 'geometry');
+
+        columnNames.forEach(columnName => {
+          const th = document.createElement('th');
+          th.contentEditable = 'true';
+          th.textContent = columnName;
+          tr.appendChild(th);
+        });
+
+        thead.appendChild(tr);
+        attributeTable.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        features.forEach(feature => {
+          const row = document.createElement('tr');
+          columnNames.forEach(columnName => {
+            const td = document.createElement('td');
+            td.contentEditable = 'true';
+            td.textContent = feature.get(columnName) || '';
+            row.appendChild(td);
+          });
+          tbody.appendChild(row);
+
+          feature.on('click', () => {
+            // Remove highlighting from all rows
+            const rows = attributeTable.getElementsByTagName('tr');
+            Array.from(rows).forEach(row => {
+              row.classList.remove('highlight');
+            });
+
+            // Highlight the clicked row
+            row.classList.add('highlight');
+          });
+        });
+
+        attributeTable.appendChild(tbody);
+      }
+
+      function displayKML(kml) {
+        const features = new ol.format.KML().readFeatures(kml, {
+          dataProjection: 'EPSG:4326',
+          featureProjection: map.getView().getProjection(),
+        });
+
+        vector.getSource().clear();
+        vector.getSource().addFeatures(features);
+
+        const attributeTable = document.getElementById('attribute-table');
+        attributeTable.innerHTML = '';
+
+        const thead = document.createElement('thead');
+        const tr = document.createElement('tr');
+
+        // Get the column names from the KML properties
+        const properties = features[0].getProperties();
+        const columnNames = Object.keys(properties).filter(prop => prop !== 'geometry' && prop !== 'styleUrl');
+
+        columnNames.forEach(columnName => {
+          const th = document.createElement('th');
+          th.contentEditable = 'true';
+          th.textContent = columnName;
+          tr.appendChild(th);
+        });
+
+        thead.appendChild(tr);
+        attributeTable.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        features.forEach(feature => {
+          const row = document.createElement('tr');
+          columnNames.forEach(columnName => {
+            const td = document.createElement('td');
+            td.contentEditable = 'true';
+            td.textContent = feature.get(columnName) || '';
+            row.appendChild(td);
+          });
+          tbody.appendChild(row);
+
+          feature.on('click', () => {
+            // Remove highlighting from all rows
+            const rows = attributeTable.getElementsByTagName('tr');
+            Array.from(rows).forEach(row => {
+              row.classList.remove('highlight');
+            });
+
+            // Highlight the clicked row
+            row.classList.add('highlight');
+          });
+        });
+
+        attributeTable.appendChild(tbody);
+      }
+
+      function handleFileUpload(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+          const content = event.target.result;
+          const fileName = file.name.toLowerCase();
+
+          if (fileName.endsWith('.geojson')) {
+            const geojson = JSON.parse(content);
+            displayGeoJSON(geojson);
+          } else if (fileName.endsWith('.kml')) {
+            const kml = content;
+            displayKML(kml);
           } else {
-            alert('No results found for the search query.');
+            alert('Unsupported file format. Please upload GeoJSON or KML files.');
           }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('An error occurred during the search.');
-        });
+        };
 
-      searchInput.value = '';
-    });
-
-    function addRow() {
-      const attributeTable = document.getElementById('attribute-table');
-      const tbody = attributeTable.getElementsByTagName('tbody')[0];
-
-      const tr = document.createElement('tr');
-
-      // Get the column names from the table header
-      const tableHead = attributeTable.getElementsByTagName('thead')[0];
-      const columnNames = Array.from(tableHead.getElementsByTagName('th')).map(th => th.textContent.trim());
-
-      columnNames.forEach(() => {
-        const td = document.createElement('td');
-        td.contentEditable = 'true';
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
-    }
-
-    const addRowButton = document.getElementById('add-row-button');
-    addRowButton.addEventListener('click', addRow);
-
-    function addColumn() {
-      const attributeTable = document.getElementById('attribute-table');
-      const thead = attributeTable.getElementsByTagName('thead')[0];
-
-      const th = document.createElement('th');
-      th.contentEditable = 'true';
-      th.textContent = 'Attribute';
-      thead.firstElementChild.appendChild(th);
-
-      const tbody = attributeTable.getElementsByTagName('tbody')[0];
-      const rows = tbody.getElementsByTagName('tr');
-
-      for (let i = 0; i < rows.length; i++) {
-        const td = document.createElement('td');
-        td.contentEditable = 'true';
-        rows[i].appendChild(td);
+        reader.readAsText(file);
       }
-    }
 
-    const addColumnButton = document.getElementById('add-column-button');
-    addColumnButton.addEventListener('click', addColumn);
+      const fileInput = document.getElementById('file-input');
+      fileInput.addEventListener('change', handleFileUpload);
 
-    function saveAttributes() {
-      const attributeTable = document.getElementById('attribute-table');
-      const rows = attributeTable.getElementsByTagName('tr');
-      const columnNames = Array.from(rows[0].getElementsByTagName('th')).map(th => th.textContent.trim());
+      function openFile() {
+        fileInput.click();
+      }
 
-      const features = vector.getSource().getFeatures();
+      const openFileButton = new ol.control.Button({
+        html: '<i class="fa fa-upload"></i>',
+        title: 'Open File',
+        handleClick: openFile,
+      });
 
-      features.forEach((feature, index) => {
-        const properties = feature.getProperties();
+      controlBar.addControl(openFileButton);
 
-        columnNames.forEach((columnName, columnIndex) => {
-          const cell = rows[index + 1].getElementsByTagName('td')[columnIndex];
-          properties[columnName] = cell.textContent.trim();
+      // Geocoding service URL
+      const geocodeUrl = 'https://nominatim.openstreetmap.org/search?format=json&q=';
+
+      // Handle search button click event
+      document.getElementById('search-button').addEventListener('click', function() {
+        const searchInput = document.getElementById('search-input');
+        const query = searchInput.value.trim();
+
+        if (query === '') {
+          alert('Please enter a location to search.');
+          return;
+        }
+
+        // Construct the geocoding service URL
+        const url = geocodeUrl + encodeURIComponent(query);
+
+        // Send a GET request to the geocoding service
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.length > 0) {
+              const result = data[0];
+              const latitude = parseFloat(result.lat);
+              const longitude = parseFloat(result.lon);
+
+              // Center the map view on the search result
+              map.getView().setCenter(ol.proj.fromLonLat([longitude, latitude]));
+              map.getView().setZoom(13);
+            } else {
+              alert('No results found for the search query.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred during the search.');
+          });
+
+        searchInput.value = '';
+      });
+
+      function addRow() {
+        const attributeTable = document.getElementById('attribute-table');
+        const tbody = attributeTable.getElementsByTagName('tbody')[0];
+
+        const tr = document.createElement('tr');
+
+        // Get the column names from the table header
+        const tableHead = attributeTable.getElementsByTagName('thead')[0];
+        const columnNames = Array.from(tableHead.getElementsByTagName('th')).map(th => th.textContent.trim());
+
+        columnNames.forEach(() => {
+          const td = document.createElement('td');
+          td.contentEditable = 'true';
+          tr.appendChild(td);
         });
 
-        feature.setProperties(properties);
-      });
-    }
+        tbody.appendChild(tr);
+      }
 
-    const saveButton = document.getElementById('save-button');
-    saveButton.addEventListener('click', saveAttributes);
+      const addRowButton = document.getElementById('add-row-button');
+      addRowButton.addEventListener('click', addRow);
 
-  </script>
-</body>
+      function addColumn() {
+        const attributeTable = document.getElementById('attribute-table');
+        const thead = attributeTable.getElementsByTagName('thead')[0];
+
+        const th = document.createElement('th');
+        th.contentEditable = 'true';
+        th.textContent = 'Attribute';
+        thead.firstElementChild.appendChild(th);
+
+        const tbody = attributeTable.getElementsByTagName('tbody')[0];
+        const rows = tbody.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+          const td = document.createElement('td');
+          td.contentEditable = 'true';
+          rows[i].appendChild(td);
+        }
+      }
+
+      const addColumnButton = document.getElementById('add-column-button');
+      addColumnButton.addEventListener('click', addColumn);
+
+      function saveAttributes() {
+        const attributeTable = document.getElementById('attribute-table');
+        const rows = attributeTable.getElementsByTagName('tr');
+        const columnNames = Array.from(rows[0].getElementsByTagName('th')).map(th => th.textContent.trim());
+
+        const features = vector.getSource().getFeatures();
+        const featureCount = features.length;
+        const rowCount = rows.length;
+
+        if (featureCount === 0) {
+          alert('There are no features to save attributes for.');
+          return;
+        }
+
+        if (rowCount === 1) {
+          alert('There are no attributes to save.');
+          return;
+        }
+
+        if (rowCount - 1 !== featureCount) {
+          alert('The number of rows does not match the number of features.');
+          return;
+        }
+
+        for (let i = 1; i < rowCount; i++) {
+          const cells = Array.from(rows[i].getElementsByTagName('td'));
+
+          if (cells.length !== columnNames.length) {
+            alert('The number of cells in a row does not match the number of columns.');
+            return;
+          }
+
+          const attributes = {};
+
+          for (let j = 0; j < cells.length; j++) {
+            const columnName = columnNames[j];
+            const cell = cells[j];
+            const attributeValue = cell.textContent.trim();
+
+            attributes[columnName] = attributeValue;
+          }
+
+          features[i - 1].setProperties(attributes);
+        }
+
+        // Add event listeners to the attribute cells for zooming on click
+        const attributeCells = attributeTable.getElementsByTagName('td');
+
+        Array.from(attributeCells).forEach((cell, index) => {
+          cell.addEventListener('click', function() {
+            const columnIndex = index % columnNames.length;
+            const featureIndex = Math.floor(index / columnNames.length);
+
+            if (columnIndex === columnNames.indexOf('Longitude') || columnIndex === columnNames.indexOf('Latitude')) {
+              const feature = features[featureIndex];
+              const geometry = feature.getGeometry();
+              const extent = geometry.getExtent();
+              const zoomLevel = 15; // Adjust the zoom level as needed
+
+              map.getView().fit(extent, {
+                duration: 1000,
+                maxZoom: zoomLevel
+              });
+            }
+          });
+        });
+
+
+        alert('Attributes saved successfully.');
+      }
+
+
+
+      const saveButton = document.getElementById('save-button');
+      saveButton.addEventListener('click', saveAttributes);
+
+    </script>
+  </body>
 
 </html>
