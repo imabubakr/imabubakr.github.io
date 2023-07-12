@@ -122,6 +122,10 @@
         background-color: lightgreen !important;
       }
 
+      .highlight {
+        background-color: yellow;
+      }
+
     </style>
   </head>
 
@@ -474,6 +478,15 @@
 
             // Highlight the clicked row
             row.classList.add('highlight');
+
+            // Zoom to the clicked feature
+            const geometry = feature.getGeometry();
+            const extent = geometry.getExtent();
+            const zoomLevel = 15; // Adjust the zoom level as needed
+            map.getView().fit(extent, {
+              duration: 1000,
+              maxZoom: zoomLevel
+            });
           });
         });
 
@@ -529,6 +542,15 @@
 
             // Highlight the clicked row
             row.classList.add('highlight');
+
+            // Zoom to the clicked feature
+            const geometry = feature.getGeometry();
+            const extent = geometry.getExtent();
+            const zoomLevel = 15; // Adjust the zoom level as needed
+            map.getView().fit(extent, {
+              duration: 1000,
+              maxZoom: zoomLevel
+            });
           });
         });
 
@@ -546,9 +568,23 @@
           if (fileName.endsWith('.geojson')) {
             const geojson = JSON.parse(content);
             displayGeoJSON(geojson);
+
+            // Zoom to the extent of the added features
+            const extent = vector.getSource().getExtent();
+            map.getView().fit(extent, {
+              padding: [50, 50, 50, 50],
+              duration: 1000
+            });
           } else if (fileName.endsWith('.kml')) {
             const kml = content;
             displayKML(kml);
+
+            // Zoom to the extent of the added features
+            const extent = vector.getSource().getExtent();
+            map.getView().fit(extent, {
+              padding: [50, 50, 50, 50],
+              duration: 1000
+            });
           } else {
             alert('Unsupported file format. Please upload GeoJSON or KML files.');
           }
@@ -556,6 +592,7 @@
 
         reader.readAsText(file);
       }
+
 
       const fileInput = document.getElementById('file-input');
       fileInput.addEventListener('change', handleFileUpload);
@@ -661,76 +698,47 @@
         const rows = attributeTable.getElementsByTagName('tr');
         const columnNames = Array.from(rows[0].getElementsByTagName('th')).map(th => th.textContent.trim());
 
-        const features = vector.getSource().getFeatures();
-        const featureCount = features.length;
-        const rowCount = rows.length;
+        for (let i = 1; i < rows.length; i++) {
+          const cells = rows[i].getElementsByTagName('td');
+          const feature = vector.getSource().getFeatures()[i - 1];
 
-        if (featureCount === 0) {
-          alert('There are no features to save attributes for.');
-          return;
-        }
-
-        if (rowCount === 1) {
-          alert('There are no attributes to save.');
-          return;
-        }
-
-        if (rowCount - 1 !== featureCount) {
-          alert('The number of rows does not match the number of features.');
-          return;
-        }
-
-        for (let i = 1; i < rowCount; i++) {
-          const cells = Array.from(rows[i].getElementsByTagName('td'));
-
-          if (cells.length !== columnNames.length) {
-            alert('The number of cells in a row does not match the number of columns.');
-            return;
-          }
-
-          const attributes = {};
-
-          for (let j = 0; j < cells.length; j++) {
-            const columnName = columnNames[j];
-            const cell = cells[j];
-            const attributeValue = cell.textContent.trim();
-
-            attributes[columnName] = attributeValue;
-          }
-
-          features[i - 1].setProperties(attributes);
-        }
-
-        // Add event listeners to the attribute cells for zooming on click
-        const attributeCells = attributeTable.getElementsByTagName('td');
-
-        Array.from(attributeCells).forEach((cell, index) => {
-          cell.addEventListener('click', function() {
-            const columnIndex = index % columnNames.length;
-            const featureIndex = Math.floor(index / columnNames.length);
-
-            if (columnIndex === columnNames.indexOf('Longitude') || columnIndex === columnNames.indexOf('Latitude')) {
-              const feature = features[featureIndex];
-              const geometry = feature.getGeometry();
-              const extent = geometry.getExtent();
-              const zoomLevel = 15; // Adjust the zoom level as needed
-
-              map.getView().fit(extent, {
-                duration: 1000,
-                maxZoom: zoomLevel
-              });
-            }
+          columnNames.forEach((columnName, index) => {
+            const cellValue = cells[index].textContent.trim();
+            feature.set(columnName, cellValue);
           });
-        });
 
-
-        alert('Attributes saved successfully.');
+          // Add a CSS class to indicate the saved row
+          rows[i].classList.add('saved-row');
+        }
       }
-
-
 
       const saveButton = document.getElementById('save-button');
       saveButton.addEventListener('click', saveAttributes);
+
+      // Add the tooltip element to the DOM
+      document.body.appendChild(overlay.getElement());
+
+      const rows = tbody.getElementsByTagName('tr');
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        row.addEventListener('click', function() {
+          const feature = features[i];
+          const extent = feature.getGeometry().getExtent();
+          map.getView().fit(extent, {
+            padding: [50, 50, 50, 50],
+            duration: 1000
+          });
+
+          // Remove previous highlight from the selected row
+          const highlightedRow = tbody.querySelector('.highlight');
+          if (highlightedRow) {
+            highlightedRow.classList.remove('highlight');
+          }
+
+          // Highlight the selected row
+          row.classList.add('highlight');
+        });
+      }
 
     </script>
   </body>
