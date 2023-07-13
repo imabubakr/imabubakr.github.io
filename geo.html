@@ -198,17 +198,53 @@
       // Create the full screen control
       //const fullScreen = new ol.control.FullScreen();
 
-      // Clear all drawn shapes
-      function clearFeatures() {
-        vector.getSource().clear();
+      function clearGeoJSON() {
+        document.getElementById('info').value = ''; // Clear GeoJSON export textarea
+
+        const attributeTable = document.getElementById('attribute-table');
+        const tbody = attributeTable.getElementsByTagName('tbody')[0];
+        tbody.innerHTML = ''; // Clear attribute table data
       }
 
-      // Add the clear button
+
+      function clearFeatures() {
+        vector.getSource().clear(); // Clear drawn features
+        clearGeoJSON(); // Clear GeoJSON export and attribute table data
+
+        const attributeTable = document.getElementById('attribute-table');
+        const tbody = attributeTable.getElementsByTagName('tbody')[0];
+        tbody.innerHTML = ''; // Clear attribute table data
+
+        // Reset the header row
+        const thead = attributeTable.getElementsByTagName('thead')[0];
+        thead.innerHTML = `
+    <tr>
+      <th contenteditable="true">Attribute 1</th>
+      <th contenteditable="true">Attribute 2</th>
+    </tr>
+  `;
+
+        // Clear the file input value
+        const fileInput = document.getElementById('file-input');
+        fileInput.value = '';
+
+        // Call handleFileUpload function with a mock event
+        const mockEvent = {
+          target: {
+            files: [null],
+          },
+        };
+        handleFileUpload(mockEvent);
+      }
+
+
+
       const clearButton = new ol.control.Button({
         html: '<i class="fa fa-trash"></i>',
         title: 'Clear',
         handleClick: clearFeatures,
       });
+
 
       // Add the editbar
       const select = new ol.interaction.Select({
