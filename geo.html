@@ -81,12 +81,18 @@
       .attribute-table {
         position: absolute;
         top: 200px;
-        right: 60px;
+        right: 10px;
         z-index: 1;
         background-color: rgba(255, 255, 255, 0.8);
         padding: 10px;
         border-radius: 4px;
+        max-height: 750px;
+        /* Example max height value, adjust as needed */
+        max-width: 500px;
+        /* Example max width value, adjust as needed */
+        overflow: auto;
       }
+
 
       .attribute-table table {
         border-collapse: collapse;
@@ -125,6 +131,15 @@
       .highlight {
         background-color: yellow;
       }
+      
+      .custom-control-bar {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
 
     </style>
   </head>
@@ -159,6 +174,10 @@
       <input type="text" id="search-input" placeholder="Search location">
       <button id="search-button" title="Search"><i class="fa fa-search"></i></button>
     </div>
+
+    <div id="control-bar2" class="custom-control-bar"></div>
+
+
 
     <div class="file-upload">
       <input type="file" id="file-input" style="display: none;">
@@ -246,6 +265,26 @@
       });
 
 
+      // Create a new button and its click event handler
+      const toggleTableButton = new ol.control.Button({
+        html: '<i class="fa fa-table"></i>',
+        title: 'Toggle Attribute Table',
+        handleClick: function() {
+          const attributeTable = document.querySelector('.attribute-table');
+          const controls = controlBar.getControls();
+
+          // Toggle the visibility of the attribute table
+          attributeTable.style.display = attributeTable.style.display === 'none' ? 'block' : 'none';
+
+          // Disable all controls except the new button
+          controls.forEach(function(control) {
+            if (control !== toggleTableButton) {
+              control.setActive(false);
+            }
+          });
+        },
+      });
+
       // Add the editbar
       const select = new ol.interaction.Select({
         title: 'Sélection',
@@ -277,6 +316,7 @@
         controls: [
           //fullScreen,
           clearButton,
+          toggleTableButton,
           edit,
           // Add more controls here if needed
         ],
@@ -337,6 +377,30 @@
         tooltip.setFeature();
         tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing shape...');
       });
+      
+            //add 2nd control bar
+      // Create the second control bar
+      const controlBar2 = new ol.control.Bar({
+        className: 'custom-control-bar',
+        target: 'control-bar2', // Use the id of the new div element
+        controls: [
+          // Add your desired controls here
+        ],
+      });
+
+      // Add the second control bar to the map
+      map.addControl(controlBar2);
+
+      const myButton = new ol.control.Button({
+        html: '<i class="fa fa-star"></i>',
+        title: 'My Button',
+        handleClick: function() {
+          // Handle the button click event
+          console.log('My Button clicked!');
+        },
+      });
+
+      controlBar2.addControl(myButton);
 
       // Add the pencil sketch filter
       const pencil = new ol.filter.PencilSketch({
