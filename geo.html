@@ -131,6 +131,10 @@
       .highlight {
         background-color: yellow;
       }
+      
+      .hidden {
+  display: none;
+}
 
     </style>
   </head>
@@ -169,6 +173,12 @@
     <div class="file-upload">
       <input type="file" id="file-input" style="display: none;">
     </div>
+    
+    <button id="toggle-attribute-table-button" title="Toggle Attribute Table"><i class="fa fa-table"></i> Toggle Attribute Table</button>
+    
+    <div class="attribute-table hidden">
+
+
 
     <script src="https://openlayers.org/en/v6.13.0/build/ol.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.js"></script>
@@ -250,6 +260,17 @@
         title: 'Clear',
         handleClick: clearFeatures,
       });
+      
+      const toggleAttributeTableButton = new ol.control.Button({
+  html: '<i class="fa fa-table"></i>',
+  title: 'Toggle Attribute Table',
+  handleClick: function() {
+    const attributeTable = document.querySelector('.attribute-table');
+    attributeTable.classList.toggle('hidden');
+  },
+});
+
+
 
 
       // Add the editbar
@@ -283,6 +304,7 @@
         controls: [
           //fullScreen,
           clearButton,
+          toggleAttributeTableButton,
           edit,
           // Add more controls here if needed
         ],
