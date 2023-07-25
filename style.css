@@ -14,14 +14,13 @@ body {
 }
 
 .background-image {
-	background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(marreeman.jpg);
+	background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(aurot.png);
 	position: relative;
 	top: 0;
 	left: 0;
-	background-size: cover;
+	background-size: contain;
 	background-repeat: no-repeat;
 	height: 100vh;
-	width: 100%;
 	background-size: 100%;
 	display: flex;
 	align-items: center;
