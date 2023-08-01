@@ -61,11 +61,11 @@ main {
 }
 
 h1 {
-  margin-top: 100px;
+  margin-top: 60px;
   font-size: 36px;
   font-weight: bold;
   margin-bottom: 30px;
-  color: #333;
+  color: #666;
   text-transform: uppercase;
   letter-spacing: 3px;
 }
@@ -171,21 +171,21 @@ button:hover {
 /* Style for bullet point text */
 #resume ul li {
   font-size: 14.5px;
-  color: #333;
+  color: #666;
   margin-bottom: 3px; /* Adjust the margin as needed */
   line-height: 1.4; /* Adjust the line height as needed */
 }
 
 /* Style for dates */
 #resume .date {
-  font-size: 14.5px;
+  font-size: 16px;
   color: #666;
   margin-bottom: 3px; /* Adjust the margin as needed */
   line-height: 1.0; /* Adjust the line height as needed */
 }
 /* Style for descriptions within <td> elements */
 #resume td p {
-  font-size: 14.5px;
+  font-size: 16px;
   color: #666;
   margin-bottom: 5px; /* Adjust the margin as needed */
   line-height: 1.4; /* Adjust the line height as needed */
@@ -202,6 +202,7 @@ button:hover {
   padding: 8px;
   text-align: left;
   line-height: 0.5; /* Adjust the line-height as needed */
+  color: #666;
 }
 
 /* Divide the table into two columns */
@@ -218,11 +219,12 @@ button:hover {
 /* Decrease the vertical spacing between <p> elements */
 .cv-table p {
   margin: 2px 0; /* Adjust the margin as needed */
-  font-size: 14.5px;
+  font-size: 16px;
+  color: #666;
 }
 
 #resume p {
-  font-size:14.5px;
+  font-size:16px;
   line-height: 1.4; /* Adjust the line height as needed */
   color: #666;
 }
@@ -239,18 +241,29 @@ button:hover {
 }
 
 .cv-table.personal-info-table p {
-  font-size: 14.5px;
+  font-size: 16px;
   margin: 0;
   line-height: 0.1;
+  color: #666;
 }
 
 /* Style for dates within the Personal Information table */
 .cv-table.personal-info-table .date {
-  font-size: 14.5px;
+  font-size: 16px;
   color: #666;
   margin-bottom: 1px; /* Adjust the margin as needed */
   line-height: 0.1; /* Adjust the line height as needed */
 }
+
+/* Style for the cover page personal information */
+#cover-page h1 {
+  font-size:24px;
+  color: #666; /* Set the font color to white */
+}
+#cover-page p {
+  font-size: 16px;
+}
+
 
 /* Use white space effectively */
 #resume h2,
