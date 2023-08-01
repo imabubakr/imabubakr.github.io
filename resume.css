@@ -252,49 +252,6 @@ button:hover {
   line-height: 0.1; /* Adjust the line height as needed */
 }
 
-/* New CSS class for the cover page */
-#cover-page {
-  background-image: url('freiburg7.jpeg');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 100%;
-  height: 100vh; /* This will make the cover page take the full viewport height */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  color: #fff;
-  text-align: center;
-  padding: 20px;
-}
-
-/* Style for the cover page content */
-.cover-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-}
-
-/* Style for the text wrapper */
-.text-wrapper {
-  text-align: center;
-  margin-top: -700px; /* Adjust the margin to move all the text down */
-  margin-left: -400px; /* Adjust the margin to move all the text to the left */
-}
-
-/* Style for the cover page personal information */
-#cover-page h1 {
-  font-size:24px;
-  color: #fff; /* Set the font color to white */
-}
-#cover-page p {
-  font-size: 16px;
-}
-
-
 /* Use white space effectively */
 #resume h2,
 #resume h3 {
