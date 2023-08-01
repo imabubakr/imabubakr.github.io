@@ -61,7 +61,7 @@ main {
 }
 
 h1 {
-  margin-top: 60px;
+  margin-top: 100px;
   font-size: 36px;
   font-weight: bold;
   margin-bottom: 30px;
@@ -345,3 +345,93 @@ button:hover {
   padding-top: 10px;
   padding-bottom: 10px;
 }
+
+.container {
+	width: 50%;
+	max-width: 600px;
+	padding: 0 15px;
+	box-sizing: border-box;
+	margin: 0 auto;
+}
+
+.timelines h2 {
+	text-align: center;
+	color: #000000;
+	font-weight: 600;
+	margin-bottom: 40px;
+	font-size: 32px;
+}
+.d-flex-2 {
+	display: flex;
+	align-items: center;
+}
+.timeline-area {
+	padding: 2px 0;
+}
+.all-timelines {
+	position: relative;
+}
+
+.all-timelines::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin: auto;
+	height: 100%;
+	width: 2px;
+	background: #efa22f;
+	top: 20px;
+}
+.single-timeline {
+	margin-bottom: 2px;
+}
+.timeline-blank {
+	width: 50%;
+}
+.timeline-text {
+	width: 50%;
+	padding-left: 10px;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	position: relative;
+  padding: -10px -10px;
+}
+.timeline-text h6 {
+	color: #000000;
+	font-weight: 900;
+	display: inline-block;
+	font-size: 1rem;
+}
+.timeline-text span {
+	color: #000000;
+	display: block;
+	width: 100%;
+}
+.single-timeline:nth-child(even) .timeline-text span {
+	text-align: right;
+}
+.t-square {
+	content: "";
+	position: absolute;
+	width: 12px;
+	height: 6px;
+	left: -6px;
+	background: #efa22f;
+}
+.single-timeline:nth-child(even) {
+	-webkit-box-orient: horizontal;
+	-webkit-box-direction: reverse;
+	-ms-flex-direction: row-reverse;
+	flex-direction: row-reverse;
+}
+.single-timeline:nth-child(even) .t-square {
+	right: -6px;
+	left: unset;
+}
+.single-timeline:nth-child(even) .timeline-text {
+	padding-left: 0;
+	padding-right: 30px;
+	text-align: right;
+}
+
