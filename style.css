@@ -14,11 +14,12 @@ body {
 }
 
 .background-image {
-	background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(marreeman.jpg);
+	background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(storm.gif);
 	position: relative;
 	top: 0;
 	left: 0;
-	background-size: contain;
+	background-size: 50%;
+    background-position: center center;
 	background-repeat: no-repeat;
 	height: 100vh;
 	background-size: 100%;
