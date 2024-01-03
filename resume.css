@@ -156,7 +156,7 @@ button:hover {
 /* Style for subheading */
 #resume h3 {
   font-size: 16px;
-  color: #333;
+  color: rgb(110, 110, 110);
   margin-bottom: 10px;
   margin-top: 20px;
   position: relative;
