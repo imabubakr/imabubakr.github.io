@@ -14,12 +14,11 @@ body {
 }
 
 .background-image {
-	background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(storm.gif);
+	background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(aurot.png);
 	position: relative;
 	top: 0;
 	left: 0;
-	background-size: 50%;
-    background-position: center center;
+	background-size: contain;
 	background-repeat: no-repeat;
 	height: 100vh;
 	background-size: 100%;
@@ -178,6 +177,7 @@ img {
   margin-bottom: -70px;
 }
 
+
 .container {
   display: flex;
   justify-content: center;
@@ -222,7 +222,6 @@ p {
 	line-height: 26px;
 	margin: 0;
 }
-
 .container {
 	width: 100%;
 	max-width: 1140px;
