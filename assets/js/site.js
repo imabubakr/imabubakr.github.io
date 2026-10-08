@@ -130,6 +130,26 @@
     openCerts();
   }
 
+  // Section background layers load only when their section comes near, and never
+  // before the page itself has loaded (they must not compete with fonts and hero).
+  var layerHeads = document.querySelectorAll(".section-head[data-layer]");
+  var startLayers = function () {
+    if (!("IntersectionObserver" in window)) {
+      layerHeads.forEach(function (h) { h.classList.add("layer-on"); });
+      return;
+    }
+    var layerObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("layer-on");
+        layerObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: "300px 0px" });
+    layerHeads.forEach(function (h) { layerObserver.observe(h); });
+  };
+  if (document.readyState === "complete") startLayers();
+  else window.addEventListener("load", startLayers);
+
   var langLink = document.querySelector(".lang a[hreflang]");
   var langBase = langLink ? langLink.getAttribute("href").split("#")[0] : "";
 

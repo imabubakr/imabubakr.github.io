@@ -69,7 +69,7 @@
 
 
         <section class="section" id="about" aria-labelledby="about-title">
-          <header class="section-head">
+          <header class="section-head" data-layer="pointcloud">
             <h2 class="section-title" id="about-title"><span class="section-no">[01]</span>Über mich</h2>
           </header>
           <div class="section-body about-body">
@@ -77,8 +77,19 @@
               <p class="intro-lead">Von Haus aus Geologe, beruflich Geodatenspezialist.</p>
               <p class="intro-sub">Bei <a href="https://beaglesystems.com/">Beagle Systems</a> mache ich aus Drohnenbildern und LiDAR-Daten nutzbare Informationen. Ich arbeite vor allem mit Python, SQL und R und interessiere mich für Datenvisualisierung und Open Data.</p>
             </div>
+            <div class="about-visual">
+              <img class="about-photo" src="../assets/img/portrait-200.webp" srcset="../assets/img/portrait-200.webp 200w, ../assets/img/portrait-400.webp 400w" sizes="140px" width="200" height="250" loading="lazy" decoding="async" alt="Muhammad Abu Bakar">
+              <figure class="altitude" aria-label="Plattformen, mit denen ich arbeite: vom Orbit bis zur Drohne">
+                <p class="alt-head" aria-hidden="true">flughöhe</p>
+                <ol class="alt-list">
+                <li class="alt-item"><svg class="alt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="8.5" width="5" height="7"/><rect x="1.5" y="9.5" width="6" height="5"/><rect x="16.5" y="9.5" width="6" height="5"/><path d="M7.5 12h2M14.5 12h2M12 8.5V5.5M10 4.5l2 1 2-1"/></svg><div class="alt-text"><p class="alt-name">Satelliten<span class="alt-h">~700 km</span></p><p class="alt-sub">Landsat · Sentinel · MODIS</p><p class="alt-years">2016 – 2025</p></div></li>
+                <li class="alt-item"><svg class="alt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5v19M3 12.5l9-3.5 9 3.5M8 20l4-1.5 4 1.5"/><path d="M12 21.5v-3" stroke-dasharray="1 1.5"/></svg><div class="alt-text"><p class="alt-name">Luftbild &amp; LiDAR<span class="alt-h">~1 km</span></p><p class="alt-sub">Punktwolken · DGM · Orthofotos</p><p class="alt-years">seit 2021</p></div></li>
+                <li class="alt-item alt-now"><svg class="alt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9.5 9.5L6.5 6.5M14.5 9.5l3-3M9.5 14.5l-3 3M14.5 14.5l3 3"/><circle cx="5" cy="5" r="3"/><circle cx="19" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/></svg><div class="alt-text"><p class="alt-name">Drohnen · Beagle Systems<span class="alt-h">~100 m</span></p><p class="alt-sub">RGB · LiDAR · KI</p><p class="alt-years">seit 11/2025</p></div></li>
+                </ol>
+                <p class="alt-ground" aria-hidden="true">boden</p>
+              </figure>
+            </div>
             <figure class="timeline" aria-label="Ausbildung und Berufsweg, 2012 bis heute">
-              <img class="tl-photo" src="../assets/img/portrait-200.webp" srcset="../assets/img/portrait-200.webp 200w, ../assets/img/portrait-400.webp 400w" sizes="140px" width="200" height="250" loading="lazy" decoding="async" alt="Muhammad Abu Bakar">
               <ol class="tl-items">
                 <li class="tl-phase">ausbildung</li>
                 <li class="tl-item tl-edu tl-l"><span class="tl-date">2012 – 2015</span><span class="tl-body"><span class="tl-what">B.Sc. Geologie</span><span class="tl-where">Bahria University</span></span></li>
@@ -94,7 +105,7 @@
         </section>
 
         <section class="section" id="cv" aria-labelledby="cv-title">
-          <header class="section-head">
+          <header class="section-head" data-layer="buildings">
             <h2 class="section-title" id="cv-title"><span class="section-no">[02]</span>Lebenslauf</h2>
             <p class="section-sub">Beruf, Ausbildung und Kenntnisse auf einen Blick.</p>
             <button class="print-cv" type="button" data-pdf-title="Muhammad Abu Bakar – Lebenslauf" hidden>lebenslauf als pdf</button>
@@ -288,7 +299,7 @@
           </div>
         </section>
         <section class="section" id="plates" aria-labelledby="plates-title">
-          <header class="section-head">
+          <header class="section-head" data-layer="detections">
             <h2 class="section-title" id="plates-title"><span class="section-no">[03]</span>Visualisierungen</h2>
             <p class="section-sub">Karten und Datengrafiken aus privaten und Studienprojekten.</p>
           </header>
@@ -388,7 +399,7 @@
           <p>© 2026 Muhammad Abu Bakar. Alle Rechte vorbehalten.</p>
           <p>Diese Website erhebt keine personenbezogenen Daten. Ihre Privatsphäre wird respektiert.</p>
         </div>
-        <p class="collar-credit"><!-- build:credit -->Höhenmodell: <span lang="en">Copernicus GLO-30 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018 provided under COPERNICUS by the European Union and ESA; all rights reserved</span><!-- /build:credit --></p>
+        <p class="collar-credit"><!-- build:credit -->Höhenmodell: <span lang="en">Copernicus GLO-30 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018 provided under COPERNICUS by the European Union and ESA; all rights reserved</span><!-- /build:credit --> · Gebäude: <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap-Mitwirkende</a></p>
       </footer>
     </div>
   </body>

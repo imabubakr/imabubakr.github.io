@@ -41,6 +41,15 @@ Edit the `PLATES` or `CERTS` list (source file, EN/DE short title and caption) i
 It writes the media to `assets/plates/` and the grids into both pages between `<!-- build:plates -->` /
 `<!-- build:certs -->` markers. The viewer pages through one grid at a time.
 
+## Section background layers
+
+`python3 tools/layers/build_layers.py` writes `assets/layers/` (needs the contour pipeline's `tools/contours/work/dem.tif`;
+OSM buildings are cached in `tools/layers/work/`, fetched from Overpass if missing):
+point cloud (About), OSM building footprints (CV), detection-style boxes over fainter footprints (Visualizations).
+The boxes are a design motif labelled only "building", never fake model scores. They're single-colour masks painted
+with `--contour`, loaded by `site.js` after page load when a section comes near, and shown as a band *above* each
+section heading (no text on top of them). Credit "© OpenStreetMap contributors" stays in the footer.
+
 ## Legal notice (Impressum)
 
 There is deliberately no Impressum (owner's decision, 2026-10: no home address on the site). If one is added
@@ -98,7 +107,10 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   `.tl-now` (accent). On phones entries stack on the centre line.
 - Beagle Systems (current employer, Hamburg) is linked to https://beaglesystems.com/ in About and the CV, with a
   one-line description under the job taken from their site. Keep it factual.
-- Certificates: a grid (`#certificates`) at the end of the CV, linked from "Further training"; hidden in print.
+- Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
+  "View certificates" link or the `#certificates` hash; hidden in print.
+- About: intro → photo + "orbit to drone" altitude scale (satellites ~700 km, aerial/LiDAR ~1 km, drones ~100 m with the
+  accent as "current") → timeline. Line icons drawn in-house; no third-party logos (trademarks).
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.
