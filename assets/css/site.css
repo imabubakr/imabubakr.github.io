@@ -485,10 +485,15 @@ a:hover {
   padding: clamp(40px, 5cqw, 80px) var(--pad);
 }
 
-/* Section headings: a small mono number (matches the nav) above a large sans
-   title, so it is always clear which part of the page you are in. */
+/* Every section opens the same way on the page's centre axis: a small mono
+   number (matches the nav), a large sans title and, where useful, one short
+   line saying what the section holds. Content sits in a centred column;
+   longer text inside it stays left-aligned for readability. */
+.section-head {
+  margin-bottom: 40px;
+  text-align: center;
+}
 .section-title {
-  margin-bottom: 28px;
   font-size: clamp(2rem, 1.4rem + 2.2cqw, 3.25rem);
   font-weight: 500;
   line-height: 1;
@@ -501,24 +506,17 @@ a:hover {
   font: 400 0.75rem/1 var(--font-mono);
   letter-spacing: 0.04em;
 }
-
-@media (min-width: 1100px) {
-  .section {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--gutter);
-    align-items: start;
-  }
-  /* Wide screens: the title stays in view while its section scrolls past. */
-  .section-title {
-    position: sticky;
-    top: calc(var(--nav-h) + 32px);
-    grid-column: 1 / 4;
-    margin-bottom: 0;
-  }
-  .section-body {
-    grid-column: 4 / 13;
-  }
+.section-sub {
+  max-width: 48ch;
+  margin: 14px auto 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.5;
+  text-wrap: balance;
+}
+.section-body {
+  max-width: 860px;
+  margin: 0 auto;
 }
 
 /* ------------------------------------------------------------ figures -- */
@@ -562,15 +560,13 @@ a:hover {
 }
 
 /* --------------------------------------------------------------- about -- */
-/* Centred section. Only short text is centred: a one-line lead and a short
-   supporting sentence (long centred paragraphs are hard to read). */
-.section--center {
-  display: block;
+/* The About body is centred throughout. Only short text is centred: a one-line
+   lead and a short supporting sentence (long centred paragraphs are hard to read). */
+.about-body {
   text-align: center;
 }
-.section--center .section-title {
-  position: static;
-  margin-bottom: 24px;
+#about .section-head {
+  margin-bottom: 20px;
 }
 .intro-lead {
   max-width: 30ch;
