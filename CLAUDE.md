@@ -51,11 +51,14 @@ per-section layers: the user found those looked broken. Credit "© OpenStreetMap
 
 ## "From orbit to drone" explorer
 
-`python3 tools/layers/build_explorer.py` (after `build_layers.py`) draws the Ebringen footprints three ways and
-injects them between `<!-- build:explorer-NAME -->` markers: satellite (1.6 km, 30 m Landsat pixels = coverage
-per cell), aerial (400 m, 20 cm orthophoto), drone (80 m, ~2 cm). Each view carries the next one's footprint
-(dashed accent). The altitude scale is a radio group (`.ex-btn`, arrow keys work). Satellite / Aerial / Drones only:
-no LiDAR row, no employer name in the scale (owner's wish).
+`python3 tools/layers/build_explorer.py` (after `build_layers.py`) writes `assets/layers/explorer.json` (OSM
+footprints of Ebringen, 1.6 x 1.0 km, delta-encoded; default descent point = most buildings in 80 x 50 m) and a
+static 30 m fallback view between `<!-- build:explorer-fallback -->` markers. `assets/js/explorer.js` draws it on a
+canvas: a vertical range slider on the altitude axis descends from 705 km to 100 m (log-interpolated through the
+platforms Satellite 30 m / 1.6 km, Aerial 20 cm / 400 m, Drone 2 cm / 80 m at slider 0 / 500 / 1000); sensor
+pixels blend into crisp outlines; clicking the map sets where you descend; platform names snap (glide unless
+reduced motion). At drone height a "run detector" button draws boxes around buildings in view, clearly labelled as
+a simulation from map footprints (no fake scores). Only Satellite / Aerial / Drone, no LiDAR row, no employer name.
 
 ## Legal notice (Impressum)
 

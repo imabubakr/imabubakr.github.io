@@ -1,15 +1,12 @@
-"""Build the "From orbit to drone" resolution explorer views.
+"""Build the data and the no-JS fallback for the "From orbit to drone" explorer.
 
-The same OSM building footprints of Ebringen (tools/layers/work/village.json, fetched by
-build_layers.py) seen at three platforms' ground resolution and footprint:
+Writes assets/layers/explorer.json: OSM building footprints of Ebringen in a
+1600 x 1000 m box (metres from the top-left, y down, delta-encoded integers) plus a
+default descent point (the densest 80 x 50 m spot). assets/js/explorer.js draws them
+at any altitude: coarse pixels from orbit, sharp outlines from a drone.
 
-  satellite  1600 x 1000 m, 30 m pixels (Landsat): building coverage per pixel
-  aerial      400 x  250 m, 20 cm (orthophoto): footprints, sub-screen-pixel resolution
-  drone        80 x   50 m, ~2 cm (drone):        a few buildings, sharp outlines
-
-Each view also carries the next view's footprint (dashed, accent). The SVGs are written
-between <!-- build:explorer-NAME --> markers in index.html and de/index.html; colours
-come from the page CSS (.ex-*), so they follow the theme.
+Also writes a static satellite view (30 m pixels) between <!-- build:explorer-fallback -->
+markers in index.html and de/index.html, shown until the script takes over.
 
 Run from the repo root after build_layers.py: python3 tools/layers/build_explorer.py
 """
@@ -26,14 +23,10 @@ osr.UseExceptions()
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = Path(__file__).resolve().parent / "work/village.json"
+OUT = ROOT / "assets/layers/explorer.json"
 
 CENTER = (7.7760, 47.9575)  # Ebringen
-VIEWS = [  # name, width (m), cell (m) for the satellite raster
-    ("satellite", 1600, 30),
-    ("aerial", 400, None),
-    ("drone", 80, None),
-]
-ASPECT = 16 / 10
+W, H = 1600, 1000  # metres
 
 
 def buildings():
@@ -43,15 +36,23 @@ def buildings():
     utm = osr.SpatialReference()
     utm.ImportFromEPSG(32632)
     ct = osr.CoordinateTransformation(wgs, utm)
+    cx, cy = ct.TransformPoint(*CENTER)[:2]
+    x0, y1 = cx - W / 2, cy + H / 2
     polys = []
     for el in json.loads(DATA.read_text())["elements"]:
-        if el.get("type") == "way" and "geometry" in el:
-            pts = np.array([ct.TransformPoint(g["lon"], g["lat"])[:2] for g in el["geometry"]])
-            if len(pts) > 1 and (pts[0] == pts[-1]).all():
-                pts = pts[:-1]
-            if len(pts) >= 3:
-                polys.append(pts)
-    return polys, ct.TransformPoint(*CENTER)[:2]
+        if el.get("type") != "way" or "geometry" not in el:
+            continue
+        pts = np.array([ct.TransformPoint(g["lon"], g["lat"])[:2] for g in el["geometry"]])
+        if len(pts) > 1 and (pts[0] == pts[-1]).all():
+            pts = pts[:-1]
+        pts = np.column_stack([pts[:, 0] - x0, y1 - pts[:, 1]])
+        if len(pts) < 3 or pts[:, 0].max() < 0 or pts[:, 0].min() > W or pts[:, 1].max() < 0 or pts[:, 1].min() > H:
+            continue
+        q = np.round(pts).astype(int)
+        q = q[np.r_[True, (np.diff(q, axis=0) != 0).any(axis=1)]]
+        if len(q) >= 3:
+            polys.append(q)
+    return polys
 
 
 def area(p):
@@ -59,90 +60,58 @@ def area(p):
     return 0.5 * abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
 
 
-def pick_drone_center(polys, c):
-    """Centre of the densest 80 x 50 m window near the village centre."""
-    best, best_score = c, -1
-    for dx in range(-150, 151, 10):
-        for dy in range(-100, 101, 10):
-            x, y = c[0] + dx, c[1] + dy
-            score = sum(area(p) for p in polys
-                        if abs(p[:, 0].mean() - x) < 34 and abs(p[:, 1].mean() - y) < 19)
-            if score > best_score:
-                best, best_score = (x, y), score
+def densest_spot(polys):
+    """Centre of the 80 x 50 m window with the most buildings (count, not roof area,
+    so the default drone view shows several houses rather than one large hall)."""
+    cents = np.array([p.mean(axis=0) for p in polys])
+    areas = np.array([1.0 for p in polys])
+    best, score = (W / 2, H / 2), -1
+    for x in range(400, 1201, 10):
+        for y in range(300, 701, 10):
+            m = (abs(cents[:, 0] - x) < 34) & (abs(cents[:, 1] - y) < 19)
+            s = areas[m].sum()
+            if s > score:
+                best, score = (x, y), s
     return best
 
 
-def outline_svg(polys, cx, cy, w, h, scale):
-    """Footprints clipped to the window, in a viewBox of w*scale x h*scale units."""
-    x0, y1 = cx - w / 2, cy + h / 2
-    d = []
-    for p in polys:
-        if p[:, 0].max() < x0 or p[:, 0].min() > x0 + w or p[:, 1].max() < y1 - h or p[:, 1].min() > y1:
-            continue
-        q = np.column_stack([(p[:, 0] - x0) * scale, (y1 - p[:, 1]) * scale])
-        d.append("M" + "L".join(f"{x:.0f} {y:.0f}" for x, y in q) + "Z")
-    return "".join(d)
-
-
-def raster_svg(polys, cx, cy, w, h, cell):
-    """Fraction of each cell covered by buildings, quantised to four levels."""
-    res = 1  # rasterise footprints at 1 m first
-    x0, y1 = cx - w / 2, cy + h / 2
-    img = Image.new("L", (w, h), 0)
+def fallback_svg(polys, cell=30):
+    img = Image.new("L", (W, H), 0)
     dr = ImageDraw.Draw(img)
     for p in polys:
-        dr.polygon([((x - x0) / res, (y1 - y) / res) for x, y in p], fill=255)
+        dr.polygon([tuple(v) for v in p], fill=255)
     a = np.asarray(img, dtype=float) / 255
-    nx, ny = w // cell, h // cell
+    nx, ny = W // cell, H // cell
     cov = a[: ny * cell, : nx * cell].reshape(ny, cell, nx, cell).mean(axis=(1, 3))
     levels = {1: [], 2: [], 3: [], 4: []}
     for j in range(ny):
         for i in range(nx):
-            v = cov[j, i]
-            if v > 0.02:
-                levels[min(4, 1 + int(v * 8))].append(f"M{i} {j}h1v1h-1z")
-    return nx, ny, levels
-
-
-def footprint_rect(cx, cy, w, h, ncx, ncy, nw, nh, scale):
-    x = (ncx - nw / 2 - (cx - w / 2)) * scale
-    y = ((cy + h / 2) - (ncy + nh / 2)) * scale
-    return f'<rect class="ex-next" x="{x:.1f}" y="{y:.1f}" width="{nw * scale:.1f}" height="{nh * scale:.1f}"/>'
+            if cov[j, i] > 0.02:
+                levels[min(4, 1 + int(cov[j, i] * 8))].append(f"M{i} {j}h1v1h-1z")
+    body = "".join(f'<path class="ex-px ex-px{lv}" d="{"".join(c)}"/>' for lv, c in levels.items() if c)
+    return (f'<svg class="ex-svg" viewBox="0 0 {nx} {ny}" preserveAspectRatio="xMidYMid slice" '
+            f'aria-hidden="true" focusable="false">{body}</svg>')
 
 
 def main():
-    polys, c = buildings()
-    dcx, dcy = pick_drone_center(polys, c)
-    centers = {"satellite": c, "aerial": c, "drone": (dcx, dcy)}
-    blocks = {}
-    for k, (name, w, cell) in enumerate(VIEWS):
-        h = round(w / ASPECT)
-        cx, cy = centers[name]
-        nxt = VIEWS[k + 1] if k + 1 < len(VIEWS) else None
-        if name == "satellite":
-            nx, ny, levels = raster_svg(polys, cx, cy, w, h, cell)
-            body = "".join(f'<path class="ex-px ex-px{lv}" d="{"".join(cells)}"/>' for lv, cells in levels.items() if cells)
-            scale, vb = nx / w, f"0 0 {nx} {ny}"
-        else:
-            scale = 1000 / w  # 1000 units across
-            body = f'<path class="ex-bldg" d="{outline_svg(polys, cx, cy, w, h, scale)}"/>'
-            vb = f"0 0 1000 {round(1000 / ASPECT)}"
-        if nxt:
-            nw = nxt[1]
-            ncx, ncy = centers[nxt[0]]
-            body += footprint_rect(cx, cy, w, h, ncx, ncy, nw, round(nw / ASPECT), scale)
-        blocks[name] = (f'<svg class="ex-svg" viewBox="{vb}" preserveAspectRatio="xMidYMid meet" '
-                        f'aria-hidden="true" focusable="false">{body}</svg>')
-        print(f"{name:9} {w} m wide, {len(blocks[name]) // 1024} KB")
+    polys = buildings()
+    enc = []
+    for p in polys:
+        d = np.vstack([p[:1], np.diff(p, axis=0)]).ravel()
+        enc.append(d.tolist())
+    data = {"w": W, "h": H, "focus": densest_spot(polys), "b": enc,
+            "credit": "Building footprints © OpenStreetMap contributors (ODbL)"}
+    OUT.write_text(json.dumps(data, separators=(",", ":")))
+    print(f"{len(polys)} buildings, {OUT.stat().st_size // 1024} KB, focus {data['focus']}")
 
+    svg = fallback_svg(polys)
     for path in ("index.html", "de/index.html"):
         page = ROOT / path
         s = page.read_text()
-        for name, svg in blocks.items():
-            s, n = re.subn(rf"(<!-- build:explorer-{name} -->).*?(<!-- /build:explorer-{name} -->)",
-                           lambda m: m.group(1) + svg + m.group(2), s, flags=re.S)
-            if not n:
-                raise SystemExit(f"no build:explorer-{name} marker in {path}")
+        s, n = re.subn(r"(<!-- build:explorer-fallback -->).*?(<!-- /build:explorer-fallback -->)",
+                       lambda m: m.group(1) + svg + m.group(2), s, flags=re.S)
+        if not n:
+            raise SystemExit(f"no build:explorer-fallback marker in {path}")
         page.write_text(s)
         print("updated", path)
 

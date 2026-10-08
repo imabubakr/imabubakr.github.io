@@ -102,33 +102,6 @@
     });
   }
 
-  // Orbit-to-drone explorer: the altitude scale is a radio group (click, or arrow keys).
-  var exButtons = Array.prototype.slice.call(document.querySelectorAll(".ex-btn"));
-  if (exButtons.length) {
-    var exViews = document.querySelectorAll(".ex-view");
-    var pick = function (btn, focus) {
-      exButtons.forEach(function (b) {
-        var on = b === btn;
-        b.setAttribute("aria-checked", String(on));
-        b.tabIndex = on ? 0 : -1;
-      });
-      exViews.forEach(function (v) {
-        v.classList.toggle("is-active", v.dataset.view === btn.dataset.view);
-      });
-      if (focus) btn.focus();
-    };
-    exButtons.forEach(function (b, i) {
-      b.tabIndex = b.getAttribute("aria-checked") === "true" ? 0 : -1;
-      b.addEventListener("click", function () { pick(b); });
-      b.addEventListener("keydown", function (e) {
-        var step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
-        if (!step) return;
-        e.preventDefault();
-        pick(exButtons[(i + step + exButtons.length) % exButtons.length], true);
-      });
-    });
-  }
-
   // CV as PDF: the print stylesheet turns the page into an A4 CV. While printing,
   // the document title becomes the suggested PDF file name.
   var printButton = document.querySelector(".print-cv");
