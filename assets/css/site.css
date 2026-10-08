@@ -246,6 +246,12 @@ a:hover {
   gap: 2px;
 }
 .lang a {
+  /* WCAG 2.5.8: at least 24 x 24 px touch targets. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
   padding: 2px 4px;
   color: var(--muted);
   text-decoration: none;
@@ -264,6 +270,8 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-width: 28px;
+  min-height: 28px;
   padding: 2px 4px;
   border: 0;
   background: none;
