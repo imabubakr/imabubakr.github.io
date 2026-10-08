@@ -1,4 +1,4 @@
-// Theme toggle (stored choice overrides prefers-color-scheme), looping figures,
+// Theme toggle (stored choice overrides prefers-color-scheme), plates viewer,
 // nav section highlight, and keeping the language switch on the current section.
 (function () {
   var root = document.documentElement;
@@ -26,41 +26,79 @@
     sync();
   }
 
-  // Looping figures: load and play only while on screen, never autoplay under
-  // reduced motion, and always offer a pause/play button (WCAG 2.2.2).
+  // Plates viewer: clicking a plate opens it large in a <dialog> (animations play
+  // there unless reduced motion is on); arrow keys step through, Esc closes.
+  var plateLinks = Array.prototype.slice.call(document.querySelectorAll(".plate-link"));
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  document.querySelectorAll(".plate").forEach(function (plate) {
-    var video = plate.querySelector("video");
-    var button = plate.querySelector(".plate-toggle");
-    if (!video || !button) return;
-    var userPaused = reduceMotion.matches;
-    var visible = false;
+  if (plateLinks.length && window.HTMLDialogElement) {
+    var de = document.documentElement.lang === "de";
+    var box = document.createElement("dialog");
+    box.className = "lightbox";
+    box.setAttribute("aria-label", de ? "Visualisierung" : "Visualization");
+    box.innerHTML =
+      '<div class="lb-stage"></div><div class="lb-bar"><span class="lb-no"></span><p class="lb-caption"></p>' +
+      '<div class="lb-nav"><button type="button" data-step="-1">' + (de ? "zurück" : "prev") + "</button>" +
+      '<button type="button" data-step="1">' + (de ? "weiter" : "next") + "</button>" +
+      '<button type="button" class="lb-close">' + (de ? "schließen" : "close") + "</button></div></div>";
+    document.body.appendChild(box);
+    var stage = box.querySelector(".lb-stage");
+    var current = 0;
 
-    function update() {
-      if (visible && !userPaused) {
-        var p = video.play();
-        if (p && p.catch) p.catch(function () {});
+    var show = function (i) {
+      current = (i + plateLinks.length) % plateLinks.length;
+      var a = plateLinks[current];
+      var media;
+      if (a.dataset.webm) {
+        media = document.createElement("video");
+        media.muted = true;
+        media.loop = true;
+        media.playsInline = true;
+        media.controls = true;
+        media.autoplay = !reduceMotion.matches;
+        media.poster = a.querySelector("img").src;
+        [["webm", "video/webm"], ["mp4", "video/mp4"]].forEach(function (f) {
+          var src = document.createElement("source");
+          src.src = a.dataset[f[0]];
+          src.type = f[1];
+          media.appendChild(src);
+        });
       } else {
-        video.pause();
+        media = document.createElement("img");
+        media.src = a.dataset.full;
+        var tmp = document.createElement("div");
+        tmp.innerHTML = a.dataset.caption;
+        media.alt = tmp.textContent;
       }
-      button.textContent = userPaused ? button.dataset.play : button.dataset.pause;
-    }
+      media.className = "lb-media";
+      stage.replaceChildren(media);
+      box.querySelector(".lb-no").textContent = a.querySelector(".plate-no").textContent;
+      box.querySelector(".lb-caption").innerHTML = a.dataset.caption;
+    };
 
-    button.hidden = false;
-    button.addEventListener("click", function () {
-      userPaused = !userPaused;
-      update();
+    plateLinks.forEach(function (a, i) {
+      a.addEventListener("click", function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+        e.preventDefault();
+        show(i);
+        box.showModal();
+      });
     });
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver(function (entries) {
-        visible = entries[0].isIntersecting;
-        update();
-      }, { threshold: 0.25 }).observe(video);
-    } else {
-      visible = true;
-      update();
-    }
-  });
+    box.querySelectorAll("[data-step]").forEach(function (b) {
+      b.addEventListener("click", function () { show(current + Number(b.dataset.step)); });
+    });
+    box.querySelector(".lb-close").addEventListener("click", function () { box.close(); });
+    box.addEventListener("click", function (e) { if (e.target === box) box.close(); });
+    // On document: swapping the media can drop focus out of the dialog.
+    document.addEventListener("keydown", function (e) {
+      if (!box.open) return;
+      if (e.key === "ArrowRight") show(current + 1);
+      if (e.key === "ArrowLeft") show(current - 1);
+    });
+    box.addEventListener("close", function () {
+      stage.replaceChildren();
+      plateLinks[current].focus();
+    });
+  }
 
   // CV as PDF: the print stylesheet turns the page into an A4 CV. While printing,
   // the document title becomes the suggested PDF file name.

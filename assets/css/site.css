@@ -526,44 +526,114 @@ a:hover {
   margin: 0 auto;
 }
 
-/* ------------------------------------------------------------ figures -- */
-.plate {
+/* -------------------------------------------------------------- plates -- */
+/* Visualizations: a calm grid of still thumbnails; clicking opens the viewer
+   (dialog.lightbox, built by site.js), where animations play. */
+.plates {
   display: grid;
-  gap: 12px;
-  margin: 0 0 56px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.plate-media {
+.plate-link {
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
+}
+.plate-link img {
   display: block;
   width: 100%;
-  max-width: 600px;
   height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
   background: var(--grid);
 }
-.plate figcaption {
+.plate-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--muted);
+  font: 400 0.6875rem/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.plate-title {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.plate-link:hover .plate-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (min-width: 900px) {
+  .plates {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 40px 24px;
+  }
+}
+
+.lightbox {
+  width: min(1100px, 100vw - 32px);
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  padding: 16px;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+.lightbox::backdrop {
+  background: rgb(14 18 21 / 0.82);
+}
+.lb-media {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100dvh - 160px);
+  margin: 0 auto;
+  object-fit: contain;
+}
+.lb-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 12px;
-  max-width: 600px;
+  gap: 4px 16px;
+  margin-top: 12px;
+}
+.lb-no {
   color: var(--muted);
-  font-size: 0.875rem;
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
-.fig-no {
-  color: var(--ink);
-  font: 400 0.75rem/1 var(--font-mono);
+.lb-caption {
+  flex: 1 1 24rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
 }
-.plate-toggle {
+.lb-nav {
+  display: flex;
+  gap: 4px;
   margin-left: auto;
-  padding: 2px 8px;
-  border: 1px solid var(--grid);
-  border-radius: 0;
+}
+.lb-nav button {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 2px 6px;
+  border: 0;
   background: none;
   color: var(--ink);
-  font: 400 0.75rem/1.5 var(--font-mono);
+  font: 400 0.8125rem/1.5 var(--font-mono);
   cursor: pointer;
 }
-.plate-toggle:hover {
-  border-color: var(--ink);
+.lb-nav button:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 /* --------------------------------------------------------------- about -- */
