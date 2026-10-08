@@ -485,13 +485,21 @@ a:hover {
   padding: clamp(40px, 5cqw, 80px) var(--pad);
 }
 
-.section-label {
-  margin-bottom: 32px;
-  font: 400 0.8125rem/1.4 var(--font-mono);
-  letter-spacing: 0.02em;
+/* Section headings: a small mono number (matches the nav) above a large sans
+   title, so it is always clear which part of the page you are in. */
+.section-title {
+  margin-bottom: 28px;
+  font-size: clamp(2rem, 1.4rem + 2.2cqw, 3.25rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.035em;
 }
-.section-label span {
+.section-no {
+  display: block;
+  margin-bottom: 12px;
   color: var(--muted);
+  font: 400 0.75rem/1 var(--font-mono);
+  letter-spacing: 0.04em;
 }
 
 @media (min-width: 1100px) {
@@ -501,10 +509,12 @@ a:hover {
     column-gap: var(--gutter);
     align-items: start;
   }
-  .section-label {
+  /* Wide screens: the title stays in view while its section scrolls past. */
+  .section-title {
+    position: sticky;
+    top: calc(var(--nav-h) + 32px);
     grid-column: 1 / 4;
     margin-bottom: 0;
-    padding-top: 6px;
   }
   .section-body {
     grid-column: 4 / 13;
@@ -558,17 +568,17 @@ a:hover {
   display: block;
   text-align: center;
 }
-.section--center .section-label {
-  margin-bottom: 28px;
-  padding-top: 0;
+.section--center .section-title {
+  position: static;
+  margin-bottom: 24px;
 }
 .intro-lead {
-  max-width: 24ch;
+  max-width: 30ch;
   margin: 0 auto;
-  font-size: clamp(1.5rem, 1.1rem + 1.4cqw, 2.25rem);
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  font-size: clamp(1.25rem, 1rem + 0.8cqw, 1.625rem);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
   text-wrap: balance;
 }
 .intro-sub {
