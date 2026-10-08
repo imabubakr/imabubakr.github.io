@@ -124,9 +124,16 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.
-- Hero map tools: hovering shows lat/lon + elevation in the strip (replacing `EPSG:4326`); two clicks/taps draw an
-  accent survey line and open the elevation profile panel (paper background, no border). Never block page
-  scrolling on touch (no drag gestures).
+- Hero map tools (`assets/js/hero-map.js`, one engine for hero and fullscreen viewer): hovering shows lat/lon +
+  elevation in the strip (replacing `EPSG:4326`); two clicks/taps draw an accent survey line and open the elevation
+  profile panel (paper background, no border). Never block page scrolling on touch in the hero (no drag gestures).
+- Two map views, switch "contours | ridges" bottom-right of the hero (synced with the viewer): ridge lines are drawn
+  in JS from the 50 m grid (rows every 100 m, 50 m when zoomed in; 2.5× vertical exaggeration, stated in the viewer;
+  paper fill so nearer ridges hide farther ones). In ridge view the cursor snaps to the visible ridge line and the
+  profile line drapes over the ridges.
+- "fullscreen" opens `dialog.map-viewer`: zoom (−/+/reset, wheel, pinch, +/- keys), pan (drag, arrow keys), live
+  readout, profile, scale bar. The viewBox follows the stage's aspect (no letterboxing; portrait screens fill the
+  height). Labels stay ~10 px at any zoom. Esc clears a profile first, then closes.
 - Visualizations: still thumbnails (4:3, `object-fit: cover`) in a 2/3-column grid with mono `PLATE 0n` /
   `TAFEL 0n`; nothing moves on the page. Clicking opens `dialog.lightbox`; animations play only there (not under
   reduced motion).

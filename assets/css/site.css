@@ -1510,6 +1510,12 @@ dl.cv-list .cv-row {
 .mt-line.is-pending {
   stroke-dasharray: 5 4;
 }
+.mt-hover {
+  fill: var(--accent-mark);
+}
+.mt-line {
+  fill: none;
+}
 .mt-pt {
   fill: var(--paper);
   stroke: var(--accent-mark);
@@ -1657,5 +1663,189 @@ html.bg-on[data-theme="dark"] body::before {
 @media print {
   body::before {
     content: none;
+  }
+}
+
+/* ------------------------------------------------- ridges, map controls -- */
+/* Ridge view: contours hide, ridge lines (drawn by hero-map.js) show. */
+.show-ridges .topo-c,
+.show-ridges .topo-i,
+.show-ridges .topo-l {
+  display: none;
+}
+.ridges path {
+  fill: var(--paper);
+  stroke: var(--contour);
+  stroke-width: 0.9px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-controls {
+  position: absolute;
+  right: var(--pad);
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 400 0.6875rem/1.5 var(--font-mono);
+}
+.map-mode {
+  display: inline-flex;
+  background: var(--paper);
+}
+.map-mode button,
+.map-full,
+.mv-zoom button,
+.mv-close {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 2px 8px;
+  border: 0;
+  background: var(--paper);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+.map-mode button[aria-pressed="true"] {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.map-mode button:hover,
+.map-full:hover,
+.mv-zoom button:hover,
+.mv-close:hover {
+  color: var(--ink);
+}
+.map-full {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+}
+.map-full svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+/* the hint moves left of the controls on wide screens */
+@media (min-width: 900px) {
+  .map-hint {
+    right: auto;
+    left: var(--pad);
+  }
+  .hero-text {
+    bottom: clamp(48px, 10cqh, 96px);
+  }
+}
+@media (max-width: 599px) {
+  .map-controls {
+    bottom: 8px;
+  }
+}
+
+/* Fullscreen map viewer */
+.map-viewer {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+.map-viewer[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.map-viewer::backdrop {
+  background: var(--paper);
+}
+.mv-top,
+.mv-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  padding: 8px var(--pad);
+  font: 400 0.75rem/1.5 var(--font-mono);
+}
+.mv-top {
+  border-bottom: 1px solid var(--grid);
+}
+.mv-bottom {
+  border-top: 1px solid var(--grid);
+  color: var(--muted);
+}
+.mv-title {
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.mv-tools,
+.mv-zoom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mv-tools {
+  gap: 16px;
+}
+.mv-zoom button {
+  font-size: 1rem;
+  color: var(--ink);
+}
+.mv-close {
+  color: var(--ink);
+  font-size: 1.25rem;
+}
+.mv-stage {
+  position: relative;
+  overflow: hidden;
+}
+.mv-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+/* contours read a little stronger in the viewer than behind the hero text */
+.mv-svg .topo-c {
+  opacity: 0.75;
+}
+.mv-svg .topo-i {
+  opacity: 0.95;
+}
+.mv-svg.is-panning {
+  cursor: grabbing;
+}
+.mv-readout.is-live {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.mv-scale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+}
+.mv-bar {
+  display: block;
+  height: 5px;
+  border: 1px solid var(--ink);
+  border-top: 0;
+}
+@media print {
+  .map-controls,
+  .map-viewer {
+    display: none !important;
   }
 }
