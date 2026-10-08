@@ -828,6 +828,37 @@ dl.cv-list .cv-row {
   }
 }
 
+/* ------------------------------------------------------------- contact -- */
+.contact-body {
+  text-align: center;
+}
+.contact-mail {
+  display: inline-block;
+  font-size: clamp(1.375rem, 1rem + 1.6cqw, 2.25rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-underline-offset: 6px;
+  overflow-wrap: anywhere;
+}
+.contact-links {
+  display: flex;
+  justify-content: center;
+  gap: 8px 28px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  font: 400 0.875rem/1.5 var(--font-mono);
+}
+.contact-links a {
+  color: var(--ink);
+}
+.contact-links a:hover {
+  color: var(--accent);
+}
+#contact {
+  padding-bottom: clamp(64px, 8cqw, 120px);
+}
+
 /* ---------------------------------------------------------- footer -- */
 .collar {
   display: grid;
