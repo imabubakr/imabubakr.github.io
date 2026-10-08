@@ -41,14 +41,13 @@ Edit the `PLATES` or `CERTS` list (source file, EN/DE short title and caption) i
 It writes the media to `assets/plates/` and the grids into both pages between `<!-- build:plates -->` /
 `<!-- build:certs -->` markers. The viewer pages through one grid at a time.
 
-## Section background layers
+## Page background
 
-`python3 tools/layers/build_layers.py` writes `assets/layers/` (needs the contour pipeline's `tools/contours/work/dem.tif`;
-OSM buildings are cached in `tools/layers/work/`, fetched from Overpass if missing):
-point cloud (About), OSM building footprints (CV), detection-style boxes over fainter footprints (Visualizations).
-The boxes are a design motif labelled only "building", never fake model scores. They're single-colour masks painted
-with `--contour`, loaded by `site.js` after page load when a section comes near, and shown as a band *above* each
-section heading (no text on top of them). Credit "© OpenStreetMap contributors" stays in the footer.
+`python3 tools/layers/build_layers.py` writes `assets/layers/village.svg`: building **outlines only** (no fill) of the
+village Ebringen near Freiburg from OpenStreetMap (cached in `tools/layers/work/`; change `VILLAGE` to use another
+place). It's one continuous background fixed behind everything below the hero (`body::before`), painted with
+`--contour` through a mask, faded towards the centre so text sits on calm paper, loaded after page load. No bands or
+per-section layers: the user found those looked broken. Credit "© OpenStreetMap contributors" stays in the footer.
 
 ## Legal notice (Impressum)
 

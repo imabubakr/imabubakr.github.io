@@ -1439,62 +1439,43 @@ dl.cv-list .cv-row {
   }
 }
 
-/* ---------------------------------------------------------- data layers -- */
-/* Each section opens with a faint band of a different geospatial layer, all of
-   central Freiburg like the hero: point cloud (About), building footprints (CV),
-   detection boxes (Visualizations). Single-colour masks painted in --contour;
-   site.js adds .layer-on when a section comes near, so nothing loads up front.
-   The band sits above the heading like a map strip; no text overlaps it. */
-.section-head[data-layer] {
-  position: relative;
-  isolation: isolate;
-  padding-top: clamp(120px, 15cqw, 230px);
-}
-.section-head[data-layer]::before,
-.section-head[data-layer]::after {
+/* ----------------------------------------------------- page background -- */
+/* Building outlines of a village (Ebringen, OSM; tools/layers/build_layers.py),
+   fixed behind everything below the hero like a map under tracing paper. A mask
+   painted in --contour, so it follows the theme; site.js adds .bg-on after load. */
+body::before {
   content: "";
-  position: absolute;
+  position: fixed;
+  inset: 0;
   z-index: -1;
-  top: calc(-1 * clamp(40px, 5cqw, 80px));
-  /* ends 24px above the heading, so text always sits on plain paper */
-  height: calc(clamp(40px, 5cqw, 80px) + clamp(120px, 15cqw, 230px) - 24px);
-  left: 50%;
-  width: 100cqw;
-  transform: translateX(-50%);
   pointer-events: none;
 }
-.section-head.layer-on::before,
-.section-head.layer-on::after {
+html.bg-on body::before {
   background-color: var(--contour);
-  -webkit-mask: var(--layer-mask) center / cover no-repeat;
-  mask: var(--layer-mask) center / cover no-repeat;
-}
-.section-head[data-layer="pointcloud"] {
-  --layer-mask: url("../layers/pointcloud.webp");
-}
-.section-head[data-layer="pointcloud"]::before {
-  opacity: 0.5;
-}
-.section-head[data-layer="buildings"],
-.section-head[data-layer="detections"] {
-  --layer-mask: url("../layers/buildings.svg");
-}
-.section-head[data-layer="buildings"]::before {
   opacity: 0.3;
+  /* outlines x a horizontal fade: full in the margins, faint behind the text column */
+  -webkit-mask:
+    url("../layers/village.svg") center / cover no-repeat,
+    linear-gradient(to right, #000, rgb(0 0 0 / 0.3) 32%, rgb(0 0 0 / 0.3) 68%, #000);
+  -webkit-mask-composite: source-in;
+  mask:
+    url("../layers/village.svg") center / cover no-repeat,
+    linear-gradient(to right, #000, rgb(0 0 0 / 0.3) 32%, rgb(0 0 0 / 0.3) 68%, #000);
+  mask-composite: intersect;
 }
-.section-head[data-layer="detections"]::before {
-  opacity: 0.14;
+@media (prefers-color-scheme: dark) {
+  html.bg-on:not([data-theme="light"]) body::before {
+    opacity: 0.42;
+  }
 }
-.section-head[data-layer="detections"]::after {
-  --layer-mask: url("../layers/detections.svg");
-  opacity: 0.55;
+html.bg-on[data-theme="dark"] body::before {
+  opacity: 0.42;
 }
-.section-head[data-layer]:not([data-layer="detections"])::after {
-  content: none;
+.hero {
+  background: var(--paper); /* the hero has its own map */
 }
 @media print {
-  .section-head[data-layer]::before,
-  .section-head[data-layer]::after {
+  body::before {
     content: none;
   }
 }
