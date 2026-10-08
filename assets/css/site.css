@@ -866,6 +866,12 @@ dl.cv-list .cv-row {
   padding-bottom: clamp(64px, 8cqw, 120px);
 }
 
+/* ----------------------------------------------------------------- 404 -- */
+.null-island {
+  justify-content: center;
+  margin: 20px 0 0;
+}
+
 /* ---------------------------------------------------------- footer -- */
 .collar {
   display: grid;
