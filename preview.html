@@ -54,7 +54,7 @@
                 <source src="assets/media/storm-emir.webm" type="video/webm">
                 <source src="assets/media/storm-emir.mp4" type="video/mp4">
               </video>
-              <figcaption><span class="fig-no">FIG. 01</span><span>Storm Emir, November 2023: wind field over Europe.</span><button class="plate-toggle" type="button" hidden>pause</button></figcaption>
+              <figcaption><span class="fig-no">FIG. 01</span><span>Storm Emir, November 2023: wind field over Europe. Data: ERA5; contains modified Copernicus Climate Change Service information 2023.</span><button class="plate-toggle" type="button" hidden>pause</button></figcaption>
             </figure>
             <table class="data">
               <caption class="visually-hidden">Selected projects with stack and sensor</caption>
@@ -110,18 +110,18 @@
                 <tr>
                   <td class="id">07</td>
                   <th scope="row"><span class="proj-title">Glacier mass balance, Mýrdalsjökull</span><span class="proj-desc">Mass balance of Mýrdalsjökull and its sub-glaciers from historical imagery and DEMs: the melting rate doubled after 2000.</span></th>
-                  <td class="stack" data-label="stack">Digitising · volume calculation</td>
+                  <td class="stack" data-label="stack">Digitizing · volume calculation</td>
                   <td class="metric" data-label="sensor">Landsat 5/7/8 · 30 m<br>Sentinel-2 · 10 m</td>
                 </tr>
                 <tr>
                   <td class="id">08</td>
-                  <th scope="row"><span class="proj-title">Snow cover and precipitation, 2000–2015</span><span class="proj-desc">Snow-cover extent and precipitation variability from a normalised MODIS snow index and the TRMM monthly product.</span></th>
+                  <th scope="row"><span class="proj-title">Snow cover and precipitation, 2000–2015</span><span class="proj-desc">Snow-cover extent and precipitation variability from a normalized MODIS snow index and the TRMM monthly product.</span></th>
                   <td class="stack" data-label="stack">Snow index · time series</td>
                   <td class="metric" data-label="sensor">MODIS · 500 m<br>TRMM · 0.25°</td>
                 </tr>
                 <tr>
                   <td class="id">09</td>
-                  <th scope="row"><span class="proj-title">Hydrological modelling, Kabul Basin</span><span class="proj-desc">Snow index from Landsat 7 to track snow-cover change and its impact on water resources.</span></th>
+                  <th scope="row"><span class="proj-title">Hydrological modeling, Kabul Basin</span><span class="proj-desc">Snow index from Landsat 7 to track snow-cover change and its impact on water resources.</span></th>
                   <td class="stack" data-label="stack">Snow index · change detection</td>
                   <td class="metric" data-label="sensor">Landsat 7 · 30 m</td>
                 </tr>
@@ -141,18 +141,21 @@
           <div class="section-body">
             <div class="cv-group">
               <h3>Personal details</h3>
+              <div class="cv-personal">
               <dl class="cv-list">
                 <div class="cv-row"><dt>Name</dt><dd>Muhammad Abu Bakar</dd></div>
                 <div class="cv-row"><dt>Location</dt><dd>Freiburg im Breisgau, Germany</dd></div>
                 <div class="cv-row"><dt>Email</dt><dd><a href="mailto:imabubakar@outlook.com">imabubakar@outlook.com</a></dd></div>
               </dl>
+              <img class="cv-photo" src="assets/img/portrait-200.webp" srcset="assets/img/portrait-200.webp 200w, assets/img/portrait-400.webp 400w" sizes="(min-width: 720px) 168px, 112px" width="200" height="250" loading="lazy" decoding="async" alt="Muhammad Abu Bakar">
+              </div>
             </div>
 
             <div class="cv-group">
               <h3>Professional experience</h3>
               <ol class="cv-list">
                 <li class="cv-row">
-                  <p class="cv-date">MM/YYYY – present</p>
+                  <p class="cv-date">11/2025 – present</p>
                   <div class="cv-entry">
                     <h4>Geospatial Data Specialist</h4>
                     <p class="cv-org">Beagle Systems</p>
@@ -160,16 +163,16 @@
                   </div>
                 </li>
                 <li class="cv-row">
-                  <p class="cv-date">03/2024 – MM/YYYY</p>
+                  <p class="cv-date">03/2024 – 10/2025</p>
                   <div class="cv-entry">
                     <h4>Geospatial (EO) Data Scientist, part-time</h4>
                     <p class="cv-org">Karuna Technology UG, Germany</p>
                     <ul>
-                      <li>Led the development and management of a comprehensive data pipeline using the ISCE processor for Differential InSAR, automating data acquisition, preprocessing, and interferogram generation.</li>
-                      <li>Designed and implemented Google Earth Engine workflows to select, preprocess (Refined Lee Filter), and download Sentinel-1 time-series images for machine learning model (Soil Moisture), improving data availability and processing speed.</li>
-                      <li>Applied machine learning techniques for tree species classification using fused data from multispectral and SAR, contributing to improved tree species classification in urban areas.</li>
-                      <li>Played a role in the development of training data for a tree crown segmentation model, improving model accuracy for automated tree detection and providing more reliable results for large-scale urban surveys.</li>
-                      <li>Processed vector data (pre- and post-processing) in QGIS to ensure spatial integrity and prepare data for further analysis, significantly reducing manual data handling time.</li>
+                      <li>Built and managed a Differential InSAR pipeline with the ISCE processor: automated data acquisition, preprocessing and interferogram generation.</li>
+                      <li>Designed Google Earth Engine workflows to select, preprocess (Refined Lee filter) and download Sentinel-1 time series for a soil-moisture ML model.</li>
+                      <li>Classified urban tree species with machine learning on fused multispectral and SAR data.</li>
+                      <li>Created training data for a tree-crown segmentation model.</li>
+                      <li>Pre- and post-processed vector data in QGIS, reducing manual data handling.</li>
                     </ul>
                   </div>
                 </li>
@@ -179,10 +182,10 @@
                     <h4>GIS &amp; RS Specialist</h4>
                     <p class="cv-org">MapTransfer, Germany</p>
                     <ul>
-                      <li>Managed spatial data workflows for a construction company, overseeing tasks such as georeferencing, orthophoto merging, and uploading cloud-optimized GeoTIFFs to AWS. Improved data accessibility and integration by seamlessly linking PostGIS with QGIS, enabling dynamic visualization of AWS-hosted layers and vector data tailored for construction site analysis.</li>
-                      <li>Independently developed and delivered in-house courses on LiDAR Data in QGIS and Spatial Data Analysis. Took a lead role in course development, particularly in Spatial SQL, ALKIS, and Geoserver, ensuring a comprehensive and up-to-date training curriculum.</li>
-                      <li>Managed, analyzed, and visualized geospatial data for a telecom project, adhering to the standardized information model of ‘Automatisiertes Liegenschaftsbuch’ (ALKIS).</li>
-                      <li>Played a pivotal role in a Web GIS project, integrating PostGIS vector layers into OpenLayers, enhancing spatial data accessibility and enabling more efficient web-based visualization and analysis for clients and stakeholders.</li>
+                      <li>Managed spatial data workflows for a construction company: georeferencing, orthophoto merging, cloud-optimized GeoTIFFs on AWS, and PostGIS–QGIS integration for site analysis.</li>
+                      <li>Developed and taught in-house courses on LiDAR data in QGIS and spatial data analysis; led course development for Spatial SQL, ALKIS and GeoServer.</li>
+                      <li>Managed, analyzed and visualized geospatial data for a telecom project based on the ALKIS information model.</li>
+                      <li>Integrated PostGIS vector layers into OpenLayers for a Web GIS project.</li>
                     </ul>
                   </div>
                 </li>

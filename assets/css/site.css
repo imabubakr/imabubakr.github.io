@@ -643,6 +643,24 @@ a:hover {
   font-size: 1rem;
   font-weight: 500;
 }
+.cv-personal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: start;
+}
+.cv-photo {
+  display: block;
+  width: 112px;
+  height: auto;
+  margin-top: 18px;
+  border: 1px solid var(--ink);
+}
+@media (min-width: 720px) {
+  .cv-photo {
+    width: 168px;
+  }
+}
 .cv-list {
   margin: 0;
   padding: 0;
