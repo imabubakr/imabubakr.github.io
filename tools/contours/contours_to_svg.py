@@ -145,8 +145,8 @@ def main():
         ".topo-c{stroke-width:.5px}"
         ".topo-i{stroke-width:1.3px}"
         f".topo-l{{fill:var(--contour,#8A6A4A);font-family:var(--font-mono,'IBM Plex Mono',ui-monospace,monospace);"
-        f"font-size:{fs}px;font-weight:500;text-anchor:middle;dominant-baseline:central;"
-        f"paint-order:stroke;stroke:var(--paper,#E9EAE6);stroke-width:{halo}px;stroke-linejoin:round}}"
+        "font-weight:500;text-anchor:middle;dominant-baseline:central;"
+        "paint-order:stroke;stroke:var(--paper,#E9EAE6);stroke-linejoin:round}"
     )
     out = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {round(width)} {round(height)}" '
@@ -154,7 +154,8 @@ def main():
         f"<style>{style}</style>",
         f'<path class="topo-c" d="{"".join(paths[False])}"/>',
         f'<path class="topo-i" d="{"".join(paths[True])}"/>',
-        '<g class="topo-l">',
+        # Sizes are in map units (metres) so they scale with the map, not the page.
+        f'<g class="topo-l" font-size="{fs}" stroke-width="{halo}">',
         *(
             f'<text transform="translate({x} {y}) rotate({theta:.0f})">{elev}</text>'
             for (x, y), theta, elev in ((to_svg(*p), t, e) for p, t, e in labels)

@@ -1,0 +1,686 @@
+/* Technical survey sheet. Design rules live in CLAUDE.md. */
+
+/* ---------------------------------------------------------------- fonts -- */
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2");
+}
+
+/* --------------------------------------------------------------- tokens -- */
+:root {
+  --paper: #e9eae6;
+  --ink: #141719;
+  --muted: #4e5358;
+  --contour: #8a6a4a;
+  --grid: #c9cbc5;
+  --accent: #b8380c; /* survey orange, darkened from #D2410F for AA text contrast */
+  --accent-mark: #d2410f; /* non-text: location marker, focus ring */
+
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --gap: 10px; /* page edge to neatline */
+  --pad: 16px; /* neatline to content */
+  --gutter: 24px;
+  --nav-h: 48px;
+  --strip-h: 32px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1215;
+    --ink: #e4e6e7;
+    --muted: #8d979e;
+    --contour: #6c7f8c;
+    --grid: #232c33;
+    --accent: #ff6a2b;
+    --accent-mark: #ff6a2b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e1215;
+  --ink: #e4e6e7;
+  --muted: #8d979e;
+  --contour: #6c7f8c;
+  --grid: #232c33;
+  --accent: #ff6a2b;
+  --accent-mark: #ff6a2b;
+  color-scheme: dark;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gap: 20px;
+    --pad: 32px;
+  }
+}
+@media (min-width: 1200px) {
+  :root {
+    --pad: 40px;
+  }
+}
+
+/* ----------------------------------------------------------------- base -- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--nav-h) + 16px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  padding: var(--gap);
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1rem/1.55 var(--font-sans);
+  font-kerning: normal;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-mark);
+  outline-offset: 2px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--gap);
+  left: var(--gap);
+  z-index: 20;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 400 0.8125rem/1 var(--font-mono);
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+/* ------------------------------------------------------------ neatline -- */
+.sheet {
+  /* --map-aspect and --map-width-m are set inline by tools/contours/build_hero.py.
+     The hero map area is exactly map-aspect wide on desktop, so the map is never
+     cropped sideways and the strip's tick labels line up with the graticule. */
+  --hero-h: clamp(520px, min(calc(100cqw / var(--map-aspect) + var(--strip-h)), calc(100svh - 80px)), 820px);
+  container-type: inline-size;
+  border: 1px solid var(--ink);
+}
+
+/* ------------------------------------------------------------------ nav -- */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 24px;
+  min-height: var(--nav-h);
+  padding: 8px var(--pad);
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink);
+  font: 400 0.8125rem/1.4 var(--font-mono);
+}
+
+.brand {
+  margin-right: auto;
+  color: var(--ink);
+  font: 500 0.9375rem/1.2 var(--font-sans);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.site-nav nav {
+  order: 3;
+  width: calc(100% + 2 * var(--pad));
+  margin: 0 calc(-1 * var(--pad));
+  padding: 0 var(--pad);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-list {
+  display: flex;
+  gap: 4px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+.nav-list a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.nav-list a span {
+  color: var(--muted);
+}
+.nav-list a:hover,
+.nav-list a[aria-current] {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.nav-list a[aria-current] span {
+  color: var(--accent);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--grid);
+  border-radius: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  border-color: var(--ink);
+}
+.theme-toggle .box {
+  width: 10px;
+  height: 10px;
+  border: 1px solid currentColor;
+}
+.theme-toggle[aria-pressed="true"] .box {
+  background: currentColor;
+}
+
+@media (min-width: 900px) {
+  .site-nav nav {
+    order: 0;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+}
+
+/* ----------------------------------------------------------------- hero -- */
+.hero {
+  --mw: max(100cqw, calc(var(--map-aspect) * (100cqh - var(--strip-h))));
+  container-type: size;
+  position: relative;
+  height: var(--hero-h);
+  overflow: hidden;
+  border-bottom: 1px solid var(--ink);
+}
+
+.hero-strip {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--strip-h);
+  padding: 0 var(--pad);
+  border-bottom: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--muted);
+  font: 400 0.6875rem/1 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.hero-strip > span {
+  position: relative;
+  z-index: 1;
+  padding: 0 6px;
+  background: var(--paper);
+}
+.hero-strip > span:first-child {
+  margin-left: -6px;
+}
+.hero-strip > span:last-child {
+  margin-right: -6px;
+}
+
+.ticks {
+  position: absolute;
+  inset: 0;
+}
+.tick {
+  position: absolute;
+  bottom: 0;
+  left: calc(50cqw + (var(--fx) - 0.5) * var(--mw));
+  width: 1px;
+  height: 3px;
+  background: var(--ink);
+}
+.tick--minute {
+  height: 6px;
+}
+.tick--major {
+  height: 9px;
+}
+.tick--major span {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+/* Phones: the map is cropped sideways, keep only the sheet number and CRS. */
+@media (max-width: 599px) {
+  .ticks {
+    display: none;
+  }
+}
+
+.hero-map {
+  position: absolute;
+  inset: var(--strip-h) 0 0;
+  overflow: hidden;
+}
+.map-box {
+  position: absolute;
+  top: 0;
+  left: calc(50% - var(--mw) / 2);
+  width: var(--mw);
+  aspect-ratio: var(--map-aspect);
+}
+.map-box svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.topo-c,
+.topo-i {
+  fill: none;
+  stroke: var(--contour);
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.topo-c {
+  stroke-width: 0.6px;
+  opacity: 0.5;
+}
+.topo-i {
+  stroke-width: 1.2px;
+  opacity: 0.7;
+}
+.topo-l {
+  fill: var(--contour);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  text-anchor: middle;
+  dominant-baseline: central;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-linejoin: round;
+}
+
+.grat-m,
+.grat-t {
+  fill: none;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+.grat-m {
+  stroke: var(--grid);
+}
+.grat-t {
+  stroke: var(--ink);
+}
+.grat-mark rect {
+  fill: var(--paper);
+  stroke: var(--accent-mark);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.grat-mark circle {
+  fill: var(--accent-mark);
+}
+@media (max-width: 899px) {
+  .grat-mark {
+    display: none;
+  }
+}
+
+.hero-text {
+  position: absolute;
+  right: var(--pad);
+  bottom: clamp(28px, 8cqh, 72px);
+  left: var(--pad);
+  z-index: 1;
+}
+
+.hero-loc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-bottom: 20px;
+  color: var(--accent);
+  font: 400 0.8125rem/1.4 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.hero-loc .sep {
+  display: inline-block;
+  width: 1.5ch;
+}
+
+.marker {
+  position: relative;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--accent-mark);
+  transform: rotate(45deg);
+}
+.marker::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: var(--accent-mark);
+}
+
+.hero h1 {
+  max-width: 11ch;
+  font-size: clamp(2.75rem, 1.2rem + 7.2cqw, 7.25rem);
+  font-weight: 500;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+.hero-sub {
+  max-width: 36ch;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: clamp(1.0625rem, 0.95rem + 0.5cqw, 1.3125rem);
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------- sections -- */
+.section {
+  padding: clamp(48px, 7cqw, 112px) var(--pad);
+  border-bottom: 1px solid var(--ink);
+}
+
+.section-label {
+  margin-bottom: 32px;
+  font: 400 0.8125rem/1.4 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.section-label span {
+  color: var(--muted);
+}
+
+@media (min-width: 1100px) {
+  .section {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: start;
+  }
+  .section-label {
+    grid-column: 1 / 4;
+    margin-bottom: 0;
+    padding-top: 6px;
+  }
+  .section-body {
+    grid-column: 4 / 13;
+  }
+}
+
+/* ----------------------------------------------------------- data table -- */
+.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.data thead th {
+  padding: 0 16px 10px 0;
+  border-bottom: 1px solid var(--ink);
+  color: var(--muted);
+  font: 400 0.6875rem/1.2 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.data td,
+.data tbody th {
+  padding: 16px 16px 16px 0;
+  border-bottom: 1px solid var(--grid);
+  font-weight: 400;
+  text-align: left;
+  vertical-align: top;
+}
+.data td:last-child,
+.data thead th:last-child {
+  padding-right: 0;
+}
+
+.data .group th {
+  padding: 32px 0 10px;
+  border-bottom: 1px solid var(--ink);
+  font: 500 0.8125rem/1.2 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.data tbody:first-of-type .group th {
+  padding-top: 20px;
+}
+
+.data .id {
+  width: 4ch;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+.proj-title {
+  display: block;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.proj-desc {
+  display: block;
+  max-width: 52ch;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.data .stack,
+.data .metric {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.data .stack {
+  width: 24%;
+}
+.data .metric {
+  width: 20%;
+}
+
+/* Phones: each row becomes a stacked block with inline labels. */
+@media (max-width: 719px) {
+  .data thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .data tr:not(.group) {
+    display: grid;
+    grid-template-columns: 4ch 1fr;
+    column-gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--grid);
+  }
+  .data .group th {
+    display: block;
+  }
+  .data tr:not(.group) > * {
+    padding: 0;
+    border: 0;
+  }
+  .data .id {
+    grid-row: 1 / 4;
+    width: auto;
+    padding-top: 2px;
+  }
+  .data .stack,
+  .data .metric {
+    width: auto;
+    margin-top: 8px;
+    color: var(--muted);
+  }
+  .data .metric {
+    margin-top: 2px;
+  }
+  .data .stack::before,
+  .data .metric::before {
+    content: attr(data-label) "  ";
+    white-space: pre;
+    color: var(--muted);
+    opacity: 0.8;
+  }
+}
+
+/* -------------------------------------------------------- footer collar -- */
+.collar {
+  display: grid;
+  gap: 20px;
+  padding: 24px var(--pad) 28px;
+  color: var(--muted);
+  font: 400 0.6875rem/1.5 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+.scalebar {
+  /* 1000 m at the hero map's on-screen scale. */
+  --len: calc(max(100cqw, var(--map-aspect) * (var(--hero-h) - var(--strip-h))) * 1000 / var(--map-width-m));
+  color: var(--ink);
+}
+.scalebar-bar {
+  position: relative;
+  width: var(--len);
+  height: 5px;
+  border: 1px solid var(--ink);
+}
+.scalebar-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0 50% 0 0;
+  background: var(--ink);
+}
+.scalebar-ticks {
+  position: relative;
+  width: var(--len);
+  height: 16px;
+}
+.scalebar-ticks span {
+  position: absolute;
+  top: 3px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.scalebar-ticks span:last-child {
+  transform: none;
+}
+.scalebar-ticks span:last-child::after {
+  content: " m";
+}
+
+.collar-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  color: var(--ink);
+}
+.collar-credit {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 0.625rem;
+  letter-spacing: 0;
+}
+.collar-legal p + p {
+  margin-top: 2px;
+}
+
+@media (min-width: 900px) {
+  .collar {
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    column-gap: 48px;
+  }
+  .collar-legal {
+    text-align: right;
+  }
+}
