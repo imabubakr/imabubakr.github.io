@@ -97,7 +97,9 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 
 - IBM Plex Sans (text, headings) and IBM Plex Mono (nav, numbers, dates, coordinates, labels, metadata).
   Self-hosted latin-subset woff2 in `assets/fonts/`. **Only weights 400 and 500.** No other fonts.
-- Hero `h1`: 500, very large, `letter-spacing: -0.045em`, `line-height: 0.92`.
+- Hero `h1`: the owner's sentence "Hello, I'm Bakar, a geospatial data professional with a passion for all things
+  spatial." (DE: "Hallo, ich bin Bakar, …"), 500, moderate size (max 2.5rem), bottom-left. No big title, no red
+  coordinates line (owner's wish).
 - Section titles: Plex Sans 500, `clamp(2rem, …, 3.25rem)`, `letter-spacing: -0.035em`, with a small mono `[0n]` above.
 - Mono is for metadata only: never for running text.
 - Centre only short text (headings, one-liners, at most about 3 lines; use `text-wrap: balance`). Longer text is
@@ -115,7 +117,8 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   grafiken, kontakt); the current section gets an underline and an accent number; on phones the numbers are hidden
   so all five fit. The hero strip says `SHEET 01 / 05` (`BLATT` in German). Update both if sections are added.
 - Hero: real contours (hero only, faint), graticule meridians, top strip with sheet number, longitude ticks and
-  `EPSG:4326`. Coordinates and elevation in the accent next to the diamond marker.
+  `EPSG:4326`. "FREIBURG IM BREISGAU" as a map label (ink dot + spaced caps) at the Münster's true position
+  (`build:hero-place`, written by build_hero.py); on phones the name sits left of the dot.
 - About: short centred lead + one supporting sentence, portrait, then a vertical timeline. Timeline: a centre
   line that starts at the first phase label (not at the photo); `EDUCATION`/`CAREER` labels sit on the line;
   entries alternate sides (`.tl-l`/`.tl-r`) with diamond markers and short connectors; the current job is
@@ -124,7 +127,9 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   one-line description under the job taken from their site. Keep it factual.
 - Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
   "View certificates" link or the `#certificates` hash; hidden in print.
-- About: intro → photo → timeline (compact: alternating entries overlap slightly on desktop).
+- About: the old site's "About Me" text (no job pitch: the owner isn't job-hunting) left-aligned in a centred 62ch
+  column → timeline (compact) → portrait below it as a duotone in map colours (`.duotone`, `--photo-shadow` /
+  `--photo-light` per theme).
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.

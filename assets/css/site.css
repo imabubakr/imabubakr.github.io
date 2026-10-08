@@ -39,6 +39,8 @@
   --grid: #c9cbc5;
   --accent: #b8380c; /* survey orange, darkened from #D2410F for AA text contrast */
   --accent-mark: #d2410f; /* non-text: location marker, focus ring */
+  --photo-shadow: #4b3b2c; /* duotone portrait: dark end (contour brown) */
+  --photo-light: #ece6da; /* duotone portrait: light end (warm paper) */
   /* land cover for the orbit-to-drone map (muted, map-like) */
   --lc-base: #e2e1d6;
   --lc-urban: #dad6cd;
@@ -73,7 +75,11 @@
     --grid: #232c33;
     --accent: #ff6a2b;
     --accent-mark: #ff6a2b;
-    --lc-base: #161b1e;
+    --photo-shadow: #0e1215;
+    --photo-light: #a9b8c2;
+    --photo-shadow: #0e1215;
+  --photo-light: #a9b8c2;
+  --lc-base: #161b1e;
     --lc-urban: #1f2529;
     --lc-field: #2a2a22;
     --lc-meadow: #232d22;
@@ -96,6 +102,8 @@
   --grid: #232c33;
   --accent: #ff6a2b;
   --accent-mark: #ff6a2b;
+  --photo-shadow: #0e1215;
+  --photo-light: #a9b8c2;
   --lc-base: #161b1e;
   --lc-urban: #1f2529;
   --lc-field: #2a2a22;
@@ -523,20 +531,61 @@ a:hover {
 }
 
 .hero h1 {
-  max-width: 11ch;
-  font-size: clamp(2.75rem, 1.2rem + 7.2cqw, 7.25rem);
+  max-width: 24ch;
+  font-size: clamp(1.5rem, 1rem + 2cqw, 2.5rem);
   font-weight: 500;
-  line-height: 0.92;
-  letter-spacing: -0.045em;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
-.hero-sub {
-  max-width: 36ch;
-  margin-top: 20px;
-  color: var(--muted);
-  font-size: clamp(1.0625rem, 0.95rem + 0.5cqw, 1.3125rem);
-  line-height: 1.45;
+/* Town label on the hero map at its true position (build_hero.py writes --fx/--fy). */
+.hero-places {
+  position: absolute;
+  inset: var(--strip-h) 0 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
 }
+.hero-place {
+  position: absolute;
+  left: calc(50cqw + (var(--fx) - 0.5) * var(--mw));
+  top: calc(var(--fy) * var(--mw) / var(--map-aspect));
+  width: 0;
+  height: 0;
+}
+.hero-place::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 3px var(--paper);
+}
+.hero-place-name {
+  position: absolute;
+  left: 12px;
+  top: 0;
+  transform: translateY(-50%);
+  padding: 1px 5px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 500 0.75rem/1.3 var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+/* phones: the map is cropped, so the name sits left of the dot */
+@media (max-width: 599px) {
+  .hero-place-name {
+    right: 12px;
+    left: auto;
+  }
+}
+
 
 /* ------------------------------------------------------------- sections -- */
 .section {
@@ -688,47 +737,72 @@ a:hover {
 }
 
 /* --------------------------------------------------------------- about -- */
-/* The About body is centred throughout. Only short text is centred: a one-line
-   lead and a short supporting sentence (long centred paragraphs are hard to read). */
+/* About: centred heading; the text is left-aligned in a centred reading column
+   (long centred paragraphs are hard to read); timeline and photo centred. */
 .about-body {
   text-align: center;
 }
 #about .section-head {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
-.intro-lead {
-  max-width: 30ch;
+.intro-text {
+  max-width: 62ch;
   margin: 0 auto;
-  font-size: clamp(1.25rem, 1rem + 0.8cqw, 1.625rem);
-  font-weight: 400;
-  line-height: 1.3;
-  letter-spacing: -0.015em;
-  text-wrap: balance;
+  text-align: left;
 }
-.intro-sub {
-  max-width: 52ch;
-  margin: 16px auto 0;
-  color: var(--muted);
+.intro-text p {
   font-size: 1rem;
-  line-height: 1.6;
-  text-wrap: balance;
+  line-height: 1.65;
+}
+.intro-text p + p {
+  margin-top: 0.8em;
+}
+.intro-text p:first-child {
+  font-size: 1.125rem;
 }
 @media (min-width: 720px) {
-  .intro-sub {
+  .intro-text p {
     font-size: 1.0625rem;
+  }
+  .intro-text p:first-child {
+    font-size: 1.25rem;
+    line-height: 1.55;
   }
 }
 
-/* Portrait above the timeline. */
+/* Portrait below the timeline, as a duotone in the map's colours: a grayscale photo
+   whose shadows are lifted to --photo-shadow (lighten) and highlights capped at
+   --photo-light (multiply). Both tokens change with the theme. */
 .about-visual {
   display: flex;
   justify-content: center;
-  margin-top: 48px;
+  margin-top: 40px;
+}
+.duotone {
+  position: relative;
+  display: block;
+  isolation: isolate;
+}
+.duotone::before,
+.duotone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.duotone::before {
+  background: var(--photo-shadow);
+  mix-blend-mode: lighten;
+}
+.duotone::after {
+  background: var(--photo-light);
+  mix-blend-mode: multiply;
 }
 .about-photo {
   display: block;
   width: 128px;
   height: auto;
+  filter: grayscale(1) contrast(1.15);
 }
 @media (min-width: 720px) {
   .about-photo {

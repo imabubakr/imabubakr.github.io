@@ -14,7 +14,7 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, colorScheme: 'light' });
 await page.goto(url, { waitUntil: 'networkidle' });
 // Hero only: hide the nav and make the hero exactly the image height.
-await page.addStyleTag({ content: '.site-nav{display:none!important} .sheet{--hero-h:630px!important}' });
+await page.addStyleTag({ content: '.site-nav,.map-hint,.map-controls{display:none!important} .sheet{--hero-h:630px!important}' });
 await page.evaluate(() => document.fonts.ready);
 await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1200, height: 630 } });
 await browser.close();

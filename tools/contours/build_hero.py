@@ -6,7 +6,7 @@ and replaces the content between marker comments in each HTML file:
 
     <!-- build:hero-map -->     inline contour + graticule SVGs
     <!-- build:hero-strip -->   longitude ticks/labels for the top neatline strip
-    <!-- build:hero-coords -->  "47.9978°N 7.8426°E  h 277 m"
+    <!-- build:hero-place -->   "Freiburg im Breisgau" map label at the Münster
     <!-- build:collar -->       CRS and contour interval
     <!-- build:credit -->       DEM licence credit
 
@@ -30,6 +30,7 @@ ROOT = Path(__file__).resolve().parents[2]
 META = ROOT / "assets/topo/hero-contours.json"
 CONTOURS = ROOT / "assets/topo/hero-contours.svg"
 
+PLACE = ("Freiburg im Breisgau", 7.8522, 47.9956)  # name, Münster lon/lat
 MERIDIAN_STEP = 2 / 60  # labelled meridians every 2'
 TICK_STEP = 1 / 60  # strip ticks every minute
 
@@ -110,6 +111,11 @@ def main(html_files):
             labelled = abs(lon * 30 - round(lon * 30)) < 1e-6 and 0.1 < fx < 0.88
             ticks.append((lon, fx, labelled))
 
+    # Town label at its true position, as a fraction of the map (like the strip ticks).
+    px, py = svg_xy(*PLACE[1:])
+    place = (f'<span class="hero-place" style="--fx:{px / width:.4f};--fy:{py / height:.4f}">'
+             f'<span class="hero-place-name">{PLACE[0]}</span></span>')
+
     utm_label = meta["crs"].replace("zone ", "")  # "WGS 84 / UTM 32N"
 
     def blocks_for(lang):
@@ -119,17 +125,11 @@ def main(html_files):
             if labelled else f'<span class="tick" style="--fx:{fx:.4f}"></span>'
             for lon, fx, labelled in ticks
         )
-        num = lambda v: f"{abs(v):.4f}".replace(".", loc["dec"])
-        coords = (
-            f'{num(meta["lat"])}°{loc["N"] if meta["lat"] >= 0 else loc["S"]} '
-            f'{num(meta["lon"])}°{loc["E"] if meta["lon"] >= 0 else loc["W"]}'
-            f'<span class="sep"> </span>h {meta["elevation_m"]} m'
-        )
         statement = DEM_STATEMENT.get(meta["dem"], meta["dem"])
         return {
             "hero-map": hero_map,
             "hero-strip": strip,
-            "hero-coords": coords,
+            "hero-place": place,
             "collar": f'{utm_label} · {loc["ci"]} {meta["contour_interval_m"]} m',
             "credit": f'{loc["dem"]}: <span lang="en">{statement}</span>' if lang != "en" else f"{loc['dem']}: {statement}",
         }
