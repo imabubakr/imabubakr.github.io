@@ -26,12 +26,6 @@
     sync();
   }
 
-  // Timeline: the current job runs to today.
-  var now = new Date();
-  document.querySelectorAll(".timeline").forEach(function (t) {
-    t.style.setProperty("--now", (now.getFullYear() + now.getMonth() / 12).toFixed(2));
-  });
-
   // Looping figures: load and play only while on screen, never autoplay under
   // reduced motion, and always offer a pause/play button (WCAG 2.2.2).
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");

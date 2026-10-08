@@ -552,16 +552,6 @@ a:hover {
 }
 
 /* --------------------------------------------------------------- about -- */
-/* Phones: text wraps around a small photo. From 720px: photo column + text column. */
-.intro {
-  display: flow-root;
-}
-.intro-photo {
-  float: left;
-  width: 88px;
-  height: auto;
-  margin: 4px 16px 4px 0;
-}
 .intro-text p {
   max-width: 60ch;
   font-size: 1rem;
@@ -571,52 +561,55 @@ a:hover {
   margin-top: 0.6em;
 }
 @media (min-width: 720px) {
-  .intro {
-    display: grid;
-    grid-template-columns: 160px minmax(0, 1fr);
-    column-gap: 32px;
-    align-items: start;
-  }
-  .intro-photo {
-    float: none;
-    width: 100%;
-    margin: 0;
-  }
   .intro-text p {
     font-size: 1.125rem;
   }
 }
 
 /* ------------------------------------------------------------ timeline -- */
-/* Phones: a vertical list with a bar per entry. From 1000px: bars on a year axis,
-   placed by --s (start) and --e (end) in decimal years, one row per --lane. */
+/* A hairline flows down from the photo; each entry hangs off a diamond marker.
+   Phones: line on the left. From 720px: line in the centre, entries alternate
+   sides and interleave vertically. */
 .timeline {
-  --from: 2012;
-  --to: 2027;
-  --span: calc(var(--to) - var(--from));
-  --now: 2026.8; /* updated from the clock by site.js */
-  grid-column: 1 / -1;
-  margin: 40px 0 0;
+  --line-x: 6px;
+  margin: 48px 0 0;
+}
+.tl-photo {
+  display: block;
+  width: 112px;
+  height: auto;
 }
 .tl-items {
+  position: relative;
   margin: 0;
-  padding: 0;
+  padding: 28px 0 8px;
   list-style: none;
+}
+.tl-items::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--line-x);
+  width: 1px;
+  background: var(--muted);
+  opacity: 0.5;
 }
 .tl-item {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 0 0 14px 16px;
+  padding: 0 0 22px 32px;
 }
 .tl-item::before {
   content: "";
   position: absolute;
-  top: 4px;
-  bottom: 16px;
-  left: 0;
-  width: 3px;
+  top: 5px;
+  left: calc(var(--line-x) - 4px);
+  width: 9px;
+  height: 9px;
   background: var(--ink);
+  transform: rotate(45deg);
 }
 .tl-edu::before {
   background: var(--contour);
@@ -635,78 +628,62 @@ a:hover {
   font-size: 0.875rem;
   line-height: 1.4;
 }
-.tl-axis {
-  display: none;
-}
 .tl-legend {
   display: flex;
   gap: 20px;
+  margin-top: 8px;
   color: var(--muted);
   font: 400 0.6875rem/1.5 var(--font-mono);
 }
 .tl-key::before {
   content: "";
   display: inline-block;
-  width: 16px;
-  height: 3px;
+  width: 7px;
+  height: 7px;
   margin-right: 8px;
-  vertical-align: middle;
+  vertical-align: 1px;
   background: var(--ink);
+  transform: rotate(45deg);
 }
 .tl-key.tl-edu::before {
   background: var(--contour);
 }
 
-@media (min-width: 1000px) {
-  .tl-items {
-    display: grid;
-    row-gap: 12px;
+@media (min-width: 720px) {
+  .timeline {
+    --line-x: 50%;
+  }
+  .tl-photo {
+    width: 140px;
+    margin: 0 auto;
   }
   .tl-item {
-    grid-row: var(--lane);
-    grid-column: 1;
-    width: calc((var(--e) - var(--s)) / var(--span) * 100%);
-    margin-left: calc((var(--s) - var(--from)) / var(--span) * 100%);
-    padding: 10px 0 0;
-    white-space: nowrap;
-  }
-  .tl-item::before {
-    top: 0;
-    right: 2px;
-    bottom: auto;
-    width: auto;
-    height: 3px;
-  }
-  .tl-end {
+    width: 50%;
+    padding: 0 32px 0 0;
     align-items: flex-end;
     text-align: right;
   }
-  .tl-axis {
-    position: relative;
-    display: block;
-    height: 24px;
-    margin-top: 16px;
-    border-top: 1px solid var(--grid);
-    color: var(--muted);
-    font: 400 0.6875rem/1 var(--font-mono);
+  .tl-item::before {
+    left: auto;
+    right: -5px;
   }
-  .tl-axis i,
-  .tl-axis span {
-    position: absolute;
-    left: calc((var(--y) - var(--from)) / var(--span) * 100%);
+  .tl-item:nth-child(even) {
+    margin-left: 50%;
+    padding: 0 0 0 32px;
+    align-items: flex-start;
+    text-align: left;
   }
-  .tl-axis i {
-    top: 0;
-    width: 1px;
-    height: 4px;
-    background: var(--muted);
+  .tl-item:nth-child(even)::before {
+    right: auto;
+    left: -4px;
   }
-  .tl-axis span {
-    top: 8px;
-    transform: translateX(-50%);
+  /* Interleave: each entry starts before the previous one on the other side ends. */
+  .tl-item + .tl-item {
+    margin-top: -18px;
   }
   .tl-legend {
-    margin-top: 4px;
+    justify-content: center;
+    margin-top: 16px;
   }
 }
 
