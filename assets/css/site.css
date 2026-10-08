@@ -107,7 +107,6 @@ html {
 
 body {
   margin: 0;
-  padding: var(--gap);
   background: var(--paper);
   color: var(--ink);
   font: 400 1rem/1.55 var(--font-sans);
@@ -177,14 +176,13 @@ a:hover {
   transform: none;
 }
 
-/* ------------------------------------------------------------ neatline -- */
+/* ---------------------------------------------------------------- sheet -- */
 .sheet {
   /* --map-aspect and --map-width-m are set inline by tools/contours/build_hero.py.
      The hero map area is exactly map-aspect wide on desktop, so the map is never
      cropped sideways and the strip's tick labels line up with the graticule. */
   --hero-h: clamp(520px, min(calc(100cqw / var(--map-aspect) + var(--strip-h)), calc(100svh - 80px)), 820px);
   container-type: inline-size;
-  border: 1px solid var(--ink);
 }
 
 /* ------------------------------------------------------------------ nav -- */
@@ -199,7 +197,7 @@ a:hover {
   min-height: var(--nav-h);
   padding: 8px var(--pad);
   background: var(--paper);
-  border-bottom: 1px solid var(--ink);
+  border-bottom: 1px solid var(--grid);
   font: 400 0.8125rem/1.4 var(--font-mono);
 }
 
@@ -245,36 +243,36 @@ a:hover {
 
 .lang {
   display: inline-flex;
-  border: 1px solid var(--grid);
+  gap: 2px;
 }
 .lang a {
-  padding: 4px 8px;
-  color: var(--ink);
+  padding: 2px 4px;
+  color: var(--muted);
   text-decoration: none;
 }
 .lang a:hover {
+  color: var(--ink);
   text-decoration: underline;
 }
 .lang a[aria-current] {
-  background: var(--ink);
-  color: var(--paper);
-  text-decoration: none;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .theme-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 8px;
-  border: 1px solid var(--grid);
-  border-radius: 0;
+  padding: 2px 4px;
+  border: 0;
   background: none;
-  color: var(--ink);
+  color: var(--muted);
   font: inherit;
   cursor: pointer;
 }
 .theme-toggle:hover {
-  border-color: var(--ink);
+  color: var(--ink);
 }
 .theme-toggle .box {
   width: 10px;
@@ -317,7 +315,6 @@ a:hover {
   position: relative;
   height: var(--hero-h);
   overflow: hidden;
-  border-bottom: 1px solid var(--ink);
 }
 
 .hero-strip {
@@ -329,7 +326,7 @@ a:hover {
   justify-content: space-between;
   height: var(--strip-h);
   padding: 0 var(--pad);
-  border-bottom: 1px solid var(--ink);
+  border-bottom: 1px solid var(--grid);
   background: var(--paper);
   color: var(--muted);
   font: 400 0.6875rem/1 var(--font-mono);
@@ -358,7 +355,7 @@ a:hover {
   left: calc(50cqw + (var(--fx) - 0.5) * var(--mw));
   width: 1px;
   height: 4px;
-  background: var(--ink);
+  background: var(--muted);
 }
 .tick--major {
   height: 9px;
@@ -485,8 +482,7 @@ a:hover {
 
 /* ------------------------------------------------------------- sections -- */
 .section {
-  padding: clamp(48px, 7cqw, 112px) var(--pad);
-  border-bottom: 1px solid var(--ink);
+  padding: clamp(40px, 5cqw, 80px) var(--pad);
 }
 
 .section-label {
@@ -526,7 +522,6 @@ a:hover {
   width: 100%;
   max-width: 600px;
   height: auto;
-  border: 1px solid var(--ink);
   background: var(--grid);
 }
 .plate figcaption {
@@ -556,33 +551,173 @@ a:hover {
   border-color: var(--ink);
 }
 
-/* ------------------------------------------------------------------ cv -- */
-.cv-group + .cv-group {
-  margin-top: 56px;
+/* --------------------------------------------------------------- about -- */
+/* Phones: text wraps around a small photo. From 720px: photo column + text column. */
+.intro {
+  display: flow-root;
 }
-.cv-group h3 {
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--ink);
-  font-size: 1rem;
-  font-weight: 500;
-}
-.cv-personal {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 24px;
-  align-items: start;
-}
-.cv-photo {
-  display: block;
-  width: 112px;
+.intro-photo {
+  float: left;
+  width: 88px;
   height: auto;
-  margin-top: 18px;
-  border: 1px solid var(--ink);
+  margin: 4px 16px 4px 0;
+}
+.intro-text p {
+  max-width: 60ch;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.intro-text p + p {
+  margin-top: 0.6em;
 }
 @media (min-width: 720px) {
-  .cv-photo {
-    width: 168px;
+  .intro {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    column-gap: 32px;
+    align-items: start;
   }
+  .intro-photo {
+    float: none;
+    width: 100%;
+    margin: 0;
+  }
+  .intro-text p {
+    font-size: 1.125rem;
+  }
+}
+
+/* ------------------------------------------------------------ timeline -- */
+/* Phones: a vertical list with a bar per entry. From 1000px: bars on a year axis,
+   placed by --s (start) and --e (end) in decimal years, one row per --lane. */
+.timeline {
+  --from: 2012;
+  --to: 2027;
+  --span: calc(var(--to) - var(--from));
+  --now: 2026.8; /* updated from the clock by site.js */
+  grid-column: 1 / -1;
+  margin: 40px 0 0;
+}
+.tl-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tl-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 14px 16px;
+}
+.tl-item::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 16px;
+  left: 0;
+  width: 3px;
+  background: var(--ink);
+}
+.tl-edu::before {
+  background: var(--contour);
+}
+.tl-date {
+  color: var(--muted);
+  font: 400 0.75rem/1.5 var(--font-mono);
+}
+.tl-what {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.tl-where {
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.tl-axis {
+  display: none;
+}
+.tl-legend {
+  display: flex;
+  gap: 20px;
+  color: var(--muted);
+  font: 400 0.6875rem/1.5 var(--font-mono);
+}
+.tl-key::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
+  background: var(--ink);
+}
+.tl-key.tl-edu::before {
+  background: var(--contour);
+}
+
+@media (min-width: 1000px) {
+  .tl-items {
+    display: grid;
+    row-gap: 12px;
+  }
+  .tl-item {
+    grid-row: var(--lane);
+    grid-column: 1;
+    width: calc((var(--e) - var(--s)) / var(--span) * 100%);
+    margin-left: calc((var(--s) - var(--from)) / var(--span) * 100%);
+    padding: 10px 0 0;
+    white-space: nowrap;
+  }
+  .tl-item::before {
+    top: 0;
+    right: 2px;
+    bottom: auto;
+    width: auto;
+    height: 3px;
+  }
+  .tl-end {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .tl-axis {
+    position: relative;
+    display: block;
+    height: 24px;
+    margin-top: 16px;
+    border-top: 1px solid var(--grid);
+    color: var(--muted);
+    font: 400 0.6875rem/1 var(--font-mono);
+  }
+  .tl-axis i,
+  .tl-axis span {
+    position: absolute;
+    left: calc((var(--y) - var(--from)) / var(--span) * 100%);
+  }
+  .tl-axis i {
+    top: 0;
+    width: 1px;
+    height: 4px;
+    background: var(--muted);
+  }
+  .tl-axis span {
+    top: 8px;
+    transform: translateX(-50%);
+  }
+  .tl-legend {
+    margin-top: 4px;
+  }
+}
+
+/* ------------------------------------------------------------------ cv -- */
+.cv-group + .cv-group {
+  margin-top: 32px;
+}
+.cv-group h3 {
+  margin-bottom: 4px;
+  font-size: 1rem;
+  font-weight: 500;
 }
 .cv-list {
   margin: 0;
@@ -591,18 +726,17 @@ a:hover {
 }
 .cv-row {
   display: grid;
-  gap: 4px 24px;
-  padding: 18px 0;
-  border-bottom: 1px solid var(--grid);
+  gap: 0 24px;
+  padding: 8px 0;
 }
 /* Key-value rows (personal details, skills, languages) sit tighter than entries. */
 dl.cv-list .cv-row {
-  padding: 10px 0;
+  padding: 3px 0;
 }
 .cv-date,
 .cv-row dt {
   color: var(--muted);
-  font: 400 0.8125rem/1.6 var(--font-mono);
+  font: 400 0.8125rem/1.7 var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 .cv-row dd {
@@ -615,28 +749,27 @@ dl.cv-list .cv-row {
 }
 .cv-org {
   color: var(--muted);
+  font-weight: 400;
+}
+.cv-org::before {
+  content: "· ";
 }
 .cv-entry ul {
-  max-width: 68ch;
-  margin: 10px 0 0;
+  max-width: 72ch;
+  margin: 4px 0 0;
   padding-left: 1.1em;
   font-size: 0.9375rem;
+  line-height: 1.5;
 }
 .cv-entry li + li {
-  margin-top: 6px;
+  margin-top: 2px;
 }
 .cv-entry li::marker {
   color: var(--muted);
 }
-.cv-note {
-  max-width: 68ch;
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 0.9375rem;
-}
 @media (min-width: 720px) {
   .cv-row {
-    grid-template-columns: 11rem minmax(0, 1fr);
+    grid-template-columns: 10rem minmax(0, 1fr);
   }
 }
 
@@ -645,6 +778,7 @@ dl.cv-list .cv-row {
   display: grid;
   gap: 16px;
   padding: 24px var(--pad) 28px;
+  border-top: 1px solid var(--grid);
   color: var(--muted);
   font-size: 0.8125rem;
   line-height: 1.5;
