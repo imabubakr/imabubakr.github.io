@@ -52,16 +52,17 @@ place). It's one continuous background fixed behind everything below the hero (`
 `--contour` through a mask, faded towards the centre so text sits on calm paper, loaded after page load. No bands or
 per-section layers: the user found those looked broken. Credit "© OpenStreetMap contributors" stays in the footer.
 
-## "Light and water" section
+## "From orbit to drone" (career story)
 
-`assets/js/terrain.js` draws the region map (`assets/topo/region-contours.json` + `-dem.bin`, 100 m grid) as shaded
-relief with cast shadows (shading 2× exaggerated, shadows from true heights), lit by a sun the visitor drags around
-a compass dial (direction = azimuth, distance from centre = altitude, min 5°; arrow keys work) or by today's real
-solar path over the Freiburg Münster ("play", clock time in Europe/Berlin). A water-level slider floods cells below
-the level that are connected to the Rhine (west edge / lowest cell), shown in `--water` (map blue, the only use of
-blue), with flooded km² and Freiburg's status. The caption must keep saying it's a simple bathtub model, not a
-forecast. `tools/layers/build_terrain_poster.py` renders the no-JS / loading poster with the same shading.
-"From orbit to drone" was removed at the owner's request (not eye-catching enough).
+Section [02] tells the owner's path: satellite data (from 2016) → aerial imagery (from 2021, MapTransfer) → drones
+(since 11/2025, Beagle Systems). Three chapters (`.ds-ch`, EN/DE text in the HTML) scroll past a pinned canvas
+(`assets/js/descent.js`) that descends over Ebringen: 705 km / 30 m pixels → 1 km / 20 cm → 100 m / ~2 cm
+(log-interpolated), land cover as coloured sensor pixels from orbit, a crisp map lower down, and at drone height
+detection boxes appear (labelled as simulated in the caption). Scroll position drives it; no buttons.
+Data: `python3 tools/layers/build_descent.py` → `assets/layers/descent.json` (OSM land cover, roads, streams,
+buildings; inputs cached in `tools/layers/work/`). Land-cover colours are `--lc-*` tokens (light + dark).
+Earlier attempts (altitude slider explorer; "Light and water" sun/flood map) were dropped by the owner: the section
+must be about the career path, not a generic toy.
 
 ## Legal notice (Impressum)
 
@@ -85,7 +86,7 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 | `--grid` | `#c9cbc5` | `#232c33` | hairlines (nav, strip, footer), graticule |
 | `--accent` | `#b8380c` | `#ff6a2b` | links and accent **text** |
 | `--accent-mark` | `#d2410f` | `#ff6a2b` | non-text: location marker, current-job marker, focus ring |
-| `--water` | `#4f7fa3` | `#3e6f94` | water in the Light and water map only |
+| `--lc-*` | muted map tints | dark tints | land cover in the orbit-to-drone map only |
 
 - Light `--accent` is darkened from the spec's `#D2410F` (3.9:1) to `#B8380C` (4.8:1) for WCAG AA text contrast.
 - Accent is used sparingly: location/"you are here" markers, links, focus. Nothing else.
@@ -108,9 +109,9 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   hairlines (under the nav, under the hero strip, above the footer) and the timeline line. Don't add more.
 - Mobile first; the content column is max 860 px. Every section opens the same way on the page's centre axis:
   `header.section-head` → mono `.section-no` + `h2.section-title` + optional one-line `.section-sub`.
-- Order of the page: hero (who) → About (story + timeline) → Light and water (interactive) → CV (details) →
+- Order of the page: hero (who) → About (story + timeline) → From orbit to drone (career story) → CV (details) →
   Visualizations (work samples) → Contact (action) → footer collar.
-- Nav: mono, `[01] about  [02] terrain  [03] cv  [04] visuals  [05] contact` (DE: über mich, gelände, lebenslauf,
+- Nav: mono, `[01] about  [02] orbit  [03] cv  [04] visuals  [05] contact` (DE: über mich, orbit, lebenslauf,
   grafiken, kontakt); the current section gets an underline and an accent number; on phones the numbers are hidden
   so all five fit. The hero strip says `SHEET 01 / 05` (`BLATT` in German). Update both if sections are added.
 - Hero: real contours (hero only, faint), graticule meridians, top strip with sheet number, longitude ticks and

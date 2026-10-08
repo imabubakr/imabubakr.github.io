@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="../assets/css/site.css">
     <script src="../assets/js/site.js" defer></script>
     <script src="../assets/js/hero-map.js" defer></script>
-    <script src="../assets/js/terrain.js" defer></script>
+    <script src="../assets/js/descent.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -40,7 +40,7 @@
         <nav aria-label="Abschnitte">
           <ul class="nav-list">
             <li><a href="#about"><span>[01]</span> über mich</a></li>
-            <li><a href="#terrain"><span>[02]</span> gelände</a></li>
+            <li><a href="#orbit"><span>[02]</span> orbit</a></li>
             <li><a href="#cv"><span>[03]</span> lebenslauf</a></li>
             <li><a href="#plates"><span>[04]</span> grafiken</a></li>
             <li><a href="#contact"><span>[05]</span> kontakt</a></li>
@@ -97,41 +97,39 @@
           </div>
         </section>
 
-        <section class="section" id="terrain" aria-labelledby="terrain-title" data-terrain="../assets/topo/">
+        <section class="section" id="orbit" aria-labelledby="orbit-title" data-descent="../assets/layers/descent.json">
           <header class="section-head">
-            <h2 class="section-title" id="terrain-title"><span class="section-no">[02]</span>Licht und Wasser</h2>
-            <p class="section-sub">Die Region um Freiburg, aus denselben Höhendaten wie die Karte oben. Bewegen Sie die Sonne, heben Sie den Wasserstand.</p>
+            <h2 class="section-title" id="orbit-title"><span class="section-no">[02]</span>Vom Orbit zur Drohne</h2>
+            <p class="section-sub">Mein Weg in der Fernerkundung, vom Satelliten bis zur Drohne. Scrollen Sie nach unten.</p>
           </header>
-          <div class="section-body terrain">
-            <div class="tr-controls">
-              <div class="tr-dial" role="slider" tabindex="0" aria-label="Sonnenstand" aria-valuemin="0" aria-valuemax="359" aria-valuenow="315">
-                <svg viewBox="-100 -100 200 200" aria-hidden="true">
-                  <circle class="tr-ring" r="86"/>
-                  <circle class="tr-ring tr-ring-in" r="43"/>
-                  <path class="tr-path"/>
-                  <text class="tr-cardinal" y="-90">N</text><text class="tr-cardinal" x="94" y="4">O</text>
-                  <text class="tr-cardinal" y="98">S</text><text class="tr-cardinal" x="-94" y="4">W</text>
-                  <line class="tr-ray"/>
-                  <circle class="tr-sun" r="9"/>
-                </svg>
+          <div class="section-body descent">
+            <figure class="ds-figure" hidden>
+              <div class="ds-stage">
+                <canvas class="ds-canvas" role="img" aria-label="Karte von Ebringen aus dem Orbit"></canvas>
+                <p class="ds-readout" aria-hidden="true"></p>
               </div>
-              <p class="tr-read tr-sun-read"></p>
-              <button class="tr-play" type="button" data-play="heutige Sonne abspielen" data-stop="anhalten">heutige Sonne abspielen</button>
-              <label class="tr-water">
-                <span class="tr-label">Wasserstand</span>
-                <input class="tr-level" type="range" min="170" max="700" step="1" value="170">
-              </label>
-              <p class="tr-read tr-water-read"></p>
-            </div>
-            <figure class="tr-figure">
-              <div class="tr-stage">
-                <img class="tr-poster" src="../assets/layers/terrain-poster.webp" width="800" height="720" alt="" loading="lazy" decoding="async">
-                <canvas class="tr-canvas" hidden></canvas>
-                <div class="tr-places" aria-hidden="true"></div>
-              </div>
-              <p class="tr-hover" aria-hidden="true"></p>
-              <figcaption>Copernicus GLO-30, 100-m-Raster. Schummerung und Schlagschatten werden in Ihrem Browser berechnet; das Wasser füllt mit dem Rhein verbundene Senken, ein einfaches „Badewannen“-Modell, keine Hochwasserprognose.</figcaption>
+              <figcaption>Ebringen bei Freiburg. Landbedeckung, Straßen und Gebäude © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap-Mitwirkende</a>, dargestellt in der Bodenauflösung der jeweiligen Plattform. Die Erkennungsboxen sind aus den Kartengrundrissen simuliert.</figcaption>
             </figure>
+            <ol class="ds-chapters">
+              <li class="ds-ch" data-step="0">
+                <p class="ds-tag">01 · Satellit · ab 2016</p>
+                <h3 class="ds-title">Es begann im Orbit.</h3>
+                <p class="ds-text">Angefangen habe ich mit Satellitendaten: Landsat, Sentinel und MODIS für Gletschermassenbilanz, Schneebedeckung, Landoberflächentemperatur und InSAR-Zeitreihen. Bei 30 m pro Pixel ist ein ganzes Dorf nur eine Handvoll farbiger Quadrate.</p>
+                <p class="ds-spec">~705 km · 30-m-Pixel</p>
+              </li>
+              <li class="ds-ch" data-step="1">
+                <p class="ds-tag">02 · Luftbild · ab 2021</p>
+                <h3 class="ds-title">Dann näher: Luftbilder.</h3>
+                <p class="ds-text">Bei MapTransfer habe ich mit Orthofotos gearbeitet: Georeferenzierung, Mosaike und cloud-optimierte GeoTIFFs für Baustellen und ALKIS-Daten. Bei 20 cm erscheint jedes Haus und jede Straße.</p>
+                <p class="ds-spec">~1 km · 20-cm-Pixel</p>
+              </li>
+              <li class="ds-ch" data-step="2">
+                <p class="ds-tag">03 · Drohne · seit 11/2025</p>
+                <h3 class="ds-title">Heute: Drohnen.</h3>
+                <p class="ds-text">Bei Beagle Systems arbeite ich mit Daten von Langstreckendrohnen: automatische Georeferenzierung, Objekterkennung mit feinabgestimmten Modellen, LiDAR und Live-Analyse auf einem NVIDIA Jetson. Bei etwa 2 cm findet das Modell die Objekte.</p>
+                <p class="ds-spec">~100 m · ~2-cm-Pixel</p>
+              </li>
+            </ol>
           </div>
         </section>
 

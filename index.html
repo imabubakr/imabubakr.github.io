@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="assets/css/site.css">
     <script src="assets/js/site.js" defer></script>
     <script src="assets/js/hero-map.js" defer></script>
-    <script src="assets/js/terrain.js" defer></script>
+    <script src="assets/js/descent.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -40,7 +40,7 @@
         <nav aria-label="Sections">
           <ul class="nav-list">
             <li><a href="#about"><span>[01]</span> about</a></li>
-            <li><a href="#terrain"><span>[02]</span> terrain</a></li>
+            <li><a href="#orbit"><span>[02]</span> orbit</a></li>
             <li><a href="#cv"><span>[03]</span> cv</a></li>
             <li><a href="#plates"><span>[04]</span> visuals</a></li>
             <li><a href="#contact"><span>[05]</span> contact</a></li>
@@ -97,41 +97,39 @@
           </div>
         </section>
 
-        <section class="section" id="terrain" aria-labelledby="terrain-title" data-terrain="assets/topo/">
+        <section class="section" id="orbit" aria-labelledby="orbit-title" data-descent="assets/layers/descent.json">
           <header class="section-head">
-            <h2 class="section-title" id="terrain-title"><span class="section-no">[02]</span>Light and water</h2>
-            <p class="section-sub">The region around Freiburg, from the same elevation data as the map above. Move the sun, raise the water.</p>
+            <h2 class="section-title" id="orbit-title"><span class="section-no">[02]</span>From orbit to drone</h2>
+            <p class="section-sub">My path in remote sensing, from satellites to drones. Scroll to descend.</p>
           </header>
-          <div class="section-body terrain">
-            <div class="tr-controls">
-              <div class="tr-dial" role="slider" tabindex="0" aria-label="Sun position" aria-valuemin="0" aria-valuemax="359" aria-valuenow="315">
-                <svg viewBox="-100 -100 200 200" aria-hidden="true">
-                  <circle class="tr-ring" r="86"/>
-                  <circle class="tr-ring tr-ring-in" r="43"/>
-                  <path class="tr-path"/>
-                  <text class="tr-cardinal" y="-90">N</text><text class="tr-cardinal" x="94" y="4">E</text>
-                  <text class="tr-cardinal" y="98">S</text><text class="tr-cardinal" x="-94" y="4">W</text>
-                  <line class="tr-ray"/>
-                  <circle class="tr-sun" r="9"/>
-                </svg>
+          <div class="section-body descent">
+            <figure class="ds-figure" hidden>
+              <div class="ds-stage">
+                <canvas class="ds-canvas" role="img" aria-label="Map of Ebringen seen from orbit"></canvas>
+                <p class="ds-readout" aria-hidden="true"></p>
               </div>
-              <p class="tr-read tr-sun-read"></p>
-              <button class="tr-play" type="button" data-play="play today’s sun" data-stop="stop">play today’s sun</button>
-              <label class="tr-water">
-                <span class="tr-label">water level</span>
-                <input class="tr-level" type="range" min="170" max="700" step="1" value="170">
-              </label>
-              <p class="tr-read tr-water-read"></p>
-            </div>
-            <figure class="tr-figure">
-              <div class="tr-stage">
-                <img class="tr-poster" src="assets/layers/terrain-poster.webp" width="800" height="720" alt="" loading="lazy" decoding="async">
-                <canvas class="tr-canvas" hidden></canvas>
-                <div class="tr-places" aria-hidden="true"></div>
-              </div>
-              <p class="tr-hover" aria-hidden="true"></p>
-              <figcaption>Copernicus GLO-30 elevation, 100 m grid. Shaded relief and cast shadows are computed in your browser; the water fills low ground connected to the Rhine, a simple “bathtub” model, not a flood forecast.</figcaption>
+              <figcaption>Ebringen near Freiburg. Land cover, roads and buildings © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, drawn at each platform’s ground resolution. Detection boxes are simulated from the map footprints.</figcaption>
             </figure>
+            <ol class="ds-chapters">
+              <li class="ds-ch" data-step="0">
+                <p class="ds-tag">01 · Satellite · from 2016</p>
+                <h3 class="ds-title">It started in orbit.</h3>
+                <p class="ds-text">My work began with satellite data: Landsat, Sentinel and MODIS for glacier mass balance, snow cover, land surface temperature and InSAR time series. At 30 m per pixel, a whole village is a handful of coloured squares.</p>
+                <p class="ds-spec">~705 km · 30 m pixels</p>
+              </li>
+              <li class="ds-ch" data-step="1">
+                <p class="ds-tag">02 · Aerial · from 2021</p>
+                <h3 class="ds-title">Then closer: aerial imagery.</h3>
+                <p class="ds-text">At MapTransfer I worked with aerial orthophotos: georeferencing, mosaics and cloud-optimized GeoTIFFs for construction sites and cadastral (ALKIS) data. At 20 cm, every house and road appears.</p>
+                <p class="ds-spec">~1 km · 20 cm pixels</p>
+              </li>
+              <li class="ds-ch" data-step="2">
+                <p class="ds-tag">03 · Drone · since 11/2025</p>
+                <h3 class="ds-title">Today: drones.</h3>
+                <p class="ds-text">At Beagle Systems I work with data from long-range drones: automatic georeferencing, object detection with fine-tuned models, LiDAR, and live analysis on an NVIDIA Jetson. At about 2 cm, the model finds the objects.</p>
+                <p class="ds-spec">~100 m · ~2 cm pixels</p>
+              </li>
+            </ol>
           </div>
         </section>
 

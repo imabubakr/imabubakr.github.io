@@ -39,7 +39,19 @@
   --grid: #c9cbc5;
   --accent: #b8380c; /* survey orange, darkened from #D2410F for AA text contrast */
   --accent-mark: #d2410f; /* non-text: location marker, focus ring */
-  --water: #4f7fa3; /* map blue: water only (Light and water section) */
+  /* land cover for the orbit-to-drone map (muted, map-like) */
+  --lc-base: #e2e1d6;
+  --lc-urban: #dad6cd;
+  --lc-field: #e6dcb6;
+  --lc-meadow: #cdd5a9;
+  --lc-orchard: #bccb93;
+  --lc-vineyard: #cbb98f;
+  --lc-garden: #c6d1a3;
+  --lc-scrub: #aebd8f;
+  --lc-forest: #8fa67b;
+  --lc-water: #8fb0c8;
+  --lc-road: #f6f5ef;
+  --lc-building: #b9aea1;
 
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -61,7 +73,18 @@
     --grid: #232c33;
     --accent: #ff6a2b;
     --accent-mark: #ff6a2b;
-    --water: #3e6f94;
+    --lc-base: #161b1e;
+    --lc-urban: #1f2529;
+    --lc-field: #2a2a22;
+    --lc-meadow: #232d22;
+    --lc-orchard: #263223;
+    --lc-vineyard: #2f2a21;
+    --lc-garden: #25301f;
+    --lc-scrub: #283323;
+    --lc-forest: #1f3122;
+    --lc-water: #20384b;
+    --lc-road: #3a4247;
+    --lc-building: #5b6268;
     color-scheme: dark;
   }
 }
@@ -73,7 +96,18 @@
   --grid: #232c33;
   --accent: #ff6a2b;
   --accent-mark: #ff6a2b;
-  --water: #3e6f94;
+  --lc-base: #161b1e;
+  --lc-urban: #1f2529;
+  --lc-field: #2a2a22;
+  --lc-meadow: #232d22;
+  --lc-orchard: #263223;
+  --lc-vineyard: #2f2a21;
+  --lc-garden: #25301f;
+  --lc-scrub: #283323;
+  --lc-forest: #1f3122;
+  --lc-water: #20384b;
+  --lc-road: #3a4247;
+  --lc-building: #5b6268;
   color-scheme: dark;
 }
 
@@ -702,182 +736,130 @@ a:hover {
   }
 }
 
-/* ------------------------------------------------------ light and water -- */
-/* Shaded relief with cast shadows + flooding, drawn by assets/js/terrain.js.
-   Without JS (or before the data loads): a pre-rendered poster of the same map. */
-.terrain {
-  display: grid;
-  gap: 24px;
+/* ------------------------------------------------- from orbit to drone -- */
+/* Career story: three chapters scroll past a pinned map (assets/js/descent.js) that
+   descends from satellite to drone height. Without JS: the chapters alone. */
+.ds-chapters {
+  max-width: 60ch;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
 }
-.tr-controls {
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-  text-align: center;
+.ds-ch + .ds-ch {
+  margin-top: 36px;
 }
-.tr-dial {
-  width: 200px;
-  touch-action: none;
-  cursor: grab;
-}
-.tr-dial.is-dragging {
-  cursor: grabbing;
-}
-.tr-dial svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-.tr-ring {
-  fill: none;
-  stroke: var(--muted);
-  stroke-width: 1px;
-  opacity: 0.6;
-  vector-effect: non-scaling-stroke;
-}
-.tr-ring-in {
-  stroke-dasharray: 2 4;
-  opacity: 0.4;
-}
-.tr-path {
-  fill: none;
-  stroke: var(--accent-mark);
-  stroke-width: 1px;
-  stroke-dasharray: 1 4;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-}
-.tr-cardinal {
-  fill: var(--muted);
-  font: 400 11px var(--font-mono);
-  text-anchor: middle;
-}
-.tr-ray {
-  stroke: var(--accent-mark);
-  stroke-width: 1px;
-  opacity: 0.6;
-  vector-effect: non-scaling-stroke;
-}
-.tr-sun {
-  fill: var(--accent-mark);
-  stroke: var(--paper);
-  stroke-width: 3px;
-  vector-effect: non-scaling-stroke;
-}
-.tr-dial:focus-visible {
-  outline-offset: 6px;
-}
-.tr-read {
-  min-height: 1.5em;
-  color: var(--ink);
-  font: 400 0.75rem/1.5 var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-.tr-play {
-  min-height: 28px;
-  padding: 2px 10px;
-  border: 1px solid var(--accent-mark);
-  border-radius: 0;
-  background: none;
-  color: var(--accent);
-  font: 400 0.75rem/1.5 var(--font-mono);
-  cursor: pointer;
-}
-.tr-play[aria-pressed="true"] {
-  background: var(--accent-mark);
-  color: var(--paper);
-}
-.tr-water {
-  display: grid;
-  gap: 4px;
-  width: min(100%, 260px);
-  margin-top: 14px;
-}
-.tr-label {
+.ds-tag {
   color: var(--muted);
-  font: 400 0.6875rem/1.5 var(--font-mono);
-  letter-spacing: 0.08em;
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.tr-level {
-  width: 100%;
-  accent-color: var(--water);
+.ds-title {
+  margin: 4px 0 8px;
+  font-size: clamp(1.375rem, 1.1rem + 1cqw, 1.875rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
 }
-.tr-figure {
+.ds-text {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.ds-spec {
+  margin-top: 8px;
+  color: var(--accent);
+  font: 400 0.75rem/1.5 var(--font-mono);
+}
+.ds-figure {
   margin: 0;
 }
-.tr-stage {
-  position: relative;
-  aspect-ratio: 10 / 9;
-  background: var(--paper);
+.ds-figure[hidden] {
+  display: none;
 }
-.tr-poster,
-.tr-canvas {
+.ds-stage {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--lc-base);
+}
+.ds-canvas {
   display: block;
   width: 100%;
   height: 100%;
 }
-.tr-canvas {
-  cursor: crosshair;
-}
-.tr-poster[hidden],
-.tr-canvas[hidden] {
-  display: none;
-}
-.tr-places {
+.ds-readout {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.tr-place {
-  position: absolute;
-  transform: translate(-6px, -50%);
+  left: 10px;
+  bottom: 10px;
+  padding: 2px 8px;
+  background: var(--paper);
   color: var(--ink);
-  font: 400 0.6875rem/1 var(--font-mono);
-  white-space: nowrap;
-  text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper);
+  font: 400 0.6875rem/1.5 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
-.tr-place::before {
-  content: "▲ ";
-}
-.tr-town::before {
-  content: "● ";
-}
-/* labels near the right edge sit left of their marker */
-.tr-flip {
-  transform: translate(calc(-100% + 6px), -50%);
-}
-.tr-flip::before {
-  content: none;
-}
-.tr-flip::after {
-  content: " ▲";
-}
-.tr-town.tr-flip::after {
-  content: " ●";
-}
-.tr-hover {
-  min-height: 1.5em;
+.ds-figure figcaption {
   margin-top: 8px;
   color: var(--muted);
-  font: 400 0.75rem/1.5 var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-.tr-hover.is-live {
-  color: var(--accent);
-}
-.tr-figure figcaption {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
+.ds-figure figcaption a {
+  color: inherit;
+}
+
+/* With the map: chapters get room to scroll past it, the active one is emphasised. */
+.ds-ready .ds-ch {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 62vh;
+  margin: 0;
+  opacity: 0.35;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ds-ready .ds-ch {
+    transition: opacity 0.4s ease;
+  }
+}
+.ds-ready .ds-ch.is-active {
+  opacity: 1;
+}
+/* phones: the map pins under the nav, chapters scroll below it */
+.ds-ready .ds-figure {
+  position: sticky;
+  top: calc(var(--nav-h) + 4px);
+  z-index: 2;
+  padding: 8px 0;
+  background: var(--paper);
+}
+.ds-ready .ds-figure figcaption {
+  display: none;
+}
 @media (min-width: 900px) {
-  .terrain {
-    grid-template-columns: 240px minmax(0, 1fr);
-    align-items: center;
-    gap: 40px;
+  #orbit.ds-ready .descent {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 48px;
+    align-items: start;
+    max-width: 1100px;
+  }
+  #orbit.ds-ready .ds-figure {
+    grid-column: 2;
+    grid-row: 1;
+    top: calc(var(--nav-h) + 48px);
+    padding: 0;
+    background: none;
+  }
+  #orbit.ds-ready .ds-figure figcaption {
+    display: block;
+  }
+  #orbit.ds-ready .ds-chapters {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+  }
+  #orbit.ds-ready .ds-ch {
+    min-height: 80vh;
   }
 }
 
@@ -1312,7 +1294,7 @@ dl.cv-list .cv-row {
   .site-nav,
   .hero,
   #about,
-  #terrain,
+  #orbit,
   #plates,
   .cv-certs,
   .cv-more,
