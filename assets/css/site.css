@@ -43,9 +43,8 @@
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --gap: 10px; /* page edge to neatline */
-  --pad: 16px; /* neatline to content */
-  --gutter: 24px;
+  --gap: 10px; /* skip-link offset */
+  --pad: 16px; /* page edge to content */
   --nav-h: 48px;
   --strip-h: 32px;
 
