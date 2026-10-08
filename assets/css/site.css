@@ -1016,15 +1016,15 @@ a:hover {
   text-transform: uppercase;
 }
 .tl-phase:not(:first-child) {
-  margin-top: 28px;
+  margin-top: 20px;
 }
 .tl-item {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 18px;
-  padding-top: 20px;
+  margin-top: 12px;
+  padding-top: 18px;
 }
 .tl-item::before {
   content: "";
@@ -1080,16 +1080,16 @@ a:hover {
   }
   .tl-item {
     width: 50%;
-    margin-top: 10px;
+    margin-top: -14px; /* sides alternate, so entries may overlap vertically */
     padding: 0 40px 0 0;
     align-items: flex-end;
     text-align: right;
   }
   .tl-phase + .tl-item {
-    margin-top: 16px;
+    margin-top: 12px;
   }
   .tl-phase:not(:first-child) {
-    margin-top: 22px;
+    margin-top: 14px;
   }
   .tl-r {
     margin-left: 50%;
