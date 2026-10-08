@@ -552,7 +552,8 @@ a:hover {
 }
 
 /* --------------------------------------------------------------- about -- */
-/* The About section is centred: label, intro, photo and timeline on one axis. */
+/* Centred section. Only short text is centred: a one-line lead and a short
+   supporting sentence (long centred paragraphs are hard to read). */
 .section--center {
   display: block;
   text-align: center;
@@ -561,27 +562,35 @@ a:hover {
   margin-bottom: 28px;
   padding-top: 0;
 }
-.intro-text p {
-  max-width: 58ch;
-  margin-right: auto;
-  margin-left: auto;
-  font-size: 1rem;
-  line-height: 1.65;
+.intro-lead {
+  max-width: 24ch;
+  margin: 0 auto;
+  font-size: clamp(1.5rem, 1.1rem + 1.4cqw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
 }
-.intro-text p + p {
-  margin-top: 0.6em;
+.intro-sub {
+  max-width: 52ch;
+  margin: 16px auto 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  text-wrap: balance;
 }
 @media (min-width: 720px) {
-  .intro-text p {
-    font-size: 1.125rem;
+  .intro-sub {
+    font-size: 1.0625rem;
   }
 }
 
 /* ------------------------------------------------------------ timeline -- */
-/* A hairline runs down from the photo through a diamond per entry.
-   Phones: entries centred on the line. From 720px: three columns
-   (side | line | side); date and title sit on opposite sides and swap
-   every row. The current job's marker uses the accent ("you are here"). */
+/* A hairline runs down from the photo. Phase labels (education / career) sit
+   on the line like contour labels. Phones: entries stacked on the line.
+   From 720px: entries alternate sides (.tl-l / .tl-r), each tied to its
+   diamond marker by a short connector. The current job's marker uses the
+   accent ("you are here"); a small tick closes the line. */
 .timeline {
   margin: 56px auto 0;
 }
@@ -594,28 +603,50 @@ a:hover {
 .tl-items {
   position: relative;
   margin: 0;
-  padding: 40px 0 0;
+  padding: 32px 0 28px;
   list-style: none;
 }
-.tl-items::before {
+.tl-items::before,
+.tl-items::after {
   content: "";
   position: absolute;
+  left: 50%;
+  background: var(--muted);
+}
+.tl-items::before {
   top: 0;
   bottom: 0;
-  left: 50%;
   width: 1px;
-  background: var(--muted);
   opacity: 0.45;
+}
+.tl-items::after {
+  bottom: 0;
+  width: 13px;
+  height: 1px;
+  margin-left: -6px;
+  opacity: 0.6;
+}
+.tl-phase {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 3px 10px;
+  background: var(--paper);
+  color: var(--muted);
+  font: 400 0.6875rem/1.4 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tl-phase:not(:first-child) {
+  margin-top: 40px;
 }
 .tl-item {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 28px;
   padding-top: 22px;
-}
-.tl-item + .tl-item {
-  margin-top: 32px;
 }
 .tl-item::before {
   content: "";
@@ -635,7 +666,7 @@ a:hover {
   outline: 1px solid var(--accent-mark);
   outline-offset: 3px;
 }
-/* Text sits on paper so the line passes behind it, not through it. */
+/* Phones: text sits on paper so the line passes behind it. */
 .tl-date,
 .tl-body {
   position: relative;
@@ -661,49 +692,32 @@ a:hover {
   font-size: 0.875rem;
   line-height: 1.5;
 }
-.tl-legend {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin-top: 40px;
-  color: var(--muted);
-  font: 400 0.6875rem/1.5 var(--font-mono);
-}
-.tl-key::before {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 8px;
-  vertical-align: 1px;
-  background: var(--ink);
-  transform: rotate(45deg);
-}
-.tl-key.tl-edu::before {
-  background: var(--contour);
-}
 
 @media (min-width: 720px) {
   .timeline {
-    max-width: 760px;
+    max-width: 720px;
   }
   .tl-photo {
     width: 152px;
   }
   .tl-items {
-    padding-top: 48px;
+    padding-top: 40px;
   }
   .tl-item {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr);
-    align-items: baseline;
-    padding-top: 0;
+    width: 50%;
+    margin-top: 24px;
+    padding: 0 40px 0 0;
+    align-items: flex-end;
+    text-align: right;
   }
-  .tl-item + .tl-item {
-    margin-top: 44px;
+  .tl-phase + .tl-item {
+    margin-top: 28px;
   }
-  .tl-item::before {
-    top: 0.45em;
+  .tl-r {
+    margin-left: 50%;
+    padding: 0 0 0 40px;
+    align-items: flex-start;
+    text-align: left;
   }
   .tl-date,
   .tl-body {
@@ -713,32 +727,32 @@ a:hover {
   .tl-date {
     font-size: 0.8125rem;
   }
-  /* Odd rows: title left, date right. Even rows: date left, title right. */
-  .tl-item:nth-child(odd) .tl-body {
-    grid-column: 1;
-    grid-row: 1;
-    text-align: right;
-  }
-  .tl-item:nth-child(odd) .tl-date {
-    grid-column: 3;
-    grid-row: 1;
-    text-align: left;
-  }
-  .tl-item:nth-child(even) .tl-date {
-    grid-column: 1;
-    grid-row: 1;
-    text-align: right;
-  }
-  .tl-item:nth-child(even) .tl-body {
-    grid-column: 3;
-    grid-row: 1;
-    text-align: left;
-  }
   .tl-what {
     font-size: 1.0625rem;
   }
-  .tl-legend {
-    margin-top: 48px;
+  /* Marker on the line, level with the date; connector from marker to text. */
+  .tl-item::before {
+    top: 6px;
+    left: auto;
+    right: -4.5px;
+  }
+  .tl-r::before {
+    right: auto;
+    left: -4.5px;
+  }
+  .tl-item::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 18px;
+    height: 1px;
+    background: var(--muted);
+    opacity: 0.45;
+  }
+  .tl-r::after {
+    right: auto;
+    left: 12px;
   }
 }
 
