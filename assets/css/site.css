@@ -904,8 +904,32 @@ dl.cv-list .cv-row {
   margin-top: 6px;
   font: 400 0.8125rem/1.5 var(--font-mono);
 }
+/* Certificates fold away behind one line until opened. */
+.cv-certs summary {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+.cv-certs summary::-webkit-details-marker {
+  display: none;
+}
+.certs-toggle {
+  color: var(--accent);
+  font: 400 0.8125rem/1.5 var(--font-mono);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.cv-certs summary:hover .certs-toggle {
+  text-decoration-thickness: 2px;
+}
+.cv-certs[open] .when-closed,
+.cv-certs:not([open]) .when-open {
+  display: none;
+}
 .cv-certs .plates {
-  margin-top: 12px;
+  margin-top: 16px;
 }
 .cv-entry li + li {
   margin-top: 2px;

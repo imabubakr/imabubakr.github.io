@@ -119,6 +119,17 @@
     });
   }
 
+  // Links to #certificates (and arriving with that hash) unfold the certificates.
+  var certs = document.getElementById("certificates");
+  if (certs) {
+    var openCerts = function () { if (location.hash === "#certificates") certs.open = true; };
+    document.querySelectorAll('a[href="#certificates"]').forEach(function (a) {
+      a.addEventListener("click", function () { certs.open = true; });
+    });
+    window.addEventListener("hashchange", openCerts);
+    openCerts();
+  }
+
   var langLink = document.querySelector(".lang a[hreflang]");
   var langBase = langLink ? langLink.getAttribute("href").split("#")[0] : "";
 
