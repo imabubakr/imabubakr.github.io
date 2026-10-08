@@ -1824,6 +1824,34 @@ html.bg-on[data-theme="dark"] body::before {
 .mv-svg .topo-i {
   opacity: 0.95;
 }
+.mv-frame {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1px;
+  stroke-dasharray: 6 5;
+  opacity: 0.55;
+  vector-effect: non-scaling-stroke;
+}
+.mv-place text {
+  fill: var(--ink);
+  font-family: var(--font-mono);
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-linejoin: round;
+}
+.mv-sym {
+  fill: var(--ink);
+}
+.mv-marker {
+  fill: var(--paper);
+  stroke: var(--accent-mark);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.map-full.is-loading {
+  opacity: 0.6;
+  cursor: progress;
+}
 .mv-svg.is-panning {
   cursor: grabbing;
 }

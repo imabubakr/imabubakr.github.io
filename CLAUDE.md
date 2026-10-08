@@ -32,6 +32,9 @@ One page per language: English at `/` (`index.html`), German at `/de/` (`de/inde
 3. `python3 tools/contours/build_hero.py index.html de/index.html` injects the map, graticule ticks, coordinates and
    footer values between the `<!-- build:name -->` markers, formatted per `<html lang>`.
    `make_contours.sh` also writes the 50 m elevation grid and the map→lat/lon formula used by `hero-map.js`.
+   Region map for the fullscreen viewer (Kaiserstuhl to Feldberg, 40 x 36 km, CI 20 m, 100 m grid): run the
+   region command from `make_contours.sh --help` (own `--work` folder!), then
+   `python3 tools/contours/region_extras.py` (summit labels found as DEM maxima, hero frame and marker).
 4. If the hero changed visibly, regenerate `assets/img/og.png` with `tools/og/make_og.mjs` (instructions in the file).
 
 ## Plates (Visualizations section) and certificates
@@ -131,7 +134,9 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   in JS from the 50 m grid (rows every 100 m, 50 m when zoomed in; 2.5× vertical exaggeration, stated in the viewer;
   paper fill so nearer ridges hide farther ones). In ridge view the cursor snaps to the visible ridge line and the
   profile line drapes over the ridges.
-- "fullscreen" opens `dialog.map-viewer`: zoom (−/+/reset, wheel, pinch, +/- keys), pan (drag, arrow keys), live
+- "fullscreen" loads the region map (`assets/topo/region-contours.*`, ~410 KB, only on open) and starts on the
+  hero's frame (dashed in contour view); ⤢ shows the whole region with summit labels. Ridge exaggeration is per
+  map (hero 2.5×, region 1.5×) and the viewer states the value in use. `dialog.map-viewer`: zoom (−/+/reset, wheel, pinch, +/- keys), pan (drag, arrow keys), live
   readout, profile, scale bar. The viewBox follows the stage's aspect (no letterboxing; portrait screens fill the
   height). Labels stay ~10 px at any zoom. Esc clears a profile first, then closes.
 - Visualizations: still thumbnails (4:3, `object-fit: cover`) in a 2/3-column grid with mono `PLATE 0n` /

@@ -15,45 +15,61 @@
     ? { profile: "Höhenprofil", close: "Profil schließen", length: "Länge", dec: ",", E: "O", W: "W",
         contours: "Höhenlinien", ridges: "Ridgelines", full: "Vollbild", view: "Kartenansicht",
         zoomIn: "Hineinzoomen", zoomOut: "Herauszoomen", reset: "Ganze Karte", closeMap: "Karte schließen",
-        title: "Freiburg im Breisgau · Copernicus GLO-30",
+        title: "Region Freiburg · Kaiserstuhl bis Feldberg · Copernicus GLO-30",
+        ci: "Äquidistanz 20 m · gestrichelt: Ausschnitt der Startseite",
         hint: "Überfahren: Koordinaten · Klick, Klick: Höhenprofil · Ziehen: verschieben · Mausrad: zoomen",
-        exag: "Ridgelines: 2,5-fach überhöht" }
+        exag: function (x) { return "Ridgelines: " + String(x).replace(".", ",") + "-fach überhöht"; } }
     : { profile: "elevation profile", close: "Close profile", length: "length", dec: ".", E: "E", W: "W",
         contours: "contours", ridges: "ridges", full: "fullscreen", view: "Map view",
         zoomIn: "Zoom in", zoomOut: "Zoom out", reset: "Whole map", closeMap: "Close map",
-        title: "Freiburg im Breisgau · Copernicus GLO-30",
+        title: "Freiburg region · Kaiserstuhl to Feldberg · Copernicus GLO-30",
+        ci: "CI 20 m · dashed: the area on the homepage",
         hint: "hover: coordinates · click, click: elevation profile · drag: pan · wheel: zoom",
-        exag: "ridges: vertical exaggeration 2.5×" };
+        exag: function (x) { return "ridges: vertical exaggeration " + x + "×"; } };
 
   var NS = "http://www.w3.org/2000/svg";
-  var EXAG = 2.5;
   var base = hero.dataset.topo;
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  var meta = null, grid = null, hmin = 0, loading = null;
   var mode = "contours";
   var maps = []; // map instances (hero, viewer)
 
-  function load() {
-    if (!loading) {
-      loading = fetch(base + "hero-contours.json")
-        .then(function (r) { return r.json(); })
-        .then(function (m) {
-          meta = m;
-          return fetch(base + m.grid.file);
-        })
-        .then(function (r) { return r.arrayBuffer(); })
-        .then(function (buf) {
-          grid = new Int16Array(buf);
-          hmin = Math.min.apply(null, grid);
-        })
-        .catch(function () { loading = null; });
-    }
-    return loading;
+  // A dataset = one map: metadata, 16-bit elevation grid, its minimum. The hero uses
+  // Freiburg (10 x 5 km); the fullscreen viewer the region (Kaiserstuhl to Feldberg).
+  // exag: vertical exaggeration of the ridge view (the region has more relief, so less)
+  function dataset(name, withSvg, exag) {
+    var ds = { meta: null, grid: null, hmin: 0, svgText: null, ready: null, exag: exag };
+    ds.load = function () {
+      if (!ds.ready) {
+        ds.ready = fetch(base + name + ".json")
+          .then(function (r) { return r.json(); })
+          .then(function (m) {
+            ds.meta = m;
+            return Promise.all([
+              fetch(base + m.grid.file).then(function (r) { return r.arrayBuffer(); }),
+              withSvg ? fetch(base + name + ".svg").then(function (r) { return r.text(); }) : null,
+            ]);
+          })
+          .then(function (res) {
+            ds.grid = new Int16Array(res[0]);
+            var lo = Infinity;
+            for (var i = 0; i < ds.grid.length; i++) if (ds.grid[i] < lo) lo = ds.grid[i];
+            ds.hmin = lo;
+            ds.svgText = res[1];
+            return ds;
+          })
+          .catch(function () { ds.ready = null; });
+      }
+      return ds.ready;
+    };
+    return ds;
   }
+  var heroData = dataset("hero-contours", false, 2.5);
+  var regionData = dataset("region-contours", true, 1.5);
+  function load() { return heroData.load(); }
 
   // ----------------------------------------------------------- geometry --
-  function elevation(x, y) {
-    var g = meta.grid;
+  function elevation(ds, x, y) {
+    var g = ds.meta.grid, grid = ds.grid;
     var fx = Math.min(Math.max(x / g.cell_m[0] - 0.5, 0), g.cols - 1);
     var fy = Math.min(Math.max(y / g.cell_m[1] - 0.5, 0), g.rows - 1);
     var x0 = Math.floor(fx), y0 = Math.floor(fy);
@@ -63,24 +79,24 @@
     return (v(x0, y0) * (1 - tx) + v(x1, y0) * tx) * (1 - ty) + (v(x0, y1) * (1 - tx) + v(x1, y1) * tx) * ty;
   }
 
-  function lift(x, y) {
-    return mode === "ridges" ? EXAG * (elevation(x, y) - hmin) : 0;
+  function lift(ds, x, y) {
+    return mode === "ridges" ? ds.exag * (elevation(ds, x, y) - ds.hmin) : 0;
   }
 
-  function lonLat(x, y) {
+  function lonLat(ds, x, y) {
     var t = [1, x, y, x * x, x * y, y * y];
     var poly = function (c) { return c.reduce(function (s, k, i) { return s + k * t[i]; }, 0); };
-    return [poly(meta.lonlat.lon), poly(meta.lonlat.lat)];
+    return [poly(ds.meta.lonlat.lon), poly(ds.meta.lonlat.lat)];
   }
 
   function num(v, digits) {
     return Math.abs(v).toFixed(digits).replace(".", T.dec);
   }
 
-  function readout(p) {
-    var ll = lonLat(p.x, p.y);
+  function readout(ds, p) {
+    var ll = lonLat(ds, p.x, p.y);
     return num(ll[1], 4) + "°" + (ll[1] >= 0 ? "N" : "S") + " " + num(ll[0], 4) + "°" +
-      (ll[0] >= 0 ? T.E : T.W) + " · " + Math.round(elevation(p.x, p.y)) + " m";
+      (ll[0] >= 0 ? T.E : T.W) + " · " + Math.round(elevation(ds, p.x, p.y)) + " m";
   }
 
   function el(name, attrs, parent) {
@@ -92,13 +108,14 @@
 
   // Ridge lines, back (north) to front (south); each closes down to the map bottom
   // with a paper fill, so nearer lines hide the ones behind.
-  function ridgeGroup(step) {
-    var W = meta.width_m, H = meta.height_m, cell = meta.grid.cell_m[0];
+  function ridgeGroup(ds, step) {
+    var W = ds.meta.width_m, H = ds.meta.height_m, cell = ds.meta.grid.cell_m[0];
+    var dx = step <= cell ? cell / 2 : cell; // sample spacing along each line
     var g = el("g", { class: "ridges" });
     for (var y = step / 2; y < H; y += step) {
       var pts = [];
-      for (var x = 0; x < W; x += cell / 2) pts.push([x, y - lift(x, y)]);
-      pts.push([W, y - lift(W, y)]);
+      for (var x = 0; x < W; x += dx) pts.push([x, y - lift(ds, x, y)]);
+      pts.push([W, y - lift(ds, W, y)]);
       // smooth: quadratic curves through the midpoints between samples
       var d = "M" + pts[0][0] + " " + pts[0][1].toFixed(1);
       for (var i = 1; i < pts.length - 1; i++) {
@@ -116,6 +133,7 @@
   // o.readout: element showing the readout; o.panelHost: where the profile panel goes.
   function MapView(o) {
     var self = this;
+    var ds = o.ds;
     var a = null, b = null, cursor = null;
     var ridges = null, ridgeStep = 0;
     var overlay = el("g", { class: "map-tools", "aria-hidden": "true" }, o.svg);
@@ -138,21 +156,21 @@
       pt.x = evt.clientX;
       pt.y = evt.clientY;
       var p = pt.matrixTransform(m.inverse());
-      return p.x >= 0 && p.y >= 0 && p.x <= meta.width_m && p.y <= meta.height_m ? { x: p.x, y: p.y } : null;
+      return p.x >= 0 && p.y >= 0 && p.x <= ds.meta.width_m && p.y <= ds.meta.height_m ? { x: p.x, y: p.y } : null;
     }
 
     // Ground point under the pointer. In ridge view: the front-most ridge line at or
     // above the pointer is the one you see, so snap to it.
     function ground(p) {
       if (!p || mode !== "ridges") return p;
-      for (var y = Math.floor((meta.height_m - ridgeStep / 2) / ridgeStep) * ridgeStep + ridgeStep / 2; y > 0; y -= ridgeStep) {
-        if (p.y >= y - lift(p.x, y)) return { x: p.x, y: y };
+      for (var y = Math.floor((ds.meta.height_m - ridgeStep / 2) / ridgeStep) * ridgeStep + ridgeStep / 2; y > 0; y -= ridgeStep) {
+        if (p.y >= y - lift(ds, p.x, y)) return { x: p.x, y: y };
       }
       return null;
     }
 
     function project(p) {
-      return { x: p.x, y: p.y - lift(p.x, p.y) };
+      return { x: p.x, y: p.y - lift(ds, p.x, p.y) };
     }
 
     function dot(c, p, r) {
@@ -201,7 +219,7 @@
       if (ridges && step === ridgeStep) return;
       if (ridges) ridges.remove();
       ridgeStep = step;
-      ridges = ridgeGroup(step);
+      ridges = ridgeGroup(ds, step);
       o.content.appendChild(ridges);
     };
 
@@ -209,14 +227,15 @@
       o.svg.classList.toggle("show-ridges", mode === "ridges");
       self.setStep(o.step());
       draw();
+      if (o.onMode) o.onMode();
     };
 
     self.move = function (e) {
-      if (!grid) return;
+      if (!ds.grid) return;
       var p = ground(toMap(e));
       cursor = p;
       if (o.readout) {
-        o.readout.textContent = p ? readout(p) : defaultText;
+        o.readout.textContent = p ? readout(ds, p) : defaultText;
         o.readout.classList.toggle("is-live", !!p);
       }
       draw();
@@ -232,11 +251,11 @@
     };
 
     self.click = function (e) {
-      if (!grid) return;
+      if (!ds.grid) return;
       var p = ground(toMap(e));
       if (!p) return;
       if (o.readout) {
-        o.readout.textContent = readout(p);
+        o.readout.textContent = readout(ds, p);
         o.readout.classList.add("is-live");
       }
       if (!a || b) {
@@ -245,7 +264,7 @@
         panel.hide();
       } else {
         b = p;
-        panel.show(profile(a, b));
+        panel.show(profile(ds, a, b));
       }
       draw();
     };
@@ -253,10 +272,10 @@
     maps.push(self);
   }
 
-  function profile(a, b) {
+  function profile(ds, a, b) {
     var n = 160, pts = [], up = 0, down = 0;
     for (var i = 0; i <= n; i++) {
-      var h = elevation(a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n);
+      var h = elevation(ds, a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n);
       if (i) { var d = h - pts[i - 1]; if (d > 0) up += d; else down -= d; }
       pts.push(h);
     }
@@ -301,7 +320,7 @@
 
   function setMode(m) {
     load().then(function () {
-      if (!grid) return;
+      if (!heroData.grid) return;
       mode = m;
       maps.forEach(function (v) { v.applyMode(); });
       document.querySelectorAll(".map-mode button").forEach(function (b) {
@@ -329,6 +348,7 @@
 
   // --------------------------------------------------------------- hero --
   var heroView = new MapView({
+    ds: heroData,
     svg: heroSvg,
     content: heroSvg,
     readout: hero.querySelector(".strip-crs"),
@@ -370,19 +390,23 @@
   // ----------------------------------------------------------- viewer --
   var viewer = null;
 
+  // Fullscreen opens the region map on the hero's own frame; zoom out for the region.
   function openViewer() {
-    load().then(function () {
-      if (!grid) return;
+    fullBtn.classList.add("is-loading");
+    Promise.all([heroData.load(), regionData.load()]).then(function () {
+      fullBtn.classList.remove("is-loading");
+      if (!regionData.grid) return;
       if (!viewer) buildViewer();
       viewer.showModal();
-      viewer.fit();
+      viewer.showHeroFrame();
       viewer.querySelector(".mv-close").focus();
     });
   }
   fullBtn.addEventListener("click", openViewer);
 
   function buildViewer() {
-    var W = meta.width_m, H = meta.height_m;
+    var ds = regionData, M = ds.meta;
+    var W = M.width_m, H = M.height_m;
     viewer = document.createElement("dialog");
     viewer.className = "map-viewer";
     viewer.setAttribute("aria-label", T.title);
@@ -418,26 +442,68 @@
     close.addEventListener("click", function () { viewer.close(); });
     tools.appendChild(close);
 
-    // One SVG: contours (cloned from the hero), graticule, ridges, tools.
+    // One SVG: region contours, ridges, places, tools.
     var stage = viewer.querySelector(".mv-stage");
     var svg = el("svg", { class: "topo mv-svg", viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "xMidYMid meet" }, stage);
     var content = el("g", {}, svg);
-    Array.prototype.forEach.call(heroSvg.children, function (c) {
-      if (!c.classList.contains("map-tools") && !c.classList.contains("ridges") && c.tagName !== "style") content.appendChild(c.cloneNode(true));
+    var parsed = new DOMParser().parseFromString(ds.svgText, "image/svg+xml").documentElement;
+    Array.prototype.forEach.call(parsed.children, function (c) {
+      if (c.tagName !== "style") content.appendChild(document.importNode(c, true));
     });
-    var grat = hero.querySelector("svg.grat .grat-m");
-    if (grat) content.appendChild(grat.cloneNode(true));
     var labels = content.querySelector(".topo-l");
+
+    // Places (summits found in the DEM), the hero's frame and its location marker.
+    var placesG = el("g", { class: "mv-places", "aria-hidden": "true" }, svg);
+    var frame = M.hero_frame || [0, 0, 0, 0];
+    var frameRect = el("rect", { class: "mv-frame", x: frame[0], y: frame[1], width: frame[2] - frame[0], height: frame[3] - frame[1] }, placesG);
+    var placeEls = (M.places || []).map(function (pl) {
+      var g = el("g", { class: "mv-place mv-" + pl.kind }, placesG);
+      el(pl.kind === "summit" ? "path" : "circle", { class: "mv-sym" }, g);
+      var t = el("text", {}, g);
+      t.textContent = (de ? pl.de : pl.en) + (pl.elev ? " " + pl.elev + " m" : "");
+      return { pl: pl, g: g, sym: g.firstChild, text: t };
+    });
+    var marker = M.hero_marker ? el("rect", { class: "mv-marker" }, placesG) : null;
+
+    function drawPlaces() {
+      var u = perPx();
+      frameRect.style.display = mode === "ridges" ? "none" : "";
+      placeEls.forEach(function (p) {
+        var x = p.pl.x, y = p.pl.y - lift(ds, p.pl.x, p.pl.y);
+        if (p.pl.kind === "summit") {
+          var s = 5 * u;
+          p.sym.setAttribute("d", "M" + x + " " + (y - s) + "L" + (x + s) + " " + (y + s * 0.7) + "L" + (x - s) + " " + (y + s * 0.7) + "Z");
+        } else {
+          p.sym.setAttribute("cx", x);
+          p.sym.setAttribute("cy", y);
+          p.sym.setAttribute("r", 3.5 * u);
+        }
+        p.text.setAttribute("x", x + 9 * u);
+        p.text.setAttribute("y", y + 4 * u);
+        p.text.setAttribute("font-size", 11 * u);
+        p.text.setAttribute("stroke-width", 4 * u);
+      });
+      if (marker) {
+        var mx = M.hero_marker[0], my = M.hero_marker[1] - lift(ds, M.hero_marker[0], M.hero_marker[1]), r = 4.5 * u;
+        marker.setAttribute("x", mx - r);
+        marker.setAttribute("y", my - r);
+        marker.setAttribute("width", 2 * r);
+        marker.setAttribute("height", 2 * r);
+        marker.setAttribute("transform", "rotate(45 " + mx + " " + my + ")");
+      }
+    }
 
     // The viewBox always has the stage's aspect ratio (no letterboxing); it may be
     // wider or taller than the map only when the whole map is in view.
     var vb = { x: 0, y: 0, w: W, h: H };
     var view = new MapView({
+      ds: ds,
       svg: svg,
       content: content,
       readout: viewer.querySelector(".mv-readout"),
       panelHost: stage,
       step: ridgeStep,
+      onMode: function () { drawPlaces(); },
     });
 
     function aspect() {
@@ -446,11 +512,12 @@
     }
     function maxW() { return Math.max(W, H * aspect()); }
     function perPx() { return vb.w / Math.max(stage.getBoundingClientRect().width, 1); }
-    function ridgeStep() { return perPx() < 4 ? 50 : 100; }
+    // ridge rows ~8-16 px apart on screen; never finer than the 100 m grid
+    function ridgeStep() { var u = perPx(); return u < 8 ? 100 : u < 16 ? 200 : 400; }
 
     function apply() {
       var ar = aspect();
-      vb.w = Math.min(Math.max(vb.w, W / 10), maxW());
+      vb.w = Math.min(Math.max(vb.w, 1500), maxW());
       vb.h = vb.w / ar;
       vb.x = vb.w >= W ? (W - vb.w) / 2 : Math.min(Math.max(vb.x, 0), W - vb.w);
       vb.y = vb.h >= H ? (H - vb.h) / 2 : Math.min(Math.max(vb.y, 0), H - vb.h);
@@ -462,6 +529,7 @@
       }
       view.setStep(ridgeStep());
       view.redraw();
+      drawPlaces();
       scale();
     }
 
@@ -469,15 +537,15 @@
       var m = svg.getScreenCTM();
       if (!m) return;
       var perPx = 1 / m.a, len = 100;
-      [100, 200, 500, 1000, 2000, 5000].forEach(function (L) { if (L / perPx <= 160) len = L; });
+      [100, 200, 500, 1000, 2000, 5000, 10000].forEach(function (L) { if (L / perPx <= 160) len = L; });
       viewer.querySelector(".mv-bar").style.width = len / perPx + "px";
       viewer.querySelector(".mv-len").textContent = len >= 1000 ? num(len / 1000, 0) + " km" : len + " m";
-      viewer.querySelector(".mv-note").textContent = mode === "ridges" ? T.exag : "";
+      viewer.querySelector(".mv-note").textContent = mode === "ridges" ? T.exag(ds.exag) : T.ci;
     }
 
     function zoomAt(mx, my, f, centre) {
       var cx = centre ? vb.x + vb.w / 2 : mx, cy = centre ? vb.y + vb.h / 2 : my;
-      var nw = Math.min(Math.max(vb.w / f, W / 10), maxW());
+      var nw = Math.min(Math.max(vb.w / f, 1500), maxW());
       var k = nw / vb.w;
       vb.x = cx - (cx - vb.x) * k;
       vb.y = cy - (cy - vb.y) * k;
@@ -501,6 +569,15 @@
       apply();
     }
     viewer.fit = fit;
+    // start on the area the hero shows
+    viewer.showHeroFrame = function () {
+      var ar = aspect();
+      var fw = frame[2] - frame[0], fh = frame[3] - frame[1];
+      vb.w = Math.max(fw, fh * ar);
+      vb.x = (frame[0] + frame[2]) / 2 - vb.w / 2;
+      vb.y = (frame[1] + frame[3]) / 2 - vb.w / ar / 2;
+      apply();
+    };
 
     // pointer: drag = pan, two fingers = pinch, short tap/click = profile point
     var pointers = {}, moved = 0, pinch = null;

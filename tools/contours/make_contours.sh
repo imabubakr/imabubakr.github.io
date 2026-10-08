@@ -19,6 +19,15 @@
 #       [--simplify 12]                     mapshaper Visvalingam interval (m)
 #       [--dem path/to/dem.tif]             use a local DEM instead of downloading
 #       [--out assets/topo/hero-contours]   output prefix (.svg + .json)
+#       [--work tools/contours/work]        scratch folder (keep the hero's: other tools read its dem.tif)
+#       [--grid-cols 200 --grid-rows 100]   size of the elevation grid for the map tools
+#       [--svg-args "--label-spacing 6000"] extra options for contours_to_svg.py
+#
+# Region map for the fullscreen viewer (Kaiserstuhl to Feldberg):
+#   tools/contours/make_contours.sh --lat 48.0 --lon 7.81 --width 40000 --height 36000 \
+#     --interval 20 --simplify 25 --work tools/contours/work-region --out assets/topo/region-contours \
+#     --grid-cols 400 --grid-rows 360 \
+#     --svg-args "--label-spacing 7000 --label-separation 3500 --max-labels 40 --min-ring 1500 --ref-width-px 1100"
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -34,6 +43,10 @@ SMOOTH=60
 SIMPLIFY=12
 DEM=""
 OUT="$ROOT/assets/topo/hero-contours"
+WORK="$HERE/work"
+GRID_COLS=200
+GRID_ROWS=100
+SVG_ARGS=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -47,7 +60,11 @@ while [[ $# -gt 0 ]]; do
     --simplify) SIMPLIFY="$2"; shift 2 ;;
     --dem) DEM="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"; shift 2 ;;
     --out) OUT="$2"; shift 2 ;;
-    -h|--help) sed -n '2,24p' "$0"; exit 0 ;;
+    --work) WORK="$2"; shift 2 ;;
+    --grid-cols) GRID_COLS="$2"; shift 2 ;;
+    --grid-rows) GRID_ROWS="$2"; shift 2 ;;
+    --svg-args) SVG_ARGS="$2"; shift 2 ;;
+    -h|--help) sed -n '2,32p' "$0"; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 1 ;;
   esac
 done
@@ -59,7 +76,6 @@ MAPSHAPER="$HERE/node_modules/.bin/mapshaper"
 SVGO="$HERE/node_modules/.bin/svgo"
 [[ -x "$MAPSHAPER" && -x "$SVGO" ]] || { echo "run 'npm ci' in $HERE first" >&2; exit 1; }
 
-WORK="$HERE/work"
 mkdir -p "$WORK" "$(dirname "$OUT")"
 
 # --- 1. Target CRS: WGS 84 / UTM zone of the centre point -------------------
@@ -136,7 +152,7 @@ python3 "$HERE/contours_to_svg.py" \
   --contours "$WORK/contours_simplified.geojson" \
   --dem "$WORK/dem_smooth.tif" \
   --bbox "$XMIN" "$YMIN" "$XMAX" "$YMAX" \
-  --out "$WORK/raw.svg"
+  --out "$WORK/raw.svg" $SVG_ARGS
 "$SVGO" -q --config "$HERE/svgo.config.mjs" -i "$WORK/raw.svg" -o "$OUT.svg"
 
 # --- 7. Metadata for the hero label and the map collar -------------------------
@@ -155,7 +171,7 @@ json.dump({
 EOF
 
 # --- 8. Elevation grid + lat/lon formula for the hero's coordinate/profile tools --
-python3 "$HERE/dem_grid.py" --dem "$WORK/dem.tif" --out "$OUT"
+python3 "$HERE/dem_grid.py" --dem "$WORK/dem.tif" --out "$OUT" --cols "$GRID_COLS" --rows "$GRID_ROWS"
 
 printf 'wrote %s.svg (%s bytes, %s gzipped) and %s.json; elevation at centre %s m\n' \
   "$OUT" "$(wc -c <"$OUT.svg" | tr -d ' ')" "$(gzip -9c "$OUT.svg" | wc -c | tr -d ' ')" "$OUT" "$(printf '%.0f' "$ELEV")"
