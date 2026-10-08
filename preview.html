@@ -22,10 +22,8 @@
         <nav aria-label="Sections">
           <ul class="nav-list">
             <li><a href="#about"><span>[01]</span> about</a></li>
-            <li><a href="#work"><span>[02]</span> work</a></li>
-            <li><a href="#cv"><span>[03]</span> cv</a></li>
-            <li><a href="#skills"><span>[04]</span> skills</a></li>
-            <li><a href="#contact"><span>[05]</span> contact</a></li>
+            <li><a href="#cv"><span>[02]</span> cv</a></li>
+            <li><a href="#contact"><span>[03]</span> contact</a></li>
           </ul>
         </nav>
         <div class="lang" role="group" aria-label="Language">
@@ -38,7 +36,7 @@
       <main id="main">
         <section class="hero" id="top" aria-labelledby="hero-title">
           <div class="hero-strip" aria-hidden="true">
-            <span>SHEET 01 / 05</span>
+            <span>SHEET 01 / 03</span>
             <div class="ticks"><!-- build:hero-strip --><span class="tick" style="--fx:0.0617"></span><span class="tick tick--major" style="--fx:0.1860"><span>7°48′E</span></span><span class="tick" style="--fx:0.3103"></span><span class="tick tick--major" style="--fx:0.4346"><span>7°50′E</span></span><span class="tick" style="--fx:0.5589"></span><span class="tick tick--major" style="--fx:0.6832"><span>7°52′E</span></span><span class="tick" style="--fx:0.8076"></span><span class="tick" style="--fx:0.9318"></span><!-- /build:hero-strip --></div>
             <span>EPSG:4326</span>
           </div>
@@ -50,110 +48,19 @@
           </div>
         </section>
 
-        <section class="section" id="work" aria-labelledby="work-title">
-          <h2 class="section-label" id="work-title"><span>[02]</span> work — selected projects</h2>
-          <div class="section-body">
-            <figure class="plate">
-              <video class="plate-media" width="600" height="504" muted loop playsinline preload="none"
-                     poster="assets/media/storm-emir-poster.webp"
-                     aria-label="Animated map: wind field of Storm Emir over the North Atlantic and Europe, November 2023">
-                <source src="assets/media/storm-emir.webm" type="video/webm">
-                <source src="assets/media/storm-emir.mp4" type="video/mp4">
-              </video>
-              <figcaption><span class="fig-no">FIG. 01</span><span>Storm Emir, November 2023: wind field over Europe. Data: ERA5; contains modified Copernicus Climate Change Service information 2023.</span><button class="plate-toggle" type="button" data-play="play" data-pause="pause" hidden>pause</button></figcaption>
-            </figure>
-            <table class="data">
-              <caption class="visually-hidden">Selected projects with stack and sensor</caption>
-              <thead>
-                <tr>
-                  <th scope="col">ID</th>
-                  <th scope="col">Project</th>
-                  <th scope="col">Stack</th>
-                  <th scope="col">Sensor · GSD</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="group"><th colspan="4" scope="colgroup">Beagle Systems — drone data</th></tr>
-                <tr>
-                  <td class="id">01</td>
-                  <th scope="row"><span class="proj-title">Automatic image georeferencing</span><span class="proj-desc">Georeferencing aerial images automatically with AI-based feature matching.</span></th>
-                  <td class="stack" data-label="stack">AI feature matching</td>
-                  <td class="metric" data-label="sensor">UAV RGB · — cm</td>
-                </tr>
-                <tr>
-                  <td class="id">02</td>
-                  <th scope="row"><span class="proj-title">Right-of-way inspection</span><span class="proj-desc">Fine-tuned foundation models for object detection, with open-source VLMs gatekeeping the detection results.</span></th>
-                  <td class="stack" data-label="stack">Foundation models · VLMs</td>
-                  <td class="metric" data-label="sensor">UAV RGB · — cm</td>
-                </tr>
-                <tr>
-                  <td class="id">03</td>
-                  <th scope="row"><span class="proj-title">Drone LiDAR workflow</span><span class="proj-desc">LiDAR data from our drones is georeferenced and classified into categories.</span></th>
-                  <td class="stack" data-label="stack">LiDAR georeferencing · classification</td>
-                  <td class="metric" data-label="sensor">UAV LiDAR · — pts/m²</td>
-                </tr>
-                <tr>
-                  <td class="id">04</td>
-                  <th scope="row"><span class="proj-title">Live analysis</span><span class="proj-desc">A fine-tuned heavy-machinery detector on an NVIDIA Jetson; each detection is sent straight to the customer.</span></th>
-                  <td class="stack" data-label="stack">Edge AI · NVIDIA Jetson</td>
-                  <td class="metric" data-label="sensor">UAV RGB · — cm</td>
-                </tr>
-                <tr>
-                  <td class="id">05</td>
-                  <th scope="row"><span class="proj-title">Large GeoTIFF serving</span><span class="proj-desc">Backend for serving large GeoTIFFs.</span></th>
-                  <td class="stack" data-label="stack">PostGIS · TiTiler</td>
-                  <td class="metric" data-label="sensor">—</td>
-                </tr>
-                <tr>
-                  <td class="id">06</td>
-                  <th scope="row"><span class="proj-title">Drone flight planning</span><span class="proj-desc">Primary checks and duplicate checks on flight plans.</span></th>
-                  <td class="stack" data-label="stack">Flight planning</td>
-                  <td class="metric" data-label="sensor">—</td>
-                </tr>
-              </tbody>
-              <tbody>
-                <tr class="group"><th colspan="4" scope="colgroup">Academic — MSc projects</th></tr>
-                <tr>
-                  <td class="id">07</td>
-                  <th scope="row"><span class="proj-title">Glacier mass balance, Mýrdalsjökull</span><span class="proj-desc">Mass balance of Mýrdalsjökull and its sub-glaciers from historical imagery and DEMs: the melting rate doubled after 2000.</span></th>
-                  <td class="stack" data-label="stack">Digitizing · volume calculation</td>
-                  <td class="metric" data-label="sensor">Landsat 5/7/8 · 30 m<br>Sentinel-2 · 10 m</td>
-                </tr>
-                <tr>
-                  <td class="id">08</td>
-                  <th scope="row"><span class="proj-title">Snow cover and precipitation, 2000–2015</span><span class="proj-desc">Snow-cover extent and precipitation variability from a normalized MODIS snow index and the TRMM monthly product.</span></th>
-                  <td class="stack" data-label="stack">Snow index · time series</td>
-                  <td class="metric" data-label="sensor">MODIS · 500 m<br>TRMM · 0.25°</td>
-                </tr>
-                <tr>
-                  <td class="id">09</td>
-                  <th scope="row"><span class="proj-title">Hydrological modeling, Kabul Basin</span><span class="proj-desc">Snow index from Landsat 7 to track snow-cover change and its impact on water resources.</span></th>
-                  <td class="stack" data-label="stack">Snow index · change detection</td>
-                  <td class="metric" data-label="sensor">Landsat 7 · 30 m</td>
-                </tr>
-                <tr>
-                  <td class="id">10</td>
-                  <th scope="row"><span class="proj-title">Volcanic terrain, Mauna Kea</span><span class="proj-desc">Land cover, erosion, symmetry and morphometry of Mauna Kea, with a land-cover map and growth-rate assessment.</span></th>
-                  <td class="stack" data-label="stack">Morphometry · land-cover mapping</td>
-                  <td class="metric" data-label="sensor">Landsat 8 · 30 m<br>ASTER DEM · 30 m</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
 
         <section class="section" id="cv" aria-labelledby="cv-title">
-          <h2 class="section-label" id="cv-title"><span>[03]</span> cv — curriculum vitae</h2>
+          <h2 class="section-label" id="cv-title"><span>[02]</span> cv — curriculum vitae</h2>
           <div class="section-body">
             <div class="cv-group">
               <h3>Personal details</h3>
               <div class="cv-personal">
-              <dl class="cv-list">
-                <div class="cv-row"><dt>Name</dt><dd>Muhammad Abu Bakar</dd></div>
-                <div class="cv-row"><dt>Location</dt><dd>Freiburg im Breisgau, Germany</dd></div>
-                <div class="cv-row"><dt>Email</dt><dd><a href="mailto:imabubakar@outlook.com">imabubakar@outlook.com</a></dd></div>
-              </dl>
-              <img class="cv-photo" src="assets/img/portrait-200.webp" srcset="assets/img/portrait-200.webp 200w, assets/img/portrait-400.webp 400w" sizes="(min-width: 720px) 168px, 112px" width="200" height="250" loading="lazy" decoding="async" alt="Muhammad Abu Bakar">
+                <dl class="cv-list">
+                  <div class="cv-row"><dt>Name</dt><dd>Muhammad Abu Bakar</dd></div>
+                  <div class="cv-row"><dt>Location</dt><dd>Freiburg im Breisgau, Germany</dd></div>
+                  <div class="cv-row"><dt>Email</dt><dd><a href="mailto:imabubakar@outlook.com">imabubakar@outlook.com</a></dd></div>
+                </dl>
+                <img class="cv-photo" src="assets/img/portrait-200.webp" srcset="assets/img/portrait-200.webp 200w, assets/img/portrait-400.webp 400w" sizes="(min-width: 720px) 168px, 112px" width="200" height="250" loading="lazy" decoding="async" alt="Muhammad Abu Bakar">
               </div>
             </div>
 
@@ -165,7 +72,14 @@
                   <div class="cv-entry">
                     <h4>Geospatial Data Specialist</h4>
                     <p class="cv-org">Beagle Systems</p>
-                    <p class="cv-note">Drone data: automatic image georeferencing, object detection with fine-tuned foundation models and VLM gatekeeping, LiDAR georeferencing and classification, edge AI on NVIDIA Jetson, PostGIS/TiTiler backend, flight planning. Details under <a href="#work">[02] work</a>.</p>
+                    <ul>
+                      <li>Automatic georeferencing of aerial images with AI-based feature matching.</li>
+                      <li>Right-of-way inspection: fine-tuned foundation models for object detection, with open-source VLMs checking the results.</li>
+                      <li>Georeferencing and classification of LiDAR data from the company’s drones.</li>
+                      <li>Live analysis: heavy-machinery detection on an NVIDIA Jetson, with detections sent directly to the customer.</li>
+                      <li>Backend with PostGIS and TiTiler for serving large GeoTIFFs.</li>
+                      <li>Drone flight planning: primary and duplicate checks.</li>
+                    </ul>
                   </div>
                 </li>
                 <li class="cv-row">
@@ -174,11 +88,10 @@
                     <h4>Geospatial (EO) Data Scientist, part-time</h4>
                     <p class="cv-org">Karuna Technology UG, Germany</p>
                     <ul>
-                      <li>Built and managed a Differential InSAR pipeline with the ISCE processor: automated data acquisition, preprocessing and interferogram generation.</li>
-                      <li>Designed Google Earth Engine workflows to select, preprocess (Refined Lee filter) and download Sentinel-1 time series for a soil-moisture ML model.</li>
-                      <li>Classified urban tree species with machine learning on fused multispectral and SAR data.</li>
-                      <li>Created training data for a tree-crown segmentation model.</li>
-                      <li>Pre- and post-processed vector data in QGIS, reducing manual data handling.</li>
+                      <li>Differential InSAR pipeline with ISCE: automated acquisition, preprocessing and interferogram generation.</li>
+                      <li>Google Earth Engine workflows for Sentinel-1 time series (Refined Lee filter) feeding a soil-moisture ML model.</li>
+                      <li>Urban tree-species classification from fused multispectral and SAR data; training data for tree-crown segmentation.</li>
+                      <li>Vector data pre- and post-processing in QGIS.</li>
                     </ul>
                   </div>
                 </li>
@@ -188,10 +101,10 @@
                     <h4>GIS &amp; RS Specialist</h4>
                     <p class="cv-org">MapTransfer, Germany</p>
                     <ul>
-                      <li>Managed spatial data workflows for a construction company: georeferencing, orthophoto merging, cloud-optimized GeoTIFFs on AWS, and PostGIS–QGIS integration for site analysis.</li>
-                      <li>Developed and taught in-house courses on LiDAR data in QGIS and spatial data analysis; led course development for Spatial SQL, ALKIS and GeoServer.</li>
-                      <li>Managed, analyzed and visualized geospatial data for a telecom project based on the ALKIS information model.</li>
-                      <li>Integrated PostGIS vector layers into OpenLayers for a Web GIS project.</li>
+                      <li>Spatial data workflows for a construction company: georeferencing, orthophoto mosaics, cloud-optimized GeoTIFFs on AWS, PostGIS–QGIS integration.</li>
+                      <li>In-house courses on LiDAR in QGIS and spatial data analysis; course development for Spatial SQL, ALKIS and GeoServer.</li>
+                      <li>Geodata management and visualization for a telecom project based on ALKIS.</li>
+                      <li>Web GIS: PostGIS vector layers in OpenLayers.</li>
                     </ul>
                   </div>
                 </li>
@@ -208,7 +121,6 @@
                     <p class="cv-org">University of Freiburg, Germany</p>
                     <ul>
                       <li>Thesis: Simulation of multispectral and hyperspectral imaging techniques for mapping of epithermal ore deposits in vegetated zones.</li>
-                      <li>Relevant courses: Computing in Geosciences (Numerical Modeling), Research Methods in Geosciences (GIS &amp; RS), Geological Project (GIS &amp; RS).</li>
                     </ul>
                   </div>
                 </li>
@@ -219,7 +131,6 @@
                     <p class="cv-org">National University of Sciences and Technology, Pakistan</p>
                     <ul>
                       <li>Thesis: Development of an open-source Python-based slope stability model that incorporates remote sensing and geotechnical data for slope failure assessment.</li>
-                      <li>Relevant courses: Advance Geographic Information System, Advance Remote Sensing and Image Processing, Advance Geodatabase and Programming, Spatial Analysis and Modeling, Web GIS.</li>
                     </ul>
                   </div>
                 </li>
@@ -230,11 +141,43 @@
                     <p class="cv-org">Bahria University, Pakistan</p>
                     <ul>
                       <li>Thesis: Petrophysical analysis of Joya Mair – Well 4.</li>
-                      <li>Relevant courses: Advance Maths, Calculus, Data Structures, GIS &amp; Image Processing, Programming Fundamentals, Statistics.</li>
                     </ul>
                   </div>
                 </li>
               </ol>
+            </div>
+
+            <div class="cv-group">
+              <h3>Academic projects</h3>
+              <dl class="cv-list">
+                <div class="cv-row"><dt>Landsat · Sentinel-2</dt><dd>Glacier mass balance of Mýrdalsjökull from historical imagery and DEMs: the melting rate doubled after 2000.</dd></div>
+                <div class="cv-row"><dt>MODIS · TRMM</dt><dd>Snow cover and precipitation variability, 2000–2015.</dd></div>
+                <div class="cv-row"><dt>Landsat 7</dt><dd>Snow-cover change in the Kabul Basin and its impact on water resources.</dd></div>
+                <div class="cv-row"><dt>Landsat 8 · ASTER</dt><dd>Land cover, erosion and morphometry of Mauna Kea.</dd></div>
+              </dl>
+            </div>
+
+            <div class="cv-group">
+              <h3>Further training</h3>
+              <dl class="cv-list">
+                <div class="cv-row"><dt>2022</dt><dd>NASA Applied Remote Sensing Training (ARSET): five trainings on SAR-based disaster assessment, flood monitoring and modeling, crop mapping with polarimetric SAR and optical data, air-quality model output, and pre- and post-fire monitoring.</dd></div>
+                <div class="cv-row"><dt></dt><dd>UNAVCO / GAGE short course: InSAR processing and time-series analysis for geophysical applications (ISCE, ARIA-tools, MintPy).</dd></div>
+              </dl>
+            </div>
+
+            <div class="cv-group">
+              <h3>Skills</h3>
+              <dl class="cv-list">
+                <div class="cv-row"><dt>GIS</dt><dd>ArcGIS Pro, QGIS, ArcMap</dd></div>
+                <div class="cv-row"><dt>Remote sensing</dt><dd>Multispectral, hyperspectral and SAR data; ENVI, ERDAS Imagine, eCognition, ESA SNAP</dd></div>
+                <div class="cv-row"><dt>LiDAR</dt><dd>CloudCompare, WhiteboxTools; DEM and DSM generation</dd></div>
+                <div class="cv-row"><dt>Cloud</dt><dd>Google Earth Engine, AWS (EC2, S3)</dd></div>
+                <div class="cv-row"><dt>Databases</dt><dd>PostgreSQL/PostGIS, SpatiaLite, DuckDB, SQL</dd></div>
+                <div class="cv-row"><dt>Programming</dt><dd>Python (GDAL, Fiona, Rasterio, scikit-learn, TensorFlow, Cartopy), R, Spatial SQL, Bash</dd></div>
+                <div class="cv-row"><dt>Machine learning</dt><dd>CatBoost, CNNs, fine-tuned foundation models, VLMs</dd></div>
+                <div class="cv-row"><dt>Web mapping</dt><dd>Leaflet, OpenLayers, GeoServer, TiTiler</dd></div>
+                <div class="cv-row"><dt>Other</dt><dd>Git, LaTeX, Microsoft Office</dd></div>
+              </dl>
             </div>
 
             <div class="cv-group">

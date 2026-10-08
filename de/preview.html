@@ -22,10 +22,8 @@
         <nav aria-label="Abschnitte">
           <ul class="nav-list">
             <li><a href="#about"><span>[01]</span> über mich</a></li>
-            <li><a href="#work"><span>[02]</span> projekte</a></li>
-            <li><a href="#cv"><span>[03]</span> lebenslauf</a></li>
-            <li><a href="#skills"><span>[04]</span> kenntnisse</a></li>
-            <li><a href="#contact"><span>[05]</span> kontakt</a></li>
+            <li><a href="#cv"><span>[02]</span> lebenslauf</a></li>
+            <li><a href="#contact"><span>[03]</span> kontakt</a></li>
           </ul>
         </nav>
         <div class="lang" role="group" aria-label="Sprache">
@@ -38,7 +36,7 @@
       <main id="main">
         <section class="hero" id="top" aria-labelledby="hero-title">
           <div class="hero-strip" aria-hidden="true">
-            <span>BLATT 01 / 05</span>
+            <span>BLATT 01 / 03</span>
             <div class="ticks"><!-- build:hero-strip --><span class="tick" style="--fx:0.0617"></span><span class="tick tick--major" style="--fx:0.1860"><span>7°48′O</span></span><span class="tick" style="--fx:0.3103"></span><span class="tick tick--major" style="--fx:0.4346"><span>7°50′O</span></span><span class="tick" style="--fx:0.5589"></span><span class="tick tick--major" style="--fx:0.6832"><span>7°52′O</span></span><span class="tick" style="--fx:0.8076"></span><span class="tick" style="--fx:0.9318"></span><!-- /build:hero-strip --></div>
             <span>EPSG:4326</span>
           </div>
@@ -50,110 +48,19 @@
           </div>
         </section>
 
-        <section class="section" id="work" aria-labelledby="work-title">
-          <h2 class="section-label" id="work-title"><span>[02]</span> projekte — eine auswahl</h2>
-          <div class="section-body">
-            <figure class="plate">
-              <video class="plate-media" width="600" height="504" muted loop playsinline preload="none"
-                     poster="../assets/media/storm-emir-poster.webp"
-                     aria-label="Animierte Karte: Windfeld des Sturms Emir über dem Nordatlantik und Europa, November 2023">
-                <source src="../assets/media/storm-emir.webm" type="video/webm">
-                <source src="../assets/media/storm-emir.mp4" type="video/mp4">
-              </video>
-              <figcaption><span class="fig-no">ABB. 01</span><span>Sturm Emir, November 2023: Windfeld über Europa. Daten: ERA5; <span lang="en">contains modified Copernicus Climate Change Service information 2023</span>.</span><button class="plate-toggle" type="button" data-play="abspielen" data-pause="pause" hidden>pause</button></figcaption>
-            </figure>
-            <table class="data">
-              <caption class="visually-hidden">Ausgewählte Projekte mit Technologien und Sensor</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Nr.</th>
-                  <th scope="col">Projekt</th>
-                  <th scope="col">Stack</th>
-                  <th scope="col">Sensor · GSD</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="group"><th colspan="4" scope="colgroup">Beagle Systems — Drohnendaten</th></tr>
-                <tr>
-                  <td class="id">01</td>
-                  <th scope="row"><span class="proj-title">Automatische Georeferenzierung von Luftbildern</span><span class="proj-desc">Luftbilder werden automatisch per KI-gestütztem Feature-Matching georeferenziert.</span></th>
-                  <td class="stack" data-label="stack">KI-Feature-Matching</td>
-                  <td class="metric" data-label="sensor">UAV RGB · — cm</td>
-                </tr>
-                <tr>
-                  <td class="id">02</td>
-                  <th scope="row"><span class="proj-title">Trasseninspektion</span><span class="proj-desc">Fine-Tuning von Foundation Models für die Objekterkennung; Open-Source-VLMs prüfen die Erkennungsergebnisse als zusätzliche Kontrollinstanz.</span></th>
-                  <td class="stack" data-label="stack">Foundation Models · VLMs</td>
-                  <td class="metric" data-label="sensor">UAV RGB · — cm</td>
-                </tr>
-                <tr>
-                  <td class="id">03</td>
-                  <th scope="row"><span class="proj-title">LiDAR-Workflow für Drohnendaten</span><span class="proj-desc">LiDAR-Daten unserer Drohnen werden georeferenziert und in Kategorien klassifiziert.</span></th>
-                  <td class="stack" data-label="stack">LiDAR-Georeferenzierung · Klassifikation</td>
-                  <td class="metric" data-label="sensor">UAV LiDAR · — Pkt./m²</td>
-                </tr>
-                <tr>
-                  <td class="id">04</td>
-                  <th scope="row"><span class="proj-title">Live-Analyse</span><span class="proj-desc">Ein feinabgestimmtes Modell erkennt Baumaschinen auf einem NVIDIA Jetson; jede Erkennung wird direkt an den Kunden übermittelt.</span></th>
-                  <td class="stack" data-label="stack">Edge AI · NVIDIA Jetson</td>
-                  <td class="metric" data-label="sensor">UAV RGB · — cm</td>
-                </tr>
-                <tr>
-                  <td class="id">05</td>
-                  <th scope="row"><span class="proj-title">Bereitstellung großer GeoTIFFs</span><span class="proj-desc">Backend zur Auslieferung großer GeoTIFFs.</span></th>
-                  <td class="stack" data-label="stack">PostGIS · TiTiler</td>
-                  <td class="metric" data-label="sensor">—</td>
-                </tr>
-                <tr>
-                  <td class="id">06</td>
-                  <th scope="row"><span class="proj-title">Flugplanung für Drohnen</span><span class="proj-desc">Vorab- und Duplikatprüfungen von Flugplänen.</span></th>
-                  <td class="stack" data-label="stack">Flugplanung</td>
-                  <td class="metric" data-label="sensor">—</td>
-                </tr>
-              </tbody>
-              <tbody>
-                <tr class="group"><th colspan="4" scope="colgroup">Studium — Masterprojekte</th></tr>
-                <tr>
-                  <td class="id">07</td>
-                  <th scope="row"><span class="proj-title">Massenbilanz des Mýrdalsjökull</span><span class="proj-desc">Massenbilanz des Mýrdalsjökull und seiner Teilgletscher aus historischen Satellitenbildern und DGMs: Die Schmelzrate hat sich nach 2000 verdoppelt.</span></th>
-                  <td class="stack" data-label="stack">Digitalisierung · Volumenberechnung</td>
-                  <td class="metric" data-label="sensor">Landsat 5/7/8 · 30 m<br>Sentinel-2 · 10 m</td>
-                </tr>
-                <tr>
-                  <td class="id">08</td>
-                  <th scope="row"><span class="proj-title">Schneebedeckung und Niederschlag, 2000–2015</span><span class="proj-desc">Schneebedeckung und Niederschlagsvariabilität aus einem normalisierten MODIS-Schneeindex und dem monatlichen TRMM-Produkt.</span></th>
-                  <td class="stack" data-label="stack">Schneeindex · Zeitreihen</td>
-                  <td class="metric" data-label="sensor">MODIS · 500 m<br>TRMM · 0,25°</td>
-                </tr>
-                <tr>
-                  <td class="id">09</td>
-                  <th scope="row"><span class="proj-title">Hydrologische Modellierung, Kabul-Becken</span><span class="proj-desc">Schneeindex aus Landsat 7, um Veränderungen der Schneebedeckung und deren Folgen für die Wasserressourcen zu erfassen.</span></th>
-                  <td class="stack" data-label="stack">Schneeindex · Veränderungsanalyse</td>
-                  <td class="metric" data-label="sensor">Landsat 7 · 30 m</td>
-                </tr>
-                <tr>
-                  <td class="id">10</td>
-                  <th scope="row"><span class="proj-title">Vulkanisches Gelände, Mauna Kea</span><span class="proj-desc">Landbedeckung, Erosion, Symmetrie und Morphometrie des Mauna Kea, mit Landbedeckungskarte und Abschätzung der Wachstumsrate.</span></th>
-                  <td class="stack" data-label="stack">Morphometrie · Landbedeckungskartierung</td>
-                  <td class="metric" data-label="sensor">Landsat 8 · 30 m<br>ASTER DEM · 30 m</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
 
         <section class="section" id="cv" aria-labelledby="cv-title">
-          <h2 class="section-label" id="cv-title"><span>[03]</span> lebenslauf</h2>
+          <h2 class="section-label" id="cv-title"><span>[02]</span> lebenslauf</h2>
           <div class="section-body">
             <div class="cv-group">
               <h3>Persönliche Daten</h3>
               <div class="cv-personal">
-              <dl class="cv-list">
-                <div class="cv-row"><dt>Name</dt><dd>Muhammad Abu Bakar</dd></div>
-                <div class="cv-row"><dt>Wohnort</dt><dd>Freiburg im Breisgau</dd></div>
-                <div class="cv-row"><dt>E-Mail</dt><dd><a href="mailto:imabubakar@outlook.com">imabubakar@outlook.com</a></dd></div>
-              </dl>
-              <img class="cv-photo" src="../assets/img/portrait-200.webp" srcset="../assets/img/portrait-200.webp 200w, ../assets/img/portrait-400.webp 400w" sizes="(min-width: 720px) 168px, 112px" width="200" height="250" loading="lazy" decoding="async" alt="Muhammad Abu Bakar">
+                <dl class="cv-list">
+                  <div class="cv-row"><dt>Name</dt><dd>Muhammad Abu Bakar</dd></div>
+                  <div class="cv-row"><dt>Wohnort</dt><dd>Freiburg im Breisgau</dd></div>
+                  <div class="cv-row"><dt>E-Mail</dt><dd><a href="mailto:imabubakar@outlook.com">imabubakar@outlook.com</a></dd></div>
+                </dl>
+                <img class="cv-photo" src="../assets/img/portrait-200.webp" srcset="../assets/img/portrait-200.webp 200w, ../assets/img/portrait-400.webp 400w" sizes="(min-width: 720px) 168px, 112px" width="200" height="250" loading="lazy" decoding="async" alt="Muhammad Abu Bakar">
               </div>
             </div>
 
@@ -163,9 +70,16 @@
                 <li class="cv-row">
                   <p class="cv-date">seit 11/2025</p>
                   <div class="cv-entry">
-                    <h4 lang="en">Geospatial Data Specialist</h4>
+                    <h4><span lang="en">Geospatial Data Specialist</span></h4>
                     <p class="cv-org">Beagle Systems</p>
-                    <p class="cv-note">Drohnendaten: automatische Georeferenzierung von Luftbildern, Objekterkennung mit feinabgestimmten Foundation Models und VLM-Prüfung, Georeferenzierung und Klassifikation von LiDAR-Daten, Edge AI auf NVIDIA Jetson, Backend mit PostGIS und TiTiler, Flugplanung. Details unter <a href="#work">[02] projekte</a>.</p>
+                    <ul>
+                      <li>Automatische Georeferenzierung von Luftbildern mittels KI-gestütztem Feature-Matching.</li>
+                      <li>Trasseninspektion: Fine-Tuning von Foundation Models zur Objekterkennung; Open-Source-VLMs prüfen die Ergebnisse.</li>
+                      <li>Georeferenzierung und Klassifikation von LiDAR-Daten der firmeneigenen Drohnen.</li>
+                      <li>Live-Analyse: Erkennung von Baumaschinen auf einem NVIDIA Jetson; Detektionen gehen direkt an den Kunden.</li>
+                      <li>Backend mit PostGIS und TiTiler zur Bereitstellung großer GeoTIFFs.</li>
+                      <li>Flugplanung für Drohneneinsätze: Vorab- und Duplikatprüfungen.</li>
+                    </ul>
                   </div>
                 </li>
                 <li class="cv-row">
@@ -174,24 +88,23 @@
                     <h4><span lang="en">Geospatial (EO) Data Scientist</span>, Teilzeit</h4>
                     <p class="cv-org">Karuna Technology UG, Deutschland</p>
                     <ul>
-                      <li>Aufbau und Betreuung einer Pipeline für differentielle InSAR mit dem ISCE-Prozessor: automatisierte Datenbeschaffung, Vorverarbeitung und Interferogrammerstellung.</li>
-                      <li>Entwicklung von Google-Earth-Engine-Workflows zur Auswahl, Vorverarbeitung (Refined-Lee-Filter) und zum Download von Sentinel-1-Zeitreihen für ein ML-Modell zur Bodenfeuchte.</li>
-                      <li>Klassifikation städtischer Baumarten mittels Machine Learning auf fusionierten Multispektral- und SAR-Daten.</li>
-                      <li>Erstellung von Trainingsdaten für ein Modell zur Segmentierung von Baumkronen.</li>
-                      <li>Vor- und Nachbearbeitung von Vektordaten in QGIS zur Reduzierung manueller Datenbearbeitung.</li>
+                      <li>Pipeline für differentielle InSAR mit ISCE: automatisierte Datenbeschaffung, Vorverarbeitung und Interferogrammerstellung.</li>
+                      <li>Google-Earth-Engine-Workflows für Sentinel-1-Zeitreihen (Refined-Lee-Filter) als Grundlage eines ML-Modells zur Bodenfeuchte.</li>
+                      <li>Klassifikation städtischer Baumarten aus fusionierten Multispektral- und SAR-Daten; Trainingsdaten für die Segmentierung von Baumkronen.</li>
+                      <li>Vor- und Nachbearbeitung von Vektordaten in QGIS.</li>
                     </ul>
                   </div>
                 </li>
                 <li class="cv-row">
                   <p class="cv-date">04/2021 – 02/2024</p>
                   <div class="cv-entry">
-                    <h4 lang="en">GIS &amp; RS Specialist</h4>
+                    <h4><span lang="en">GIS &amp; RS Specialist</span></h4>
                     <p class="cv-org">MapTransfer, Deutschland</p>
                     <ul>
-                      <li>Steuerung räumlicher Daten-Workflows für ein Bauunternehmen: Georeferenzierung, Zusammenführung von Orthofotos, cloud-optimierte GeoTIFFs auf AWS sowie Anbindung von PostGIS an QGIS für Baustellenanalysen.</li>
-                      <li>Konzeption und Durchführung interner Schulungen zu LiDAR-Daten in QGIS und zur räumlichen Datenanalyse; federführend bei der Kursentwicklung zu Spatial SQL, ALKIS und GeoServer.</li>
-                      <li>Verwaltung, Analyse und Visualisierung von Geodaten für ein Telekommunikationsprojekt auf Basis des ALKIS-Informationsmodells.</li>
-                      <li>Einbindung von PostGIS-Vektorlayern in OpenLayers für ein Web-GIS-Projekt.</li>
+                      <li>Geodaten-Workflows für ein Bauunternehmen: Georeferenzierung, Orthofoto-Mosaike, cloud-optimierte GeoTIFFs auf AWS, Anbindung von PostGIS an QGIS.</li>
+                      <li>Interne Schulungen zu LiDAR in QGIS und räumlicher Datenanalyse; Kursentwicklung zu Spatial SQL, ALKIS und GeoServer.</li>
+                      <li>Verwaltung und Visualisierung von Geodaten für ein Telekommunikationsprojekt auf Basis von ALKIS.</li>
+                      <li>Web-GIS: Einbindung von PostGIS-Vektorlayern in OpenLayers.</li>
                     </ul>
                   </div>
                 </li>
@@ -208,7 +121,6 @@
                     <p class="cv-org">Universität Freiburg, Deutschland</p>
                     <ul>
                       <li>Masterarbeit: <span lang="en">„Simulation of multispectral and hyperspectral imaging techniques for mapping of epithermal ore deposits in vegetated zones“</span></li>
-                      <li>Relevante Module: <span lang="en">Computing in Geosciences (Numerical Modeling), Research Methods in Geosciences (GIS &amp; RS), Geological Project (GIS &amp; RS)</span></li>
                     </ul>
                   </div>
                 </li>
@@ -216,10 +128,9 @@
                   <p class="cv-date">2016 – 2020</p>
                   <div class="cv-entry">
                     <h4>M.Sc. <span lang="en">Remote Sensing &amp; Geographic Information System</span></h4>
-                    <p class="cv-org" lang="en">National University of Sciences and Technology, Pakistan</p>
+                    <p class="cv-org"><span lang="en">National University of Sciences and Technology</span>, Pakistan</p>
                     <ul>
                       <li>Masterarbeit: <span lang="en">„Development of an open-source Python-based slope stability model that incorporates remote sensing and geotechnical data for slope failure assessment“</span></li>
-                      <li>Relevante Module: <span lang="en">Advance Geographic Information System, Advance Remote Sensing and Image Processing, Advance Geodatabase and Programming, Spatial Analysis and Modeling, Web GIS</span></li>
                     </ul>
                   </div>
                 </li>
@@ -227,14 +138,46 @@
                   <p class="cv-date">2012 – 2015</p>
                   <div class="cv-entry">
                     <h4>B.Sc. Geologie</h4>
-                    <p class="cv-org" lang="en">Bahria University, Pakistan</p>
+                    <p class="cv-org"><span lang="en">Bahria University</span>, Pakistan</p>
                     <ul>
                       <li>Bachelorarbeit: <span lang="en">„Petrophysical analysis of Joya Mair – Well 4“</span></li>
-                      <li>Relevante Module: <span lang="en">Advance Maths, Calculus, Data Structures, GIS &amp; Image Processing, Programming Fundamentals, Statistics</span></li>
                     </ul>
                   </div>
                 </li>
               </ol>
+            </div>
+
+            <div class="cv-group">
+              <h3>Projekte im Studium</h3>
+              <dl class="cv-list">
+                <div class="cv-row"><dt>Landsat · Sentinel-2</dt><dd>Massenbilanz des Mýrdalsjökull aus historischen Satellitenbildern und DGMs: Die Schmelzrate hat sich nach 2000 verdoppelt.</dd></div>
+                <div class="cv-row"><dt>MODIS · TRMM</dt><dd>Schneebedeckung und Niederschlagsvariabilität, 2000–2015.</dd></div>
+                <div class="cv-row"><dt>Landsat 7</dt><dd>Veränderung der Schneebedeckung im Kabul-Becken und deren Folgen für die Wasserressourcen.</dd></div>
+                <div class="cv-row"><dt>Landsat 8 · ASTER</dt><dd>Landbedeckung, Erosion und Morphometrie des Mauna Kea.</dd></div>
+              </dl>
+            </div>
+
+            <div class="cv-group">
+              <h3>Weiterbildung</h3>
+              <dl class="cv-list">
+                <div class="cv-row"><dt>2022</dt><dd><span lang="en">NASA Applied Remote Sensing Training (ARSET)</span>: fünf Schulungen zu SAR-gestützter Schadensbewertung, Hochwassermonitoring und -modellierung, Kartierung von Kulturpflanzen mit polarimetrischem SAR und optischen Daten, Auswertung von Luftqualitätsmodellen sowie Monitoring vor und nach Waldbränden.</dd></div>
+                <div class="cv-row"><dt></dt><dd>Kurzlehrgang von UNAVCO / GAGE: InSAR-Prozessierung und Zeitreihenanalyse für geophysikalische Anwendungen (ISCE, ARIA-tools, MintPy).</dd></div>
+              </dl>
+            </div>
+
+            <div class="cv-group">
+              <h3>Kenntnisse</h3>
+              <dl class="cv-list">
+                <div class="cv-row"><dt>GIS</dt><dd>ArcGIS Pro, QGIS, ArcMap</dd></div>
+                <div class="cv-row"><dt>Fernerkundung</dt><dd>Multispektral-, Hyperspektral- und SAR-Daten; ENVI, ERDAS Imagine, eCognition, ESA SNAP</dd></div>
+                <div class="cv-row"><dt>LiDAR</dt><dd>CloudCompare, WhiteboxTools; Ableitung von DGM und DOM</dd></div>
+                <div class="cv-row"><dt>Cloud</dt><dd>Google Earth Engine, AWS (EC2, S3)</dd></div>
+                <div class="cv-row"><dt>Datenbanken</dt><dd>PostgreSQL/PostGIS, SpatiaLite, DuckDB, SQL</dd></div>
+                <div class="cv-row"><dt>Programmierung</dt><dd>Python (GDAL, Fiona, Rasterio, scikit-learn, TensorFlow, Cartopy), R, Spatial SQL, Bash</dd></div>
+                <div class="cv-row"><dt>Machine Learning</dt><dd>CatBoost, CNNs, feinabgestimmte Foundation Models, VLMs</dd></div>
+                <div class="cv-row"><dt>Web-Mapping</dt><dd>Leaflet, OpenLayers, GeoServer, TiTiler</dd></div>
+                <div class="cv-row"><dt>Sonstiges</dt><dd>Git, LaTeX, Microsoft Office</dd></div>
+              </dl>
             </div>
 
             <div class="cv-group">
