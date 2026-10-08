@@ -34,11 +34,18 @@ One page per language: English at `/` (`index.html`), German at `/de/` (`de/inde
    `make_contours.sh` also writes the 50 m elevation grid and the map→lat/lon formula used by `hero-map.js`.
 4. If the hero changed visibly, regenerate `assets/img/og.png` with `tools/og/make_og.mjs` (instructions in the file).
 
-## Plates (Visualizations section)
+## Plates (Visualizations section) and certificates
 
-Edit the `PLATES` list (source file, EN/DE short title and caption) in `tools/plates/build_plates.py`, then run
+Edit the `PLATES` or `CERTS` list (source file, EN/DE short title and caption) in `tools/plates/build_plates.py`, then run
 `python3 tools/plates/build_plates.py` (needs Pillow and ffmpeg; `--skip-media` to only rewrite the markup).
-It writes the media to `assets/plates/` and the grid into both pages between `<!-- build:plates -->` markers.
+It writes the media to `assets/plates/` and the grids into both pages between `<!-- build:plates -->` /
+`<!-- build:certs -->` markers. The viewer pages through one grid at a time.
+
+## Legal pages
+
+`legal-notice.html` (EN) and `de/impressum.html` (DE), linked from the footer of both homepages, `noindex`.
+§ 5 DDG requires a postal address where the owner can be served: keep it current, and don't publish placeholders.
+Data-licence credits (Copernicus DEM, C3S/ERA5) are repeated there.
 
 Licence statements (Copernicus DEM, and C3S for ERA5 if the storm figure returns) stay **verbatim in English**,
 also on the German page (marked `lang="en"`).
@@ -92,6 +99,9 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   line that starts at the first phase label (not at the photo); `EDUCATION`/`CAREER` labels sit on the line;
   entries alternate sides (`.tl-l`/`.tl-r`) with diamond markers and short connectors; the current job is
   `.tl-now` (accent). On phones entries stack on the centre line.
+- Beagle Systems (current employer, Hamburg) is linked to https://beaglesystems.com/ in About and the CV, with a
+  one-line description under the job taken from their site. Keep it factual.
+- Certificates: a grid (`#certificates`) at the end of the CV, linked from "Further training"; hidden in print.
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.

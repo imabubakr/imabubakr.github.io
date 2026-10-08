@@ -43,10 +43,11 @@
     document.body.appendChild(box);
     var stage = box.querySelector(".lb-stage");
     var current = 0;
+    var group = plateLinks; // the grid the open item belongs to (plates or certificates)
 
     var show = function (i) {
-      current = (i + plateLinks.length) % plateLinks.length;
-      var a = plateLinks[current];
+      current = (i + group.length) % group.length;
+      var a = group[current];
       var media;
       if (a.dataset.webm) {
         media = document.createElement("video");
@@ -75,11 +76,12 @@
       box.querySelector(".lb-caption").innerHTML = a.dataset.caption;
     };
 
-    plateLinks.forEach(function (a, i) {
+    plateLinks.forEach(function (a) {
       a.addEventListener("click", function (e) {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
         e.preventDefault();
-        show(i);
+        group = Array.prototype.slice.call(a.closest(".plates").querySelectorAll(".plate-link"));
+        show(group.indexOf(a));
         box.showModal();
       });
     });
@@ -96,7 +98,7 @@
     });
     box.addEventListener("close", function () {
       stage.replaceChildren();
-      plateLinks[current].focus();
+      group[current].focus();
     });
   }
 

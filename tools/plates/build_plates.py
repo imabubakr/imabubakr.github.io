@@ -1,10 +1,10 @@
-"""Build the "Visualizations" plates: web images/videos plus the markup in both pages.
+"""Build the image grids: "Visualizations" plates and the CV's certificates.
 
-For each plate in PLATES (source files are the old gallery images in the repo root):
+For each item in PLATES and CERTS (source files are images in the repo root):
   stills      -> assets/plates/<id>-720.webp (grid) and <id>-1600.webp (viewer)
   animations  -> assets/plates/<id>.webm + .mp4 (viewer) and <id>-720.webp poster (grid)
-Then replaces the content between <!-- build:plates --> and <!-- /build:plates -->
-in index.html (English) and de/index.html (German).
+Then replaces the content between <!-- build:plates --> / <!-- build:certs --> and the
+matching <!-- /build:... --> marker in index.html (English) and de/index.html (German).
 
 Requires Pillow and ffmpeg. Run from the repo root:  python3 tools/plates/build_plates.py
 Add --skip-media to only rewrite the markup (e.g. after editing a caption).
@@ -55,6 +55,30 @@ PLATES = [
      ("Straßennetz von Freiburg", "Straßennetz von Freiburg im Breisgau.")),
 ]
 
+# Certificates, newest first: id, source, (title, caption, date) in English and German.
+# Titles stay in English on both pages (official course names).
+ARSET = "NASA Applied Remote Sensing Training (ARSET)"
+CERTS = [
+    ("cert-sar-disaster", "cer6.jpg", "Disaster Assessment Using Synthetic Aperture Radar",
+     (f"{ARSET}, introductory training, October 2022.", "10/2022"),
+     (f'<span lang="en">{ARSET}</span>, Einführungskurs, Oktober 2022.', "10/2022")),
+    ("cert-floods", "cer3.jpg", "Monitoring and Modeling Floods using Earth Observations",
+     (f"{ARSET}, intermediate training, September 2022.", "09/2022"),
+     (f'<span lang="en">{ARSET}</span>, Aufbaukurs, September 2022.', "09/2022")),
+    ("cert-crops-sar", "cer4.jpg", "Mapping Crops and their Biophysical Characteristics with Polarimetric SAR and Optical Remote Sensing",
+     (f"{ARSET}, advanced training, April–May 2022.", "05/2022"),
+     (f'<span lang="en">{ARSET}</span>, Fortgeschrittenenkurs, April–Mai 2022.', "05/2022")),
+    ("cert-air-quality", "cer2.jpg", "Tools for Analyzing NASA Air Quality Model Output",
+     (f"{ARSET}, March 2022.", "03/2022"),
+     (f'<span lang="en">{ARSET}</span>, März 2022.', "03/2022")),
+    ("cert-fire", "cer1.jpg", "Using Earth Observations for Pre- and Post-Fire Monitoring",
+     (f"{ARSET}, January 2022.", "01/2022"),
+     (f'<span lang="en">{ARSET}</span>, Januar 2022.', "01/2022")),
+    ("cert-insar", "cer5.jpg", "InSAR Processing and Time-Series Analysis for Geophysical Applications: ISCE, ARIA-tools, and MintPy",
+     ("UNAVCO / GAGE short course (NSF, NASA).", ""),
+     ("Kurzlehrgang von UNAVCO / GAGE (NSF, NASA).", "")),
+]
+
 LABELS = {
     "en": {"plate": "Plate", "anim": "animation", "open": "Open"},
     "de": {"plate": "Tafel", "anim": "Animation", "open": "Öffnen"},
@@ -76,7 +100,8 @@ def save_webp(im, path, width, quality):
 def build_media():
     OUT.mkdir(parents=True, exist_ok=True)
     sizes = {}
-    for pid, src, anim, frame, *_ in PLATES:
+    items = [(p[0], p[1], p[2], p[3]) for p in PLATES] + [(c[0], c[1], False, 0) for c in CERTS]
+    for pid, src, anim, frame in items:
         im = Image.open(ROOT / src)
         if anim:
             n = getattr(im, "n_frames", 1)
@@ -94,6 +119,26 @@ def build_media():
         sizes[pid] = (thumb, full)
         print(f"{pid:18} thumb {thumb[0]}x{thumb[1]}  full {full[0]}x{full[1]}")
     return sizes
+
+
+def cert_markup(lang, prefix):
+    items = []
+    for cid, src, title, en, de in CERTS:
+        caption, date = en if lang == "en" else de
+        base = f"{prefix}assets/plates/{cid}"
+        thumb = Image.open(OUT / f"{cid}-720.webp").size
+        issuer = "UNAVCO / GAGE" if "UNAVCO" in caption else "NASA ARSET"
+        full_caption = f'<span lang="en">{title}</span>. {caption}' if lang == "de" else f"{title}. {caption}"
+        items.append(
+            f'              <li class="plate">\n'
+            f'                <a href="{base}-1600.webp" class="plate-link" data-full="{base}-1600.webp" data-caption="{html.escape(full_caption, quote=True)}">\n'
+            f'                  <img src="{base}-720.webp" width="{thumb[0]}" height="{thumb[1]}" loading="lazy" decoding="async" alt="">\n'
+            f'                  <span class="plate-meta"><span class="plate-no">{date or "&nbsp;"}</span><span>{issuer}</span></span>\n'
+            f'                  <span class="plate-title" lang="en">{title}</span>\n'
+            f"                </a>\n"
+            f"              </li>"
+        )
+    return '\n              <ol class="plates certs">\n' + "\n".join(items) + "\n              </ol>\n              "
 
 
 def markup(lang, prefix):
@@ -124,10 +169,11 @@ def main():
     for path, lang, prefix in [("index.html", "en", ""), ("de/index.html", "de", "../")]:
         page = ROOT / path
         s = page.read_text()
-        s, n = re.subn(r"(<!-- build:plates -->).*?(<!-- /build:plates -->)",
-                       lambda m: m.group(1) + markup(lang, prefix) + m.group(2), s, flags=re.S)
-        if not n:
-            sys.exit(f"no build:plates marker in {path}")
+        for key, render in (("plates", markup), ("certs", cert_markup)):
+            s, n = re.subn(rf"(<!-- build:{key} -->).*?(<!-- /build:{key} -->)",
+                           lambda m: m.group(1) + render(lang, prefix) + m.group(2), s, flags=re.S)
+            if not n:
+                sys.exit(f"no build:{key} marker in {path}")
         page.write_text(s)
         print(f"updated {path}")
 
