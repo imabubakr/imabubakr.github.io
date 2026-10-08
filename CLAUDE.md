@@ -49,6 +49,14 @@ place). It's one continuous background fixed behind everything below the hero (`
 `--contour` through a mask, faded towards the centre so text sits on calm paper, loaded after page load. No bands or
 per-section layers: the user found those looked broken. Credit "© OpenStreetMap contributors" stays in the footer.
 
+## "From orbit to drone" explorer
+
+`python3 tools/layers/build_explorer.py` (after `build_layers.py`) draws the Ebringen footprints three ways and
+injects them between `<!-- build:explorer-NAME -->` markers: satellite (1.6 km, 30 m Landsat pixels = coverage
+per cell), aerial (400 m, 20 cm orthophoto), drone (80 m, ~2 cm). Each view carries the next one's footprint
+(dashed accent). The altitude scale is a radio group (`.ex-btn`, arrow keys work). Satellite / Aerial / Drones only:
+no LiDAR row, no employer name in the scale (owner's wish).
+
 ## Legal notice (Impressum)
 
 There is deliberately no Impressum (owner's decision, 2026-10: no home address on the site). If one is added
@@ -93,11 +101,11 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   hairlines (under the nav, under the hero strip, above the footer) and the timeline line. Don't add more.
 - Mobile first; the content column is max 860 px. Every section opens the same way on the page's centre axis:
   `header.section-head` → mono `.section-no` + `h2.section-title` + optional one-line `.section-sub`.
-- Order of the page: hero (who) → About (story + timeline) → CV (details) → Visualizations (work samples) →
-  Contact (action) → footer collar.
-- Nav: mono, `[01] about  [02] cv  [03] visuals  [04] contact` (DE: über mich, lebenslauf, grafiken, kontakt);
-  the current section gets an underline and an accent number. The hero strip says `SHEET 01 / 04` (`BLATT` in
-  German). Update both if sections are added.
+- Order of the page: hero (who) → About (story + timeline) → From orbit to drone (interactive) → CV (details) →
+  Visualizations (work samples) → Contact (action) → footer collar.
+- Nav: mono, `[01] about  [02] orbit  [03] cv  [04] visuals  [05] contact` (DE: über mich, orbit, lebenslauf,
+  grafiken, kontakt); the current section gets an underline and an accent number; on phones the numbers are hidden
+  so all five fit. The hero strip says `SHEET 01 / 05` (`BLATT` in German). Update both if sections are added.
 - Hero: real contours (hero only, faint), graticule meridians, top strip with sheet number, longitude ticks and
   `EPSG:4326`. Coordinates and elevation in the accent next to the diamond marker.
 - About: short centred lead + one supporting sentence, portrait, then a vertical timeline. Timeline: a centre
@@ -108,8 +116,8 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   one-line description under the job taken from their site. Keep it factual.
 - Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
   "View certificates" link or the `#certificates` hash; hidden in print.
-- About: intro → photo + "orbit to drone" altitude scale (satellites ~700 km, aerial/LiDAR ~1 km, drones ~100 m with the
-  accent as "current") → timeline. Line icons drawn in-house; no third-party logos (trademarks).
+- About: intro → photo → timeline. The altitude scale lives in its own section ([02] orbit), see above. Line icons
+  are drawn in-house; no third-party logos (trademarks).
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.

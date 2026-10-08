@@ -293,10 +293,14 @@ a:hover {
 }
 
 /* Phones: four nav items must fit on one line. */
+/* Phones: five sections fit on one line without their [0n] numbers. */
 @media (max-width: 599px) {
   .nav-list {
     gap: 4px 14px;
     font-size: 0.75rem;
+  }
+  .nav-list a span {
+    display: none;
   }
 }
 
@@ -698,6 +702,26 @@ a:hover {
   margin: 0;
   text-align: left;
 }
+.alt-item {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.alt-text,
+.alt-name,
+.alt-sub,
+.alt-years {
+  display: block;
+}
+.alt-name {
+  display: flex;
+}
 .alt-head,
 .alt-ground {
   color: var(--muted);
@@ -728,8 +752,8 @@ a:hover {
 .alt-item {
   position: relative;
 }
-.alt-item + .alt-item {
-  margin-top: 22px;
+.alt-list > * + * {
+  margin-top: 18px;
 }
 .alt-icon {
   position: absolute;
@@ -745,8 +769,15 @@ a:hover {
   stroke-linejoin: round;
   stroke-linecap: round;
 }
-.alt-now .alt-icon {
+.alt-item[aria-checked="true"] .alt-icon {
   stroke: var(--accent-mark);
+}
+.alt-item[aria-checked="false"] .alt-name {
+  color: var(--muted);
+  font-weight: 400;
+}
+.alt-item:hover .alt-name {
+  color: var(--ink);
 }
 .alt-name {
   display: flex;
@@ -770,7 +801,7 @@ a:hover {
   color: var(--muted);
   font: 400 0.75rem/1.5 var(--font-mono);
 }
-.alt-now .alt-years {
+.alt-item[aria-checked="true"] .alt-years {
   color: var(--accent);
 }
 .alt-ground {
@@ -779,14 +810,89 @@ a:hover {
   border-top: 1px solid var(--muted);
 }
 @media (min-width: 720px) {
-  .about-visual {
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 56px;
-  }
   .about-photo {
     width: 152px;
+  }
+}
+
+/* -------------------------------------------------- orbit-to-drone explorer -- */
+/* Altitude scale (radio buttons) + the same village at each platform's ground
+   resolution. Views are stacked; the active one fades in (no motion if reduced). */
+.explorer {
+  display: grid;
+  gap: 28px;
+  justify-items: center;
+}
+.ex-figure {
+  width: 100%;
+  margin: 0;
+}
+.ex-stage {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--grid);
+}
+.ex-view {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+.ex-view.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ex-view {
+    transition: opacity 0.35s ease, visibility 0.35s;
+  }
+}
+.ex-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ex-px {
+  fill: var(--ink);
+  shape-rendering: crispEdges;
+}
+.ex-px1 { opacity: 0.18; }
+.ex-px2 { opacity: 0.38; }
+.ex-px3 { opacity: 0.6; }
+.ex-px4 { opacity: 0.85; }
+.ex-bldg {
+  fill: var(--contour);
+  fill-opacity: 0.12;
+  stroke: var(--ink);
+  stroke-width: 1px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.ex-view[data-view="drone"] .ex-bldg {
+  stroke-width: 1.5px;
+}
+.ex-next {
+  fill: none;
+  stroke: var(--accent-mark);
+  stroke-width: 1.5px;
+  stroke-dasharray: 5 4;
+  vector-effect: non-scaling-stroke;
+}
+.ex-figure figcaption {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.ex-figure figcaption a {
+  color: inherit;
+}
+@media (min-width: 900px) {
+  .explorer {
+    grid-template-columns: 280px minmax(0, 1fr);
+    align-items: center;
+    gap: 48px;
   }
 }
 
@@ -1221,6 +1327,7 @@ dl.cv-list .cv-row {
   .site-nav,
   .hero,
   #about,
+  #orbit,
   #plates,
   .cv-certs,
   .cv-more,
