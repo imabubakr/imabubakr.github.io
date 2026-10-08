@@ -1298,26 +1298,3 @@ dl.cv-list .cv-row {
     width: 360px;
   }
 }
-
-/* --------------------------------------------------------- legal pages -- */
-.legal-body {
-  max-width: 60ch;
-}
-.legal-body h2 {
-  margin: 28px 0 6px;
-  font-size: 1rem;
-  font-weight: 500;
-}
-.legal-body p {
-  line-height: 1.6;
-}
-.legal-body p + p {
-  margin-top: 10px;
-}
-.legal-back {
-  margin-top: 36px !important;
-  font: 400 0.8125rem/1.5 var(--font-mono);
-}
-.collar-legal a {
-  color: var(--muted);
-}

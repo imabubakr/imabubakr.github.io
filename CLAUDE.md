@@ -41,14 +41,11 @@ Edit the `PLATES` or `CERTS` list (source file, EN/DE short title and caption) i
 It writes the media to `assets/plates/` and the grids into both pages between `<!-- build:plates -->` /
 `<!-- build:certs -->` markers. The viewer pages through one grid at a time.
 
-## Legal pages
+## Legal notice (Impressum)
 
-`legal-notice.html` (EN) and `de/impressum.html` (DE), linked from the footer of both homepages, `noindex`.
-§ 5 DDG requires a postal address where the owner can be served: keep it current, and don't publish placeholders.
-Data-licence credits (Copernicus DEM, C3S/ERA5) are repeated there.
-
-Licence statements (Copernicus DEM, and C3S for ERA5 if the storm figure returns) stay **verbatim in English**,
-also on the German page (marked `lang="en"`).
+There is deliberately no Impressum (owner's decision, 2026-10: no home address on the site). If one is added
+later, § 5 DDG / § 18 MStV need a postal address where documents can be served (a c/o address service works;
+a PO box does not). Never publish placeholder addresses.
 
 ## Design rules
 
