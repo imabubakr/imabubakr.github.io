@@ -1,0 +1,9 @@
+{
+  "name": "contour-tools",
+  "private": true,
+  "description": "Dev-only tooling for the hero contour SVG. Not part of the published site.",
+  "devDependencies": {
+    "mapshaper": "0.7.80",
+    "svgo": "4.1.0"
+  }
+}

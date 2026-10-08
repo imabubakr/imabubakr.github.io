@@ -1,0 +1,18 @@
+{
+  "lat": 47.997791,
+  "lon": 7.842609,
+  "elevation_m": 277,
+  "crs": "WGS 84 / UTM zone 32N",
+  "epsg": 32632,
+  "bbox": [
+    408660,
+    5314200,
+    418660,
+    5319200
+  ],
+  "width_m": 10000,
+  "height_m": 5000,
+  "contour_interval_m": 10,
+  "index_every": 5,
+  "dem": "Copernicus DEM GLO-30"
+}
