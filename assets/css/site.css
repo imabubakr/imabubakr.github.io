@@ -121,6 +121,16 @@ p {
   margin: 0;
 }
 
+/* No hyphens: auto. Browser dictionaries split German compounds badly
+   ("Bauma-schinen"); long headings use &shy; instead. */
+p,
+li,
+dd,
+td,
+th {
+  overflow-wrap: break-word;
+}
+
 a {
   color: var(--accent);
   text-decoration: underline;
@@ -185,7 +195,7 @@ a:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 24px;
+  gap: 4px 12px;
   min-height: var(--nav-h);
   padding: 8px var(--pad);
   background: var(--paper);
@@ -233,6 +243,24 @@ a:hover {
   color: var(--accent);
 }
 
+.lang {
+  display: inline-flex;
+  border: 1px solid var(--grid);
+}
+.lang a {
+  padding: 4px 8px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.lang a:hover {
+  text-decoration: underline;
+}
+.lang a[aria-current] {
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -257,7 +285,22 @@ a:hover {
   background: currentColor;
 }
 
+/* Phones: theme toggle shows only its square; the label stays for screen readers. */
+@media (max-width: 599px) {
+  .theme-toggle .toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
 @media (min-width: 900px) {
+  .site-nav {
+    column-gap: 24px;
+  }
   .site-nav nav {
     order: 0;
     width: auto;

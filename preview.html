@@ -9,6 +9,8 @@
     <script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
     <link rel="preload" href="assets/fonts/ibm-plex-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" hreflang="en" href="preview.html">
+    <link rel="alternate" hreflang="de" href="de/preview.html">
     <link rel="stylesheet" href="assets/css/site.css">
     <script src="assets/js/site.js" defer></script>
   </head>
@@ -26,7 +28,11 @@
             <li><a href="#contact"><span>[05]</span> contact</a></li>
           </ul>
         </nav>
-        <button class="theme-toggle" type="button" aria-pressed="false"><span class="box" aria-hidden="true"></span>dark</button>
+        <div class="lang" role="group" aria-label="Language">
+          <a href="preview.html" aria-current="page"><span aria-hidden="true">EN</span><span class="visually-hidden">English</span></a>
+          <a href="de/preview.html" hreflang="de" lang="de"><span aria-hidden="true">DE</span><span class="visually-hidden">Deutsch</span></a>
+        </div>
+        <button class="theme-toggle" type="button" aria-pressed="false"><span class="box" aria-hidden="true"></span><span class="toggle-label">dark</span></button>
       </header>
 
       <main id="main">
@@ -54,7 +60,7 @@
                 <source src="assets/media/storm-emir.webm" type="video/webm">
                 <source src="assets/media/storm-emir.mp4" type="video/mp4">
               </video>
-              <figcaption><span class="fig-no">FIG. 01</span><span>Storm Emir, November 2023: wind field over Europe. Data: ERA5; contains modified Copernicus Climate Change Service information 2023.</span><button class="plate-toggle" type="button" hidden>pause</button></figcaption>
+              <figcaption><span class="fig-no">FIG. 01</span><span>Storm Emir, November 2023: wind field over Europe. Data: ERA5; contains modified Copernicus Climate Change Service information 2023.</span><button class="plate-toggle" type="button" data-play="play" data-pause="pause" hidden>pause</button></figcaption>
             </figure>
             <table class="data">
               <caption class="visually-hidden">Selected projects with stack and sensor</caption>
@@ -235,7 +241,7 @@
               <h3>Languages</h3>
               <dl class="cv-list">
                 <div class="cv-row"><dt>English</dt><dd>C2</dd></div>
-                <div class="cv-row"><dt>German</dt><dd>B1, learning in progress</dd></div>
+                <div class="cv-row"><dt>German</dt><dd>B2</dd></div>
               </dl>
             </div>
           </div>

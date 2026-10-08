@@ -33,11 +33,18 @@ CONTOURS = ROOT / "assets/topo/hero-contours.svg"
 MERIDIAN_STEP = 2 / 60  # labelled meridians every 2'
 TICK_STEP = 1 / 60  # strip ticks every minute
 
-DEM_CREDIT = {
+# The Copernicus DEM licence prescribes this statement verbatim (in English).
+DEM_STATEMENT = {
     "Copernicus DEM GLO-30": (
-        "DEM: Copernicus GLO-30 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018 "
+        "Copernicus GLO-30 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018 "
         "provided under COPERNICUS by the European Union and ESA; all rights reserved"
     ),
+}
+
+# Per-language notation: hemisphere letters, decimal separator, collar wording.
+LOCALES = {
+    "en": {"E": "E", "W": "W", "N": "N", "S": "S", "dec": ".", "ci": "CI", "dem": "DEM"},
+    "de": {"E": "O", "W": "W", "N": "N", "S": "S", "dec": ",", "ci": "Äquidistanz", "dem": "Höhenmodell"},
 }
 
 
@@ -94,39 +101,44 @@ def main(html_files):
     hero_map = f'<div class="map-box">{contours}{graticule}</div>'
 
     # Top strip: ticks every minute positioned by their x at the top edge (fraction of width).
-    strip = []
+    ticks = []
     for lon in multiples(lon_lo, lon_hi, TICK_STEP):
         top, _ = meridian(lon)
         fx = top / width
-        if not 0.02 < fx < 0.98:
-            continue
-        minutes = lon * 60
-        # Labels near the ends would collide with the sheet number / CRS.
-        if abs(minutes / 2 - round(minutes / 2)) < 1e-6 and 0.1 < fx < 0.88:
-            strip.append(f'<span class="tick tick--major" style="--fx:{fx:.4f}"><span>{dms(lon, "E", "W")}</span></span>')
-        else:
-            strip.append(f'<span class="tick" style="--fx:{fx:.4f}"></span>')
-
-    coords = (
-        f'{abs(meta["lat"]):.4f}°{"N" if meta["lat"] >= 0 else "S"} '
-        f'{abs(meta["lon"]):.4f}°{"E" if meta["lon"] >= 0 else "W"}'
-        f'<span class="sep"> </span>h {meta["elevation_m"]} m'
-    )
+        if 0.02 < fx < 0.98:
+            # Labels near the ends would collide with the sheet number / CRS.
+            labelled = abs(lon * 30 - round(lon * 30)) < 1e-6 and 0.1 < fx < 0.88
+            ticks.append((lon, fx, labelled))
 
     utm_label = meta["crs"].replace("zone ", "")  # "WGS 84 / UTM 32N"
-    credit = DEM_CREDIT.get(meta["dem"], f'DEM: {meta["dem"]}')
-    collar = f'{utm_label} · CI {meta["contour_interval_m"]} m'
 
-    blocks = {
-        "hero-map": hero_map,
-        "hero-strip": "".join(strip),
-        "hero-coords": coords,
-        "collar": collar,
-        "credit": credit,
-    }
+    def blocks_for(lang):
+        loc = LOCALES.get(lang, LOCALES["en"])
+        strip = "".join(
+            f'<span class="tick tick--major" style="--fx:{fx:.4f}"><span>{dms(lon, loc["E"], loc["W"])}</span></span>'
+            if labelled else f'<span class="tick" style="--fx:{fx:.4f}"></span>'
+            for lon, fx, labelled in ticks
+        )
+        num = lambda v: f"{abs(v):.4f}".replace(".", loc["dec"])
+        coords = (
+            f'{num(meta["lat"])}°{loc["N"] if meta["lat"] >= 0 else loc["S"]} '
+            f'{num(meta["lon"])}°{loc["E"] if meta["lon"] >= 0 else loc["W"]}'
+            f'<span class="sep"> </span>h {meta["elevation_m"]} m'
+        )
+        statement = DEM_STATEMENT.get(meta["dem"], meta["dem"])
+        return {
+            "hero-map": hero_map,
+            "hero-strip": strip,
+            "hero-coords": coords,
+            "collar": f'{utm_label} · {loc["ci"]} {meta["contour_interval_m"]} m',
+            "credit": f'{loc["dem"]}: <span lang="en">{statement}</span>' if lang != "en" else f"{loc['dem']}: {statement}",
+        }
+
     for name in html_files:
         path = Path(name)
         html = path.read_text()
+        lang = re.search(r'<html[^>]*\blang="([a-z]+)', html)
+        blocks = blocks_for(lang.group(1) if lang else "en")
         for key, content in blocks.items():
             html = re.sub(
                 rf"(<!-- build:{key} -->).*?(<!-- /build:{key} -->)",

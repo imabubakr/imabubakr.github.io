@@ -1,4 +1,5 @@
-// Theme toggle (stored choice overrides prefers-color-scheme) and nav section highlight.
+// Theme toggle (stored choice overrides prefers-color-scheme), looping figures,
+// nav section highlight, and keeping the language switch on the current section.
 (function () {
   var root = document.documentElement;
   var toggle = document.querySelector(".theme-toggle");
@@ -42,7 +43,7 @@
       } else {
         video.pause();
       }
-      button.textContent = userPaused ? "play" : "pause";
+      button.textContent = userPaused ? button.dataset.play : button.dataset.pause;
     }
 
     button.hidden = false;
@@ -61,6 +62,13 @@
     }
   });
 
+  var langLink = document.querySelector(".lang a[hreflang]");
+  var langBase = langLink ? langLink.getAttribute("href").split("#")[0] : "";
+
+  function setLangHash(id) {
+    if (langLink) langLink.setAttribute("href", langBase + (id ? "#" + id : ""));
+  }
+
   var links = document.querySelectorAll(".nav-list a[href^='#']");
   if (!("IntersectionObserver" in window) || !links.length) return;
 
@@ -78,6 +86,7 @@
           a.removeAttribute("aria-current");
         });
         link.setAttribute("aria-current", "location");
+        setLangHash(entry.target.id);
       });
     },
     { rootMargin: "-40% 0px -55% 0px" }
