@@ -100,7 +100,9 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 - Hero `h1`: the owner's sentence "Hello, I'm Bakar, a geospatial data professional with a passion for all things
   spatial." (DE: "Hallo, ich bin Bakar, …"), 500, moderate size (max 2.5rem), bottom-left. No big title, no red
   coordinates line (owner's wish).
-- Section titles: Plex Sans 500, `clamp(2rem, …, 3.25rem)`, `letter-spacing: -0.035em`, with a small mono `[0n]` above.
+- Running text is 15px (0.9375rem) everywhere, one size per text block (no bigger "lead" paragraphs); the owner
+  found the earlier scale too big.
+- Section titles: Plex Sans 500, `clamp(1.625rem, …, 2.375rem)`, `letter-spacing: -0.035em`, with a small mono `[0n]` above.
 - Mono is for metadata only: never for running text.
 - Centre only short text (headings, one-liners, at most about 3 lines; use `text-wrap: balance`). Longer text is
   left-aligned, even inside centred columns.

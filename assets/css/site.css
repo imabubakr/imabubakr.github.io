@@ -153,7 +153,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 400 1rem/1.55 var(--font-sans);
+  font: 400 0.9375rem/1.6 var(--font-sans);
   font-kerning: normal;
 }
 
@@ -532,7 +532,7 @@ a:hover {
 
 .hero h1 {
   max-width: 24ch;
-  font-size: clamp(1.5rem, 1rem + 2cqw, 2.5rem);
+  font-size: clamp(1.375rem, 1rem + 1.6cqw, 2.125rem);
   font-weight: 500;
   line-height: 1.12;
   letter-spacing: -0.03em;
@@ -601,7 +601,7 @@ a:hover {
   text-align: center;
 }
 .section-title {
-  font-size: clamp(2rem, 1.4rem + 2.2cqw, 3.25rem);
+  font-size: clamp(1.625rem, 1.25rem + 1.4cqw, 2.375rem);
   font-weight: 500;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -617,7 +617,7 @@ a:hover {
   max-width: 48ch;
   margin: 14px auto 0;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 0.9375rem;
   line-height: 1.5;
   text-wrap: balance;
 }
@@ -751,23 +751,10 @@ a:hover {
   text-align: left;
 }
 .intro-text p {
-  font-size: 1rem;
-  line-height: 1.65;
+  line-height: 1.7;
 }
 .intro-text p + p {
   margin-top: 0.8em;
-}
-.intro-text p:first-child {
-  font-size: 1.125rem;
-}
-@media (min-width: 720px) {
-  .intro-text p {
-    font-size: 1.0625rem;
-  }
-  .intro-text p:first-child {
-    font-size: 1.25rem;
-    line-height: 1.55;
-  }
 }
 
 /* Portrait below the timeline, as a duotone in the map's colours: a grayscale photo
@@ -830,13 +817,13 @@ a:hover {
 }
 .ds-title {
   margin: 4px 0 8px;
-  font-size: clamp(1.375rem, 1.1rem + 1cqw, 1.875rem);
+  font-size: clamp(1.125rem, 1rem + 0.6cqw, 1.5rem);
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: -0.025em;
 }
 .ds-text {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   line-height: 1.6;
 }
 .ds-spec {
@@ -1029,7 +1016,7 @@ a:hover {
   flex-direction: column;
 }
 .tl-what {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   line-height: 1.35;
 }
@@ -1074,7 +1061,7 @@ a:hover {
     font-size: 0.8125rem;
   }
   .tl-what {
-    font-size: 1.0625rem;
+    font-size: 1rem;
   }
   /* Marker on the line, level with the date; connector from marker to text. */
   .tl-item::before {
@@ -1136,7 +1123,7 @@ dl.cv-list .cv-row {
 }
 .cv-entry h4 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 .cv-org {
@@ -1209,7 +1196,7 @@ dl.cv-list .cv-row {
 }
 .contact-mail {
   display: inline-block;
-  font-size: clamp(1.375rem, 1rem + 1.6cqw, 2.25rem);
+  font-size: clamp(1.25rem, 1rem + 1cqw, 1.75rem);
   font-weight: 500;
   letter-spacing: -0.02em;
   text-underline-offset: 6px;
