@@ -1077,3 +1077,136 @@ dl.cv-list .cv-row {
     font-size: 9pt;
   }
 }
+
+/* ------------------------------------------------------- hero map tools -- */
+/* Live coordinates in the strip, a survey line between two clicks and an
+   elevation profile panel (assets/js/hero-map.js). */
+.hero-map {
+  cursor: crosshair;
+}
+.hero-text {
+  pointer-events: none; /* clicks reach the map underneath */
+}
+.strip-crs.is-live {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.map-tools {
+  pointer-events: none;
+}
+.mt-line {
+  stroke: var(--accent-mark);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.mt-line.is-pending {
+  stroke-dasharray: 5 4;
+}
+.mt-pt {
+  fill: var(--paper);
+  stroke: var(--accent-mark);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-hint {
+  position: absolute;
+  top: calc(var(--strip-h) + 10px);
+  right: var(--pad);
+  z-index: 1;
+  margin: 0;
+  padding: 2px 6px;
+  background: var(--paper);
+  color: var(--muted);
+  font: 400 0.6875rem/1.5 var(--font-mono);
+}
+.hint-touch {
+  display: none;
+}
+@media (hover: none) {
+  .hint-hover {
+    display: none;
+  }
+  .hint-touch {
+    display: inline;
+  }
+}
+@media (min-width: 900px) {
+  .map-hint {
+    top: auto;
+    bottom: 14px;
+  }
+}
+
+.map-profile {
+  position: absolute;
+  top: calc(var(--strip-h) + 12px);
+  right: var(--pad);
+  left: var(--pad);
+  z-index: 3;
+  padding: 10px 14px 12px;
+  background: var(--paper);
+  font: 400 0.75rem/1.4 var(--font-mono);
+}
+.mp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.mp-close {
+  min-width: 28px;
+  min-height: 28px;
+  margin: -6px -8px -6px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.mp-chart {
+  position: relative;
+  height: 90px;
+  margin: 6px 0 8px 44px;
+}
+.mp-chart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.mp-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.25px;
+  vector-effect: non-scaling-stroke;
+}
+.mp-fill {
+  fill: var(--contour);
+  opacity: 0.2;
+}
+.mp-max,
+.mp-min {
+  position: absolute;
+  right: calc(100% + 8px);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.mp-max {
+  top: 0;
+}
+.mp-min {
+  bottom: 0;
+}
+.mp-stats {
+  color: var(--ink);
+}
+@media (min-width: 720px) {
+  .map-profile {
+    left: auto;
+    width: 360px;
+  }
+}

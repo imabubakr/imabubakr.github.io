@@ -7,6 +7,7 @@
 #     -> clip, simplify, tag every 5th as index    (mapshaper)
 #     -> SVG paths + uphill-facing index labels    (contours_to_svg.py)
 #     -> optimise                                  (svgo)
+#     -> coarse elevation grid + lat/lon formula   (dem_grid.py, for the map tools)
 #
 # Requires: GDAL >= 3.6 with Python bindings + numpy, Node (run `npm ci` here once).
 #
@@ -152,6 +153,9 @@ json.dump({
   "dem": "$DEM_SOURCE",
 }, open(sys.argv[1], "w"), indent=2)
 EOF
+
+# --- 8. Elevation grid + lat/lon formula for the hero's coordinate/profile tools --
+python3 "$HERE/dem_grid.py" --dem "$WORK/dem.tif" --out "$OUT"
 
 printf 'wrote %s.svg (%s bytes, %s gzipped) and %s.json; elevation at centre %s m\n' \
   "$OUT" "$(wc -c <"$OUT.svg" | tr -d ' ')" "$(gzip -9c "$OUT.svg" | wc -c | tr -d ' ')" "$OUT" "$(printf '%.0f' "$ELEV")"
