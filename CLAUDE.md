@@ -129,7 +129,7 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   one-line description under the job taken from their site. Keep it factual.
 - Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
   "View certificates" link or the `#certificates` hash; hidden in print.
-- About: the old site's "About Me" text (no job pitch: the owner isn't job-hunting) left-aligned in a centred 62ch
+- About: a professional four-paragraph profile (no job pitch: the owner is not job-hunting) left-aligned in a centred 62ch
   column → timeline (compact) → portrait below it as a duotone in map colours (`.duotone`, `--photo-shadow` /
   `--photo-light` per theme).
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
@@ -166,6 +166,10 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   course and thesis names (thesis titles in „…“), marked `lang="en"`. No `hyphens: auto` (browsers split German
   compounds badly); use `&shy;` in long headings.
 - US English spelling on the English page (matches the original CV).
+- Professional register: **no contractions** on either page ("I am", "do not", never "I'm", "you'd").
+- About text positions the owner as working at the intersection of Earth observation, data engineering (pipelines)
+  and AI (fine-tuning detection models, open-source large models and VLMs, edge deployment), with the geology /
+  satellite background after that. Keep it factual: only things stated in the CV or by the owner.
 
 ### Accessibility and performance
 
