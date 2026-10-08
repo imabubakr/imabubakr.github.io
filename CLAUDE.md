@@ -136,7 +136,7 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   profile line drapes over the ridges.
 - "fullscreen" loads the region map (`assets/topo/region-contours.*`, ~410 KB, only on open) and starts on the
   hero's frame (dashed in contour view); ⤢ shows the whole region with summit labels. Ridge exaggeration is per
-  map (hero 2.5×, region 1.5×) and the viewer states the value in use. `dialog.map-viewer`: zoom (−/+/reset, wheel, pinch, +/- keys), pan (drag, arrow keys), live
+  map (hero 2.5×, region 4×) and the viewer states the value in use. `dialog.map-viewer`: zoom (−/+/reset, wheel, pinch, +/- keys), pan (drag, arrow keys), live
   readout, profile, scale bar. The viewBox follows the stage's aspect (no letterboxing; portrait screens fill the
   height). Labels stay ~10 px at any zoom. Esc clears a profile first, then closes.
 - Visualizations: still thumbnails (4:3, `object-fit: cover`) in a 2/3-column grid with mono `PLATE 0n` /

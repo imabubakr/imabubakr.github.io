@@ -64,7 +64,7 @@
     return ds;
   }
   var heroData = dataset("hero-contours", false, 2.5);
-  var regionData = dataset("region-contours", true, 1.5);
+  var regionData = dataset("region-contours", true, 4);
   function load() { return heroData.load(); }
 
   // ----------------------------------------------------------- geometry --
