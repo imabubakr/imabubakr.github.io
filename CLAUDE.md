@@ -52,16 +52,16 @@ place). It's one continuous background fixed behind everything below the hero (`
 `--contour` through a mask, faded towards the centre so text sits on calm paper, loaded after page load. No bands or
 per-section layers: the user found those looked broken. Credit "© OpenStreetMap contributors" stays in the footer.
 
-## "From orbit to drone" explorer
+## "Light and water" section
 
-`python3 tools/layers/build_explorer.py` (after `build_layers.py`) writes `assets/layers/explorer.json` (OSM
-footprints of Ebringen, 1.6 x 1.0 km, delta-encoded; default descent point = most buildings in 80 x 50 m) and a
-static 30 m fallback view between `<!-- build:explorer-fallback -->` markers. `assets/js/explorer.js` draws it on a
-canvas: a vertical range slider on the altitude axis descends from 705 km to 100 m (log-interpolated through the
-platforms Satellite 30 m / 1.6 km, Aerial 20 cm / 400 m, Drone 2 cm / 80 m at slider 0 / 500 / 1000); sensor
-pixels blend into crisp outlines; clicking the map sets where you descend; platform names snap (glide unless
-reduced motion). At drone height a "run detector" button draws boxes around buildings in view, clearly labelled as
-a simulation from map footprints (no fake scores). Only Satellite / Aerial / Drone, no LiDAR row, no employer name.
+`assets/js/terrain.js` draws the region map (`assets/topo/region-contours.json` + `-dem.bin`, 100 m grid) as shaded
+relief with cast shadows (shading 2× exaggerated, shadows from true heights), lit by a sun the visitor drags around
+a compass dial (direction = azimuth, distance from centre = altitude, min 5°; arrow keys work) or by today's real
+solar path over the Freiburg Münster ("play", clock time in Europe/Berlin). A water-level slider floods cells below
+the level that are connected to the Rhine (west edge / lowest cell), shown in `--water` (map blue, the only use of
+blue), with flooded km² and Freiburg's status. The caption must keep saying it's a simple bathtub model, not a
+forecast. `tools/layers/build_terrain_poster.py` renders the no-JS / loading poster with the same shading.
+"From orbit to drone" was removed at the owner's request (not eye-catching enough).
 
 ## Legal notice (Impressum)
 
@@ -85,6 +85,7 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 | `--grid` | `#c9cbc5` | `#232c33` | hairlines (nav, strip, footer), graticule |
 | `--accent` | `#b8380c` | `#ff6a2b` | links and accent **text** |
 | `--accent-mark` | `#d2410f` | `#ff6a2b` | non-text: location marker, current-job marker, focus ring |
+| `--water` | `#4f7fa3` | `#3e6f94` | water in the Light and water map only |
 
 - Light `--accent` is darkened from the spec's `#D2410F` (3.9:1) to `#B8380C` (4.8:1) for WCAG AA text contrast.
 - Accent is used sparingly: location/"you are here" markers, links, focus. Nothing else.
@@ -107,9 +108,9 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   hairlines (under the nav, under the hero strip, above the footer) and the timeline line. Don't add more.
 - Mobile first; the content column is max 860 px. Every section opens the same way on the page's centre axis:
   `header.section-head` → mono `.section-no` + `h2.section-title` + optional one-line `.section-sub`.
-- Order of the page: hero (who) → About (story + timeline) → From orbit to drone (interactive) → CV (details) →
+- Order of the page: hero (who) → About (story + timeline) → Light and water (interactive) → CV (details) →
   Visualizations (work samples) → Contact (action) → footer collar.
-- Nav: mono, `[01] about  [02] orbit  [03] cv  [04] visuals  [05] contact` (DE: über mich, orbit, lebenslauf,
+- Nav: mono, `[01] about  [02] terrain  [03] cv  [04] visuals  [05] contact` (DE: über mich, gelände, lebenslauf,
   grafiken, kontakt); the current section gets an underline and an accent number; on phones the numbers are hidden
   so all five fit. The hero strip says `SHEET 01 / 05` (`BLATT` in German). Update both if sections are added.
 - Hero: real contours (hero only, faint), graticule meridians, top strip with sheet number, longitude ticks and
@@ -122,8 +123,7 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   one-line description under the job taken from their site. Keep it factual.
 - Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
   "View certificates" link or the `#certificates` hash; hidden in print.
-- About: intro → photo → timeline. The altitude scale lives in its own section ([02] orbit), see above. Line icons
-  are drawn in-house; no third-party logos (trademarks).
+- About: intro → photo → timeline (compact: alternating entries overlap slightly on desktop).
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.

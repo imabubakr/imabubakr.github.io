@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="assets/css/site.css">
     <script src="assets/js/site.js" defer></script>
     <script src="assets/js/hero-map.js" defer></script>
-    <script src="assets/js/explorer.js" defer></script>
+    <script src="assets/js/terrain.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -40,7 +40,7 @@
         <nav aria-label="Sections">
           <ul class="nav-list">
             <li><a href="#about"><span>[01]</span> about</a></li>
-            <li><a href="#orbit"><span>[02]</span> orbit</a></li>
+            <li><a href="#terrain"><span>[02]</span> terrain</a></li>
             <li><a href="#cv"><span>[03]</span> cv</a></li>
             <li><a href="#plates"><span>[04]</span> visuals</a></li>
             <li><a href="#contact"><span>[05]</span> contact</a></li>
@@ -97,33 +97,40 @@
           </div>
         </section>
 
-        <section class="section" id="orbit" data-explorer="assets/layers/explorer.json" aria-labelledby="orbit-title">
+        <section class="section" id="terrain" aria-labelledby="terrain-title" data-terrain="assets/topo/">
           <header class="section-head">
-            <h2 class="section-title" id="orbit-title"><span class="section-no">[02]</span>From orbit to drone</h2>
-            <p class="section-sub">Drag the marker down the altitude scale, or pick a platform. Click the map to choose where to descend.</p>
+            <h2 class="section-title" id="terrain-title"><span class="section-no">[02]</span>Light and water</h2>
+            <p class="section-sub">The region around Freiburg, from the same elevation data as the map above. Move the sun, raise the water.</p>
           </header>
-          <div class="section-body explorer">
-            <div class="altitude">
-              <input class="alt-range" type="range" min="0" max="1000" step="1" value="0" aria-label="Altitude" hidden>
-              <p class="alt-head" aria-hidden="true">altitude</p>
-              <div class="alt-list">
-                  <div><button class="alt-item ex-btn" type="button" aria-pressed="true" data-view="satellite"><svg class="alt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="8.5" width="5" height="7"/><rect x="1.5" y="9.5" width="6" height="5"/><rect x="16.5" y="9.5" width="6" height="5"/><path d="M7.5 12h2M14.5 12h2M12 8.5V5.5M10 4.5l2 1 2-1"/></svg><span class="alt-text"><span class="alt-name">Satellite<span class="alt-h">~705 km</span></span><span class="alt-sub">Landsat · 30 m pixels</span><span class="alt-years">1.6 km wide</span></span></button></div>
-                  <div><button class="alt-item ex-btn" type="button" aria-pressed="false" data-view="aerial"><svg class="alt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5v19M3 12.5l9-3.5 9 3.5M8 20l4-1.5 4 1.5"/><path d="M12 21.5v-3" stroke-dasharray="1 1.5"/></svg><span class="alt-text"><span class="alt-name">Aerial<span class="alt-h">~1 km</span></span><span class="alt-sub">orthophoto · 20 cm</span><span class="alt-years">400 m wide</span></span></button></div>
-                  <div><button class="alt-item ex-btn" type="button" aria-pressed="false" data-view="drone"><svg class="alt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9.5 9.5L6.5 6.5M14.5 9.5l3-3M9.5 14.5l-3 3M14.5 14.5l3 3"/><circle cx="5" cy="5" r="3"/><circle cx="19" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/></svg><span class="alt-text"><span class="alt-name">Drone<span class="alt-h">~100 m</span></span><span class="alt-sub">RGB camera · ~2 cm</span><span class="alt-years">80 m wide</span></span></button></div>
+          <div class="section-body terrain">
+            <div class="tr-controls">
+              <div class="tr-dial" role="slider" tabindex="0" aria-label="Sun position" aria-valuemin="0" aria-valuemax="359" aria-valuenow="315">
+                <svg viewBox="-100 -100 200 200" aria-hidden="true">
+                  <circle class="tr-ring" r="86"/>
+                  <circle class="tr-ring tr-ring-in" r="43"/>
+                  <path class="tr-path"/>
+                  <text class="tr-cardinal" y="-90">N</text><text class="tr-cardinal" x="94" y="4">E</text>
+                  <text class="tr-cardinal" y="98">S</text><text class="tr-cardinal" x="-94" y="4">W</text>
+                  <line class="tr-ray"/>
+                  <circle class="tr-sun" r="9"/>
+                </svg>
               </div>
-              <p class="alt-ground" aria-hidden="true">ground</p>
+              <p class="tr-read tr-sun-read"></p>
+              <button class="tr-play" type="button" data-play="play today’s sun" data-stop="stop">play today’s sun</button>
+              <label class="tr-water">
+                <span class="tr-label">water level</span>
+                <input class="tr-level" type="range" min="170" max="700" step="1" value="170">
+              </label>
+              <p class="tr-read tr-water-read"></p>
             </div>
-            <figure class="ex-figure">
-              <div class="ex-stage">
-                <div class="ex-fallback"><!-- build:explorer-fallback --><svg class="ex-svg" viewBox="0 0 53 33" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><path class="ex-px ex-px1" d="M1 0h1v1h-1zM1 1h1v1h-1zM26 1h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM9 2h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM1 4h1v1h-1zM0 5h1v1h-1zM4 5h1v1h-1zM3 6h1v1h-1zM14 6h1v1h-1zM2 7h1v1h-1zM15 7h1v1h-1zM24 7h1v1h-1zM0 8h1v1h-1zM11 8h1v1h-1zM3 9h1v1h-1zM25 9h1v1h-1zM0 10h1v1h-1zM12 10h1v1h-1zM21 10h1v1h-1zM25 10h1v1h-1zM35 10h1v1h-1zM13 11h1v1h-1zM16 11h1v1h-1zM17 11h1v1h-1zM23 11h1v1h-1zM27 11h1v1h-1zM28 11h1v1h-1zM33 11h1v1h-1zM38 11h1v1h-1zM40 11h1v1h-1zM41 11h1v1h-1zM42 11h1v1h-1zM1 12h1v1h-1zM10 12h1v1h-1zM12 12h1v1h-1zM18 12h1v1h-1zM29 12h1v1h-1zM44 12h1v1h-1zM45 12h1v1h-1zM49 12h1v1h-1zM50 12h1v1h-1zM30 13h1v1h-1zM32 13h1v1h-1zM22 14h1v1h-1zM33 14h1v1h-1zM34 14h1v1h-1zM49 14h1v1h-1zM50 14h1v1h-1zM52 14h1v1h-1zM30 15h1v1h-1zM41 15h1v1h-1zM49 15h1v1h-1zM50 15h1v1h-1zM13 16h1v1h-1zM14 16h1v1h-1zM16 16h1v1h-1zM43 16h1v1h-1zM52 16h1v1h-1zM10 17h1v1h-1zM30 17h1v1h-1zM33 17h1v1h-1zM2 18h1v1h-1zM7 18h1v1h-1zM13 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM18 18h1v1h-1zM33 18h1v1h-1zM34 18h1v1h-1zM48 18h1v1h-1zM28 19h1v1h-1zM37 19h1v1h-1zM49 19h1v1h-1zM7 20h1v1h-1zM26 20h1v1h-1zM27 20h1v1h-1zM32 20h1v1h-1zM37 20h1v1h-1zM48 20h1v1h-1zM7 21h1v1h-1zM22 21h1v1h-1zM24 21h1v1h-1zM37 21h1v1h-1zM38 21h1v1h-1zM39 21h1v1h-1zM21 22h1v1h-1zM23 22h1v1h-1zM28 22h1v1h-1zM8 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM21 23h1v1h-1zM15 24h1v1h-1zM18 24h1v1h-1zM7 25h1v1h-1zM9 25h1v1h-1zM13 25h1v1h-1zM16 25h1v1h-1zM8 26h1v1h-1zM11 26h1v1h-1zM12 26h1v1h-1zM18 26h1v1h-1zM19 26h1v1h-1zM12 27h1v1h-1zM17 27h1v1h-1zM11 28h1v1h-1zM13 28h1v1h-1zM16 28h1v1h-1zM18 28h1v1h-1zM23 28h1v1h-1zM9 29h1v1h-1zM24 29h1v1h-1zM11 30h1v1h-1zM20 30h1v1h-1zM21 30h1v1h-1zM23 30h1v1h-1zM18 31h1v1h-1zM21 31h1v1h-1z"/><path class="ex-px ex-px2" d="M0 0h1v1h-1zM3 0h1v1h-1zM3 1h1v1h-1zM3 2h1v1h-1zM2 3h1v1h-1zM7 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM6 4h1v1h-1zM7 4h1v1h-1zM6 5h1v1h-1zM4 6h1v1h-1zM3 7h1v1h-1zM4 7h1v1h-1zM14 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM1 9h1v1h-1zM24 9h1v1h-1zM22 10h1v1h-1zM52 10h1v1h-1zM0 11h1v1h-1zM11 11h1v1h-1zM12 11h1v1h-1zM21 11h1v1h-1zM24 11h1v1h-1zM37 11h1v1h-1zM39 11h1v1h-1zM49 11h1v1h-1zM52 11h1v1h-1zM0 12h1v1h-1zM13 12h1v1h-1zM21 12h1v1h-1zM23 12h1v1h-1zM24 12h1v1h-1zM28 12h1v1h-1zM35 12h1v1h-1zM43 12h1v1h-1zM46 12h1v1h-1zM48 12h1v1h-1zM51 12h1v1h-1zM52 12h1v1h-1zM9 13h1v1h-1zM10 13h1v1h-1zM11 13h1v1h-1zM14 13h1v1h-1zM15 13h1v1h-1zM26 13h1v1h-1zM28 13h1v1h-1zM29 13h1v1h-1zM35 13h1v1h-1zM36 13h1v1h-1zM40 13h1v1h-1zM47 13h1v1h-1zM48 13h1v1h-1zM49 13h1v1h-1zM8 14h1v1h-1zM11 14h1v1h-1zM18 14h1v1h-1zM30 14h1v1h-1zM32 14h1v1h-1zM35 14h1v1h-1zM36 14h1v1h-1zM37 14h1v1h-1zM43 14h1v1h-1zM8 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM15 15h1v1h-1zM17 15h1v1h-1zM27 15h1v1h-1zM42 15h1v1h-1zM43 15h1v1h-1zM45 15h1v1h-1zM48 15h1v1h-1zM8 16h1v1h-1zM10 16h1v1h-1zM12 16h1v1h-1zM15 16h1v1h-1zM17 16h1v1h-1zM18 16h1v1h-1zM20 16h1v1h-1zM25 16h1v1h-1zM27 16h1v1h-1zM33 16h1v1h-1zM34 16h1v1h-1zM36 16h1v1h-1zM38 16h1v1h-1zM39 16h1v1h-1zM41 16h1v1h-1zM42 16h1v1h-1zM45 16h1v1h-1zM49 16h1v1h-1zM51 16h1v1h-1zM8 17h1v1h-1zM9 17h1v1h-1zM12 17h1v1h-1zM17 17h1v1h-1zM18 17h1v1h-1zM22 17h1v1h-1zM29 17h1v1h-1zM32 17h1v1h-1zM38 17h1v1h-1zM44 17h1v1h-1zM45 17h1v1h-1zM46 17h1v1h-1zM47 17h1v1h-1zM48 17h1v1h-1zM50 17h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM36 18h1v1h-1zM39 18h1v1h-1zM47 18h1v1h-1zM49 18h1v1h-1zM51 18h1v1h-1zM8 19h1v1h-1zM11 19h1v1h-1zM12 19h1v1h-1zM13 19h1v1h-1zM14 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM25 19h1v1h-1zM29 19h1v1h-1zM31 19h1v1h-1zM32 19h1v1h-1zM33 19h1v1h-1zM41 19h1v1h-1zM45 19h1v1h-1zM46 19h1v1h-1zM47 19h1v1h-1zM52 19h1v1h-1zM8 20h1v1h-1zM9 20h1v1h-1zM11 20h1v1h-1zM15 20h1v1h-1zM16 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM21 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM38 20h1v1h-1zM39 20h1v1h-1zM44 20h1v1h-1zM8 21h1v1h-1zM10 21h1v1h-1zM11 21h1v1h-1zM12 21h1v1h-1zM13 21h1v1h-1zM18 21h1v1h-1zM41 21h1v1h-1zM45 21h1v1h-1zM4 22h1v1h-1zM9 22h1v1h-1zM10 22h1v1h-1zM12 22h1v1h-1zM14 22h1v1h-1zM16 22h1v1h-1zM19 22h1v1h-1zM26 22h1v1h-1zM45 22h1v1h-1zM4 23h1v1h-1zM5 23h1v1h-1zM6 23h1v1h-1zM7 23h1v1h-1zM9 23h1v1h-1zM19 23h1v1h-1zM20 23h1v1h-1zM22 23h1v1h-1zM26 23h1v1h-1zM7 24h1v1h-1zM9 24h1v1h-1zM12 24h1v1h-1zM17 24h1v1h-1zM24 24h1v1h-1zM10 25h1v1h-1zM17 25h1v1h-1zM21 25h1v1h-1zM22 25h1v1h-1zM6 26h1v1h-1zM7 26h1v1h-1zM13 26h1v1h-1zM22 26h1v1h-1zM9 27h1v1h-1zM18 27h1v1h-1zM19 27h1v1h-1zM21 27h1v1h-1zM22 27h1v1h-1zM23 27h1v1h-1zM15 28h1v1h-1zM19 28h1v1h-1zM24 28h1v1h-1zM15 29h1v1h-1zM18 29h1v1h-1zM15 30h1v1h-1zM16 31h1v1h-1zM22 31h1v1h-1zM19 32h1v1h-1z"/><path class="ex-px ex-px3" d="M2 0h1v1h-1zM0 1h1v1h-1zM0 2h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM0 3h1v1h-1zM3 3h1v1h-1zM8 3h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM1 6h1v1h-1zM5 6h1v1h-1zM0 7h1v1h-1zM0 9h1v1h-1zM2 9h1v1h-1zM11 9h1v1h-1zM1 10h1v1h-1zM24 10h1v1h-1zM14 11h1v1h-1zM22 11h1v1h-1zM25 11h1v1h-1zM34 11h1v1h-1zM35 11h1v1h-1zM36 11h1v1h-1zM50 11h1v1h-1zM51 11h1v1h-1zM14 12h1v1h-1zM16 12h1v1h-1zM17 12h1v1h-1zM25 12h1v1h-1zM27 12h1v1h-1zM40 12h1v1h-1zM41 12h1v1h-1zM12 13h1v1h-1zM13 13h1v1h-1zM16 13h1v1h-1zM21 13h1v1h-1zM23 13h1v1h-1zM25 13h1v1h-1zM33 13h1v1h-1zM43 13h1v1h-1zM50 13h1v1h-1zM52 13h1v1h-1zM9 14h1v1h-1zM10 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM16 14h1v1h-1zM19 14h1v1h-1zM20 14h1v1h-1zM24 14h1v1h-1zM29 14h1v1h-1zM31 14h1v1h-1zM38 14h1v1h-1zM42 14h1v1h-1zM44 14h1v1h-1zM45 14h1v1h-1zM46 14h1v1h-1zM48 14h1v1h-1zM11 15h1v1h-1zM14 15h1v1h-1zM16 15h1v1h-1zM21 15h1v1h-1zM26 15h1v1h-1zM31 15h1v1h-1zM32 15h1v1h-1zM35 15h1v1h-1zM36 15h1v1h-1zM39 15h1v1h-1zM44 15h1v1h-1zM46 15h1v1h-1zM47 15h1v1h-1zM9 16h1v1h-1zM11 16h1v1h-1zM19 16h1v1h-1zM24 16h1v1h-1zM26 16h1v1h-1zM30 16h1v1h-1zM32 16h1v1h-1zM40 16h1v1h-1zM44 16h1v1h-1zM46 16h1v1h-1zM11 17h1v1h-1zM15 17h1v1h-1zM16 17h1v1h-1zM24 17h1v1h-1zM25 17h1v1h-1zM26 17h1v1h-1zM27 17h1v1h-1zM34 17h1v1h-1zM39 17h1v1h-1zM40 17h1v1h-1zM49 17h1v1h-1zM52 17h1v1h-1zM8 18h1v1h-1zM14 18h1v1h-1zM22 18h1v1h-1zM24 18h1v1h-1zM25 18h1v1h-1zM26 18h1v1h-1zM28 18h1v1h-1zM29 18h1v1h-1zM32 18h1v1h-1zM35 18h1v1h-1zM40 18h1v1h-1zM41 18h1v1h-1zM44 18h1v1h-1zM45 18h1v1h-1zM46 18h1v1h-1zM50 18h1v1h-1zM52 18h1v1h-1zM7 19h1v1h-1zM9 19h1v1h-1zM10 19h1v1h-1zM15 19h1v1h-1zM16 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM24 19h1v1h-1zM38 19h1v1h-1zM39 19h1v1h-1zM40 19h1v1h-1zM42 19h1v1h-1zM44 19h1v1h-1zM48 19h1v1h-1zM10 20h1v1h-1zM13 20h1v1h-1zM14 20h1v1h-1zM24 20h1v1h-1zM25 20h1v1h-1zM30 20h1v1h-1zM40 20h1v1h-1zM41 20h1v1h-1zM42 20h1v1h-1zM45 20h1v1h-1zM46 20h1v1h-1zM9 21h1v1h-1zM14 21h1v1h-1zM15 21h1v1h-1zM17 21h1v1h-1zM19 21h1v1h-1zM21 21h1v1h-1zM40 21h1v1h-1zM42 21h1v1h-1zM43 21h1v1h-1zM44 21h1v1h-1zM46 21h1v1h-1zM5 22h1v1h-1zM7 22h1v1h-1zM13 22h1v1h-1zM15 22h1v1h-1zM17 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM46 22h1v1h-1zM11 23h1v1h-1zM13 23h1v1h-1zM14 23h1v1h-1zM17 23h1v1h-1zM18 23h1v1h-1zM23 23h1v1h-1zM24 23h1v1h-1zM8 24h1v1h-1zM10 24h1v1h-1zM11 24h1v1h-1zM13 24h1v1h-1zM16 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM18 25h1v1h-1zM19 25h1v1h-1zM23 25h1v1h-1zM10 26h1v1h-1zM17 26h1v1h-1zM20 26h1v1h-1zM21 26h1v1h-1zM23 26h1v1h-1zM10 27h1v1h-1zM8 28h1v1h-1zM12 28h1v1h-1zM20 28h1v1h-1zM21 28h1v1h-1zM25 28h1v1h-1zM10 29h1v1h-1zM12 29h1v1h-1zM17 29h1v1h-1zM14 30h1v1h-1zM16 30h1v1h-1zM19 30h1v1h-1zM20 31h1v1h-1zM18 32h1v1h-1zM20 32h1v1h-1zM22 32h1v1h-1z"/><path class="ex-px ex-px4" d="M4 0h1v1h-1zM5 0h1v1h-1zM4 1h1v1h-1zM5 1h1v1h-1zM6 1h1v1h-1zM5 2h1v1h-1zM2 5h1v1h-1zM0 6h1v1h-1zM1 8h1v1h-1zM2 10h1v1h-1zM1 11h1v1h-1zM2 11h1v1h-1zM11 12h1v1h-1zM15 12h1v1h-1zM22 12h1v1h-1zM26 12h1v1h-1zM33 12h1v1h-1zM34 12h1v1h-1zM36 12h1v1h-1zM37 12h1v1h-1zM38 12h1v1h-1zM39 12h1v1h-1zM42 12h1v1h-1zM0 13h1v1h-1zM17 13h1v1h-1zM22 13h1v1h-1zM24 13h1v1h-1zM27 13h1v1h-1zM34 13h1v1h-1zM37 13h1v1h-1zM38 13h1v1h-1zM39 13h1v1h-1zM41 13h1v1h-1zM42 13h1v1h-1zM44 13h1v1h-1zM45 13h1v1h-1zM46 13h1v1h-1zM51 13h1v1h-1zM14 14h1v1h-1zM15 14h1v1h-1zM17 14h1v1h-1zM21 14h1v1h-1zM23 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM28 14h1v1h-1zM39 14h1v1h-1zM40 14h1v1h-1zM41 14h1v1h-1zM47 14h1v1h-1zM13 15h1v1h-1zM18 15h1v1h-1zM19 15h1v1h-1zM20 15h1v1h-1zM22 15h1v1h-1zM23 15h1v1h-1zM24 15h1v1h-1zM25 15h1v1h-1zM28 15h1v1h-1zM29 15h1v1h-1zM33 15h1v1h-1zM34 15h1v1h-1zM37 15h1v1h-1zM38 15h1v1h-1zM40 15h1v1h-1zM21 16h1v1h-1zM22 16h1v1h-1zM23 16h1v1h-1zM28 16h1v1h-1zM29 16h1v1h-1zM31 16h1v1h-1zM35 16h1v1h-1zM37 16h1v1h-1zM47 16h1v1h-1zM48 16h1v1h-1zM13 17h1v1h-1zM14 17h1v1h-1zM19 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM23 17h1v1h-1zM28 17h1v1h-1zM31 17h1v1h-1zM35 17h1v1h-1zM36 17h1v1h-1zM37 17h1v1h-1zM41 17h1v1h-1zM42 17h1v1h-1zM43 17h1v1h-1zM51 17h1v1h-1zM19 18h1v1h-1zM20 18h1v1h-1zM21 18h1v1h-1zM23 18h1v1h-1zM27 18h1v1h-1zM30 18h1v1h-1zM31 18h1v1h-1zM42 18h1v1h-1zM43 18h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM26 19h1v1h-1zM27 19h1v1h-1zM30 19h1v1h-1zM43 19h1v1h-1zM12 20h1v1h-1zM19 20h1v1h-1zM20 20h1v1h-1zM47 20h1v1h-1zM16 21h1v1h-1zM20 21h1v1h-1zM27 21h1v1h-1zM28 21h1v1h-1zM8 22h1v1h-1zM18 22h1v1h-1zM27 22h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM25 23h1v1h-1zM14 24h1v1h-1zM11 25h1v1h-1zM12 25h1v1h-1zM15 25h1v1h-1zM20 25h1v1h-1zM9 26h1v1h-1zM16 26h1v1h-1zM7 27h1v1h-1zM8 27h1v1h-1zM11 27h1v1h-1zM20 27h1v1h-1zM9 28h1v1h-1zM10 28h1v1h-1zM14 28h1v1h-1zM11 29h1v1h-1zM13 29h1v1h-1zM14 29h1v1h-1zM16 29h1v1h-1zM18 30h1v1h-1zM17 31h1v1h-1zM21 32h1v1h-1z"/></svg><!-- /build:explorer-fallback --></div>
-                <canvas class="ex-canvas" role="img" hidden></canvas>
+            <figure class="tr-figure">
+              <div class="tr-stage">
+                <img class="tr-poster" src="assets/layers/terrain-poster.webp" width="800" height="720" alt="" loading="lazy" decoding="async">
+                <canvas class="tr-canvas" hidden></canvas>
+                <div class="tr-places" aria-hidden="true"></div>
               </div>
-              <div class="ex-bar">
-                <p class="ex-readout" aria-hidden="true"></p>
-                <button class="ex-detect" type="button" aria-pressed="false" hidden disabled>run detector</button>
-              </div>
-              <p class="ex-note" hidden>simulated from map footprints, not a model’s output</p>
-              <figcaption>Ebringen near Freiburg. Building footprints © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, drawn at the ground resolution of each altitude.</figcaption>
+              <p class="tr-hover" aria-hidden="true"></p>
+              <figcaption>Copernicus GLO-30 elevation, 100 m grid. Shaded relief and cast shadows are computed in your browser; the water fills low ground connected to the Rhine, a simple “bathtub” model, not a flood forecast.</figcaption>
             </figure>
           </div>
         </section>

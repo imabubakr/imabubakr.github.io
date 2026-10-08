@@ -39,6 +39,7 @@
   --grid: #c9cbc5;
   --accent: #b8380c; /* survey orange, darkened from #D2410F for AA text contrast */
   --accent-mark: #d2410f; /* non-text: location marker, focus ring */
+  --water: #4f7fa3; /* map blue: water only (Light and water section) */
 
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -60,6 +61,7 @@
     --grid: #232c33;
     --accent: #ff6a2b;
     --accent-mark: #ff6a2b;
+    --water: #3e6f94;
     color-scheme: dark;
   }
 }
@@ -71,6 +73,7 @@
   --grid: #232c33;
   --accent: #ff6a2b;
   --accent-mark: #ff6a2b;
+  --water: #3e6f94;
   color-scheme: dark;
 }
 
@@ -682,13 +685,10 @@ a:hover {
   }
 }
 
-/* Photo + "orbit to drone" altitude scale: the platforms worked with, highest
-   first, on a vertical axis that ends at a ground line. */
+/* Portrait above the timeline. */
 .about-visual {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
+  justify-content: center;
   margin-top: 48px;
 }
 .about-photo {
@@ -696,230 +696,85 @@ a:hover {
   width: 128px;
   height: auto;
 }
-.altitude {
-  position: relative;
-  width: min(100%, 340px);
-  margin: 0;
-  text-align: left;
-}
-.alt-item {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.alt-text,
-.alt-name,
-.alt-sub,
-.alt-years {
-  display: block;
-}
-.alt-name {
-  display: flex;
-}
-.alt-head,
-.alt-ground {
-  color: var(--muted);
-  font: 400 0.6875rem/1 var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.alt-head {
-  margin-bottom: 14px;
-}
-.alt-list {
-  position: relative;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-/* the axis */
-.alt-list::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  bottom: -12px;
-  left: 14px;
-  width: 1px;
-  background: var(--muted);
-  opacity: 0.45;
-}
-.alt-item {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  column-gap: 24px;
-}
-.alt-item {
-  position: relative;
-}
-.alt-list > * + * {
-  margin-top: 18px;
-}
-.alt-icon {
-  position: relative;
-  width: 28px;
-  height: 28px;
-  padding: 2px;
-  background: var(--paper);
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 1.3;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-.alt-item[aria-pressed="true"] .alt-icon {
-  stroke: var(--accent-mark);
-}
-.alt-item[aria-pressed="false"] .alt-name {
-  color: var(--muted);
-  font-weight: 400;
-}
-/* With the slider, icons step aside to the right of the axis. */
-.ex-ready .alt-item {
-  grid-template-columns: 28px minmax(0, 1fr);
-  column-gap: 16px;
-  padding-left: 36px;
-}
-.ex-ready .alt-icon {
-  background: none;
-}
-.alt-item:hover .alt-name {
-  color: var(--ink);
-}
-.alt-name {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.35;
-}
-.alt-h {
-  color: var(--muted);
-  font: 400 0.75rem/1.8 var(--font-mono);
-  white-space: nowrap;
-}
-.alt-sub {
-  color: var(--muted);
-  font-size: 0.8125rem;
-  line-height: 1.5;
-}
-.alt-years {
-  color: var(--muted);
-  font: 400 0.75rem/1.5 var(--font-mono);
-}
-.alt-item[aria-pressed="true"] .alt-years {
-  color: var(--accent);
-}
-.alt-ground {
-  margin-top: 12px;
-  padding-top: 8px;
-  border-top: 1px solid var(--muted);
-}
 @media (min-width: 720px) {
   .about-photo {
     width: 152px;
   }
 }
 
-/* -------------------------------------------------- orbit-to-drone explorer -- */
-/* Altitude scale with a slider + a canvas drawing the village at that altitude's
-   ground resolution (assets/js/explorer.js). Without JS: a static 30 m view. */
-.explorer {
+/* ------------------------------------------------------ light and water -- */
+/* Shaded relief with cast shadows + flooding, drawn by assets/js/terrain.js.
+   Without JS (or before the data loads): a pre-rendered poster of the same map. */
+.terrain {
   display: grid;
-  gap: 28px;
+  gap: 24px;
+}
+.tr-controls {
+  display: grid;
   justify-items: center;
+  gap: 10px;
+  text-align: center;
 }
-.ex-figure {
-  width: 100%;
-  margin: 0;
+.tr-dial {
+  width: 200px;
+  touch-action: none;
+  cursor: grab;
 }
-.ex-stage {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  background: var(--paper);
-  box-shadow: inset 0 0 0 1px var(--grid);
+.tr-dial.is-dragging {
+  cursor: grabbing;
 }
-.ex-fallback,
-.ex-svg,
-.ex-canvas {
+.tr-dial svg {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  overflow: visible;
 }
-.ex-canvas {
-  cursor: crosshair;
+.tr-ring {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1px;
+  opacity: 0.6;
+  vector-effect: non-scaling-stroke;
 }
-.ex-fallback[hidden],
-.ex-canvas[hidden] {
-  display: none;
+.tr-ring-in {
+  stroke-dasharray: 2 4;
+  opacity: 0.4;
 }
-
-/* Altitude slider: a native range input laid along the axis (vertical), thumb = diamond. */
-.altitude {
-  position: relative;
+.tr-path {
+  fill: none;
+  stroke: var(--accent-mark);
+  stroke-width: 1px;
+  stroke-dasharray: 1 4;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
 }
-.alt-range {
-  position: absolute;
-  z-index: 1;
-  width: 26px;
-  margin: 0;
-  writing-mode: vertical-lr;
-  background: none;
-  cursor: ns-resize;
-  appearance: none;
-  -webkit-appearance: none;
+.tr-cardinal {
+  fill: var(--muted);
+  font: 400 11px var(--font-mono);
+  text-anchor: middle;
 }
-.alt-range::-webkit-slider-runnable-track {
-  background: none;
+.tr-ray {
+  stroke: var(--accent-mark);
+  stroke-width: 1px;
+  opacity: 0.6;
+  vector-effect: non-scaling-stroke;
 }
-.alt-range::-webkit-slider-thumb {
-  width: 16px;
-  height: 16px;
-  border: 0;
-  background: var(--accent-mark);
-  transform: rotate(45deg);
-  -webkit-appearance: none;
-  appearance: none;
+.tr-sun {
+  fill: var(--accent-mark);
+  stroke: var(--paper);
+  stroke-width: 3px;
+  vector-effect: non-scaling-stroke;
 }
-.alt-range::-moz-range-track {
-  background: none;
+.tr-dial:focus-visible {
+  outline-offset: 6px;
 }
-.alt-range::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border: 0;
-  border-radius: 0;
-  background: var(--accent-mark);
-  transform: rotate(45deg);
-}
-.alt-range:focus-visible {
-  outline-offset: 4px;
-}
-.ex-ready .alt-list::before {
-  left: 14px;
-}
-
-.ex-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px 16px;
-  min-height: 32px;
-  margin-top: 8px;
-}
-.ex-readout {
+.tr-read {
+  min-height: 1.5em;
   color: var(--ink);
   font: 400 0.75rem/1.5 var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
-.ex-detect {
+.tr-play {
   min-height: 28px;
   padding: 2px 10px;
   border: 1px solid var(--accent-mark);
@@ -929,43 +784,100 @@ a:hover {
   font: 400 0.75rem/1.5 var(--font-mono);
   cursor: pointer;
 }
-.ex-detect[aria-pressed="true"] {
+.tr-play[aria-pressed="true"] {
   background: var(--accent-mark);
   color: var(--paper);
 }
-.ex-detect:disabled {
-  border-color: var(--grid);
-  color: var(--muted);
-  cursor: default;
-  opacity: 0.7;
+.tr-water {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 260px);
+  margin-top: 14px;
 }
-.ex-note {
-  margin-top: 2px;
+.tr-label {
   color: var(--muted);
   font: 400 0.6875rem/1.5 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
-.ex-px {
-  fill: var(--ink);
-  shape-rendering: crispEdges;
+.tr-level {
+  width: 100%;
+  accent-color: var(--water);
 }
-.ex-px1 { opacity: 0.18; }
-.ex-px2 { opacity: 0.38; }
-.ex-px3 { opacity: 0.6; }
-.ex-px4 { opacity: 0.85; }
-.ex-figure figcaption {
-  margin-top: 10px;
+.tr-figure {
+  margin: 0;
+}
+.tr-stage {
+  position: relative;
+  aspect-ratio: 10 / 9;
+  background: var(--paper);
+}
+.tr-poster,
+.tr-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.tr-canvas {
+  cursor: crosshair;
+}
+.tr-poster[hidden],
+.tr-canvas[hidden] {
+  display: none;
+}
+.tr-places {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tr-place {
+  position: absolute;
+  transform: translate(-6px, -50%);
+  color: var(--ink);
+  font: 400 0.6875rem/1 var(--font-mono);
+  white-space: nowrap;
+  text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper);
+}
+.tr-place::before {
+  content: "▲ ";
+}
+.tr-town::before {
+  content: "● ";
+}
+/* labels near the right edge sit left of their marker */
+.tr-flip {
+  transform: translate(calc(-100% + 6px), -50%);
+}
+.tr-flip::before {
+  content: none;
+}
+.tr-flip::after {
+  content: " ▲";
+}
+.tr-town.tr-flip::after {
+  content: " ●";
+}
+.tr-hover {
+  min-height: 1.5em;
+  margin-top: 8px;
+  color: var(--muted);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.tr-hover.is-live {
+  color: var(--accent);
+}
+.tr-figure figcaption {
+  margin-top: 4px;
   color: var(--muted);
   font-size: 0.8125rem;
   line-height: 1.5;
 }
-.ex-figure figcaption a {
-  color: inherit;
-}
 @media (min-width: 900px) {
-  .explorer {
-    grid-template-columns: 280px minmax(0, 1fr);
+  .terrain {
+    grid-template-columns: 240px minmax(0, 1fr);
     align-items: center;
-    gap: 48px;
+    gap: 40px;
   }
 }
 
@@ -1400,7 +1312,7 @@ dl.cv-list .cv-row {
   .site-nav,
   .hero,
   #about,
-  #orbit,
+  #terrain,
   #plates,
   .cv-certs,
   .cv-more,
