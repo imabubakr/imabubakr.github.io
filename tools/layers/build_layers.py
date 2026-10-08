@@ -60,6 +60,10 @@ def simplify(pts):
     for p in pts[1:]:
         if (p != keep[-1]).any():
             keep.append(p)
+    # OSM repeats the first node to close a way; drop it, "Z" closes the path.
+    # (Left in, it made the first corner look collinear and turned rectangles into triangles.)
+    while len(keep) > 1 and (keep[-1] == keep[0]).all():
+        keep.pop()
     out = []
     n = len(keep)
     for i in range(n):
