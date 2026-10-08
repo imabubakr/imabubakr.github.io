@@ -7,14 +7,14 @@ and replaces the content between marker comments in each HTML file:
     <!-- build:hero-map -->     inline contour + graticule SVGs
     <!-- build:hero-strip -->   longitude ticks/labels for the top neatline strip
     <!-- build:hero-coords -->  "47.9978°N 7.8426°E  h 277 m"
-    <!-- build:collar -->       CRS, contour interval, DEM credit, revision
+    <!-- build:collar -->       CRS and contour interval
+    <!-- build:credit -->       DEM licence credit
 
 Each marker is closed by <!-- /build:name -->.
 
 Usage: python3 tools/contours/build_hero.py index.html [more.html ...]
 """
 
-import datetime
 import json
 import math
 import re
@@ -31,7 +31,7 @@ META = ROOT / "assets/topo/hero-contours.json"
 CONTOURS = ROOT / "assets/topo/hero-contours.svg"
 
 MERIDIAN_STEP = 2 / 60  # labelled meridians every 2'
-TICK_STEP = 0.5 / 60  # minor ticks every 30"
+TICK_STEP = 1 / 60  # strip ticks every minute
 
 DEM_CREDIT = {
     "Copernicus DEM GLO-30": (
@@ -81,39 +81,19 @@ def main(html_files):
         return (float(np.interp(0, pts[order, 1], pts[order, 0])),
                 float(np.interp(height, pts[order, 1], pts[order, 0])))
 
-    # Parallels: y where each one crosses the left (x=0) and right (x=W) edges.
-    def parallel(lat):
-        pts = np.array([svg_xy(lon, lat) for lon in np.linspace(lon_lo - 0.02, lon_hi + 0.02, 40)])
-        order = np.argsort(pts[:, 0])
-        return (float(np.interp(0, pts[order, 0], pts[order, 1])),
-                float(np.interp(width, pts[order, 0], pts[order, 1])))
-
     meridians = [(lon, *meridian(lon)) for lon in multiples(lon_lo, lon_hi, MERIDIAN_STEP)]
     meridians = [m for m in meridians if 0 < m[1] < width]
 
-    # Edge ticks for latitude, every 30", longer on whole minutes.
-    edge_ticks = []
-    for lat in multiples(lat_lo, lat_hi, TICK_STEP):
-        y_left, y_right = parallel(lat)
-        if not (0 < y_left < height):
-            continue
-        length = 90 if abs(lat * 60 - round(lat * 60)) < 1e-6 else 45
-        edge_ticks.append(f"M0 {y_left:.0f}h{length}M{width:.0f} {y_right:.0f}h-{length}")
-
-    mx, my = svg_xy(meta["lon"], meta["lat"])
     graticule = (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width:.0f} {height:.0f}" '
         f'aria-hidden="true" focusable="false" class="grat">'
         f'<path class="grat-m" d="{"".join(f"M{top:.0f} 0L{bottom:.0f} {height:.0f}" for _, top, bottom in meridians)}"/>'
-        f'<path class="grat-t" d="{"".join(edge_ticks)}"/>'
-        f'<g class="grat-mark" transform="translate({mx:.0f} {my:.0f})">'
-        f'<rect x="-24" y="-24" width="48" height="48" transform="rotate(45)"/><circle r="8"/></g>'
         "</svg>"
     )
     contours = re.sub(r"<style>.*?</style>", "", CONTOURS.read_text(), flags=re.S)
     hero_map = f'<div class="map-box">{contours}{graticule}</div>'
 
-    # Top strip: ticks every 30" positioned by their x at the top edge (fraction of width).
+    # Top strip: ticks every minute positioned by their x at the top edge (fraction of width).
     strip = []
     for lon in multiples(lon_lo, lon_hi, TICK_STEP):
         top, _ = meridian(lon)
@@ -124,8 +104,6 @@ def main(html_files):
         # Labels near the ends would collide with the sheet number / CRS.
         if abs(minutes / 2 - round(minutes / 2)) < 1e-6 and 0.1 < fx < 0.88:
             strip.append(f'<span class="tick tick--major" style="--fx:{fx:.4f}"><span>{dms(lon, "E", "W")}</span></span>')
-        elif abs(minutes / 2 - round(minutes / 2)) < 1e-6 or abs(minutes - round(minutes)) < 1e-6:
-            strip.append(f'<span class="tick tick--minute" style="--fx:{fx:.4f}"></span>')
         else:
             strip.append(f'<span class="tick" style="--fx:{fx:.4f}"></span>')
 
@@ -137,18 +115,14 @@ def main(html_files):
 
     utm_label = meta["crs"].replace("zone ", "")  # "WGS 84 / UTM 32N"
     credit = DEM_CREDIT.get(meta["dem"], f'DEM: {meta["dem"]}')
-    collar = (
-        f'<span class="collar-item">{utm_label}</span>'
-        f'<span class="collar-item">CI {meta["contour_interval_m"]} m</span>'
-        f'<span class="collar-item">rev. {datetime.date.today():%Y-%m}</span>'
-        f'<span class="collar-credit">{credit}</span>'
-    )
+    collar = f'{utm_label} · CI {meta["contour_interval_m"]} m'
 
     blocks = {
         "hero-map": hero_map,
         "hero-strip": "".join(strip),
         "hero-coords": coords,
         "collar": collar,
+        "credit": credit,
     }
     for name in html_files:
         path = Path(name)

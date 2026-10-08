@@ -25,6 +25,42 @@
     sync();
   }
 
+  // Looping figures: load and play only while on screen, never autoplay under
+  // reduced motion, and always offer a pause/play button (WCAG 2.2.2).
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  document.querySelectorAll(".plate").forEach(function (plate) {
+    var video = plate.querySelector("video");
+    var button = plate.querySelector(".plate-toggle");
+    if (!video || !button) return;
+    var userPaused = reduceMotion.matches;
+    var visible = false;
+
+    function update() {
+      if (visible && !userPaused) {
+        var p = video.play();
+        if (p && p.catch) p.catch(function () {});
+      } else {
+        video.pause();
+      }
+      button.textContent = userPaused ? "play" : "pause";
+    }
+
+    button.hidden = false;
+    button.addEventListener("click", function () {
+      userPaused = !userPaused;
+      update();
+    });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        update();
+      }, { threshold: 0.25 }).observe(video);
+    } else {
+      visible = true;
+      update();
+    }
+  });
+
   var links = document.querySelectorAll(".nav-list a[href^='#']");
   if (!("IntersectionObserver" in window) || !links.length) return;
 

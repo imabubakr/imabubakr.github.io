@@ -314,11 +314,8 @@ a:hover {
   bottom: 0;
   left: calc(50cqw + (var(--fx) - 0.5) * var(--mw));
   width: 1px;
-  height: 3px;
+  height: 4px;
   background: var(--ink);
-}
-.tick--minute {
-  height: 6px;
 }
 .tick--major {
   height: 9px;
@@ -382,31 +379,11 @@ a:hover {
   stroke-linejoin: round;
 }
 
-.grat-m,
-.grat-t {
+.grat-m {
   fill: none;
+  stroke: var(--grid);
   stroke-width: 1px;
   vector-effect: non-scaling-stroke;
-}
-.grat-m {
-  stroke: var(--grid);
-}
-.grat-t {
-  stroke: var(--ink);
-}
-.grat-mark rect {
-  fill: var(--paper);
-  stroke: var(--accent-mark);
-  stroke-width: 1.5px;
-  vector-effect: non-scaling-stroke;
-}
-.grat-mark circle {
-  fill: var(--accent-mark);
-}
-@media (max-width: 899px) {
-  .grat-mark {
-    display: none;
-  }
 }
 
 .hero-text {
@@ -528,8 +505,7 @@ a:hover {
 .data .group th {
   padding: 32px 0 10px;
   border-bottom: 1px solid var(--ink);
-  font: 500 0.8125rem/1.2 var(--font-mono);
-  letter-spacing: 0.02em;
+  font-weight: 500;
 }
 .data tbody:first-of-type .group th {
   padding-top: 20px;
@@ -554,7 +530,10 @@ a:hover {
   font-size: 0.875rem;
   line-height: 1.5;
 }
-.data .stack,
+.data .stack {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
 .data .metric {
   font-family: var(--font-mono);
   font-size: 0.8125rem;
@@ -613,20 +592,132 @@ a:hover {
   }
 }
 
-/* -------------------------------------------------------- footer collar -- */
+/* ------------------------------------------------------------ figures -- */
+.plate {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 56px;
+}
+.plate-media {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border: 1px solid var(--ink);
+  background: var(--grid);
+}
+.plate figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  max-width: 600px;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.fig-no {
+  color: var(--ink);
+  font: 400 0.75rem/1 var(--font-mono);
+}
+.plate-toggle {
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 1px solid var(--grid);
+  border-radius: 0;
+  background: none;
+  color: var(--ink);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  cursor: pointer;
+}
+.plate-toggle:hover {
+  border-color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ cv -- */
+.cv-group + .cv-group {
+  margin-top: 56px;
+}
+.cv-group h3 {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 1rem;
+  font-weight: 500;
+}
+.cv-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cv-row {
+  display: grid;
+  gap: 4px 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--grid);
+}
+.cv-date,
+.cv-row dt {
+  color: var(--muted);
+  font: 400 0.8125rem/1.6 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.cv-row dd {
+  margin: 0;
+}
+.cv-entry h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.cv-org {
+  color: var(--muted);
+}
+.cv-entry ul {
+  max-width: 68ch;
+  margin: 10px 0 0;
+  padding-left: 1.1em;
+  font-size: 0.9375rem;
+}
+.cv-entry li + li {
+  margin-top: 6px;
+}
+.cv-entry li::marker {
+  color: var(--muted);
+}
+.cv-note {
+  max-width: 68ch;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+@media (min-width: 720px) {
+  .cv-row {
+    grid-template-columns: 11rem minmax(0, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------- footer -- */
 .collar {
   display: grid;
-  gap: 20px;
+  gap: 16px;
   padding: 24px var(--pad) 28px;
   color: var(--muted);
-  font: 400 0.6875rem/1.5 var(--font-mono);
-  letter-spacing: 0.02em;
+  font-size: 0.8125rem;
+  line-height: 1.5;
 }
 
 .scalebar {
   /* 1000 m at the hero map's on-screen scale. */
   --len: calc(max(100cqw, var(--map-aspect) * (var(--hero-h) - var(--strip-h))) * 1000 / var(--map-width-m));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 4px 20px;
   color: var(--ink);
+  font: 400 0.6875rem/1.5 var(--font-mono);
+}
+.scalebar-graphic {
+  flex: none;
+  padding-right: 7ch; /* room for the "1000 m" label past the bar's end */
 }
 .scalebar-bar {
   position: relative;
@@ -657,30 +748,24 @@ a:hover {
 .scalebar-ticks span:last-child::after {
   content: " m";
 }
-
-.collar-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 24px;
-  color: var(--ink);
-}
-.collar-credit {
-  flex-basis: 100%;
+.scalebar-meta {
   color: var(--muted);
-  font-size: 0.625rem;
-  letter-spacing: 0;
 }
-.collar-legal p + p {
-  margin-top: 2px;
+
+.collar-credit {
+  font-size: 0.6875rem;
 }
 
 @media (min-width: 900px) {
   .collar {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
     align-items: start;
     column-gap: 48px;
   }
   .collar-legal {
     text-align: right;
+  }
+  .collar-credit {
+    grid-column: 1 / -1;
   }
 }

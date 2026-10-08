@@ -30,7 +30,7 @@ def parse_args():
     p.add_argument("--ref-width-px", type=float, default=1440, help="viewport width the label size is tuned for")
     p.add_argument("--label-spacing", type=float, default=2200, help="distance between labels along a line (m)")
     p.add_argument("--label-separation", type=float, default=900, help="minimum distance between any two labels (m)")
-    p.add_argument("--max-labels", type=int, default=16)
+    p.add_argument("--max-labels", type=int, default=10)
     return p.parse_args()
 
 
