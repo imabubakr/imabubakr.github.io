@@ -17,6 +17,10 @@ Model
     ~/miniforge3/envs/geoai/bin/python tools/media/landslide.py [--scan] [--preview]
       --scan     print FS statistics and candidate slopes, write work/ls_scan.png
       --preview  render a few frames only
+  3D version (terrain mesh with the map draped on it):
+    python landslide.py --3d                      textures, panel layers, ls_dem.bin
+    node tools/media/render_landslide3d.mjs       3D frames (three.js, headless Chromium)
+    python landslide.py --compose3d               panel over the frames, encode
 Writes assets/plates/landslide-sim.{webm,mp4}, -720.webp and work/landslide.json (results).
 """
 import glob
@@ -195,7 +199,7 @@ def fmt(v):  # thin-space thousands: valid in English and German (SI style)
     return f"{v:,.0f}".replace(",", " ")
 
 
-def render(preview=False):
+def render(preview=False, mode3d=False):
     d = dtm()
     beta, _, _ = slope_aspect(d)
     fs1 = factor_of_safety(beta, 1.0)
@@ -229,8 +233,15 @@ def render(preview=False):
     up = lambda a: np.asarray(Image.fromarray(a.astype(np.float32)).resize((W, H), Image.BILINEAR))
     mono = lambda s: ImageFont.truetype(MONO, s)
     f_small, f_mid, f_big = mono(17), mono(20), mono(26)
-    frames = WORK / "landslide_frames"
+    frames = WORK / ("landslide_panel" if mode3d else "landslide_frames")
     shutil.rmtree(frames, ignore_errors=True); frames.mkdir(parents=True)
+    tex = WORK / "landslide_tex"
+    if mode3d:
+        shutil.rmtree(tex, ignore_errors=True); tex.mkdir(parents=True)
+        win = d[sl].astype(np.float32)
+        (WORK / "ls_dem.bin").write_bytes((win - float(win.min())).tobytes())
+        (WORK / "ls_dem.json").write_text(json.dumps({"rows": win.shape[0], "cols": win.shape[1], "cell": CELL,
+                                                        "frames": FPS * SECONDS}))
     n_frames = FPS * SECONDS
     picks = (0, 150, 240, 330, n_frames - 1)
     src_up = up(src_w.astype(np.float32)) > 0.5
@@ -262,6 +273,9 @@ def render(preview=False):
             inten = np.clip(wgt_up / wmax, 0.25, 1)[..., None] * on[..., None]
             img = img * (1 - 0.85 * inten) + np.array(ACCENT) * 0.85 * inten
         im = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
+        if mode3d:   # the map becomes the terrain texture; the panel goes on a separate layer
+            im.save(tex / f"{i:04d}.jpg", quality=92)
+            im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
         dr = ImageDraw.Draw(im, "RGBA")
         # panel: model, wetness, results (symbols and SI units only: works in both languages)
         dr.rectangle((24, 24, 640, 236 if t < 8 else 352), fill=(14, 18, 21, 205))
@@ -285,6 +299,11 @@ def render(preview=False):
                 b = int(255 * smooth((t - 9) / 0.6))
                 shown = min(L, flow * L)
                 dr.text((44, 308), f"L ≈ {fmt(round(shown, -1))} m   α = {alpha:.0f}°", font=f_big, fill=(228, 230, 231, b))
+        if mode3d:
+            im.save(frames / f"{i:04d}.png")
+            if i % 60 == 0:
+                print("frame", i)
+            continue
         # scale bar (100 m) and north arrow
         px = 100.0 / WIN_W * W
         dr.rectangle((W - 60 - px, H - 52, W - 60, H - 46), fill=(14, 18, 21, 230))
@@ -294,7 +313,7 @@ def render(preview=False):
         im.save(frames / f"{i:04d}.png")
         if i % 60 == 0:
             print("frame", i)
-    if preview:
+    if preview or mode3d:
         return
     pat = str(frames / "%04d.png")
     run = lambda *a: subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *a], check=True)
@@ -307,5 +326,29 @@ def render(preview=False):
     print("done")
 
 
+def compose3d():
+    """Panel layer over the 3D frames (render_landslide3d.mjs), then encode."""
+    src, pan = WORK / "landslide_3d", WORK / "landslide_panel"
+    out = WORK / "landslide_final"
+    shutil.rmtree(out, ignore_errors=True); out.mkdir()
+    files = sorted(src.glob("*.png"))
+    for f in files:
+        im = Image.open(f).convert("RGBA")
+        im = Image.alpha_composite(im, Image.open(pan / f.name).convert("RGBA")).convert("RGB")
+        im.save(out / f.name)
+    pat = str(out / "%04d.png")
+    run = lambda *a: subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *a], check=True)
+    run("-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-c:v", "libvpx-vp9", "-crf", "33", "-b:v", "0",
+        "-row-mt", "1", str(OUT / "landslide-sim.webm"))
+    run("-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-c:v", "libx264",
+        "-preset", "slow", "-crf", "23", str(OUT / "landslide-sim.mp4"))
+    Image.open(files[-1]).convert("RGB").resize((720, 405), Image.LANCZOS).save(
+        OUT / "landslide-sim-720.webp", quality=80, method=6)
+    print("done")
+
+
 if __name__ == "__main__" and "--scan" not in sys.argv:
-    render(preview="--preview" in sys.argv)
+    if "--compose3d" in sys.argv:
+        compose3d()
+    else:
+        render(preview="--preview" in sys.argv, mode3d="--3d" in sys.argv)

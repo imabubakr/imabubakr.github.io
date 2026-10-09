@@ -56,7 +56,8 @@ with `src=None` (pre-rendered, skipped by `build_media`).
 Plate 04 is a landslide MODEL SCENARIO (`tools/media/landslide.py`): 2 m DTM from the Freudenberg LiDAR ground
 points, infinite-slope FS with rising wetness m, failure where FS < 1 (largest compact cluster after a morphological
 opening = the scenario's slide), volume/mass from area × 1.5 m, runout by MFD routing limited by the Corominas (1996)
-reach angle; results in work/landslide.json and in the caption, which says it is a scenario with assumed soil values.
+reach angle; rendered in 3D (`--3d` → `render_landslide3d.mjs` → `--compose3d`: map frames draped on the
+terrain mesh, heights ×1.6, panel composited on top); results in work/landslide.json and in the caption, which says it is a scenario with assumed soil values.
 Added 2026-10-10 from the owner's Downloads: vehicle detection video (pre-rendered, `src=None`; source stays in
 ~/Downloads, not in the repo), tree crowns (`tree-crowns.png`), population density Europe (`population-europe.png`,
 cropped from a geemap screenshot to remove the UI; basemap credit in the caption). Captions neutral until the owner

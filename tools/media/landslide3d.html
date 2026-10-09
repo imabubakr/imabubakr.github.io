@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#0e1215;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+</head>
+<body>
+<script type="module">
+// Landslide scenario in 3D: the 2 m terrain window as a mesh, each frame's map
+// (FS colours, scar, runout; hillshade baked in) draped on it. Driven by
+// render_landslide3d.mjs, one frame at a time.
+import * as THREE from "three";
+
+const W = 1600, H = 900, EXAG = 1.6;
+const meta = await (await fetch("work/ls_dem.json")).json();
+const dem = new Float32Array(await (await fetch("work/ls_dem.bin")).arrayBuffer());
+const { rows, cols, cell } = meta;
+const sizeX = (cols - 1) * cell, sizeZ = (rows - 1) * cell;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H);
+renderer.setClearColor(0x0e1215);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+// terrain mesh: x east, y up, z south; row 0 = north edge
+const geo = new THREE.PlaneGeometry(sizeX, sizeZ, cols - 1, rows - 1);
+geo.rotateX(-Math.PI / 2);
+const pos = geo.attributes.position;
+for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) pos.setY(r * cols + c, dem[r * cols + c] * EXAG);
+geo.computeVertexNormals();
+
+// a dark base block under the terrain, so the edges read as a cut-out
+const skirt = new THREE.Group();
+const sideMat = new THREE.MeshBasicMaterial({ color: 0x232c33, side: THREE.DoubleSide });
+function side(points) {
+  const g = new THREE.BufferGeometry(), v = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const [ax, ay, az] = points[i], [bx, by, bz] = points[i + 1];
+    v.push(ax, ay, az, bx, by, bz, bx, -20, bz, ax, ay, az, bx, -20, bz, ax, -20, az);
+  }
+  g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+  skirt.add(new THREE.Mesh(g, sideMat));
+}
+const P = (r, c) => [c * cell - sizeX / 2, dem[r * cols + c] * EXAG, r * cell - sizeZ / 2];
+const edge = (fn, n) => Array.from({ length: n }, (_, i) => fn(i));
+side(edge((c) => P(0, c), cols));
+side(edge((c) => P(rows - 1, c), cols));
+side(edge((r) => P(r, 0), rows));
+side(edge((r) => P(r, cols - 1), rows));
+
+const tex = new THREE.Texture();
+tex.colorSpace = THREE.SRGBColorSpace;
+tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex }));
+const scene = new THREE.Scene();
+scene.add(mesh, skirt);
+
+const camera = new THREE.PerspectiveCamera(36, W / H, 1, 6000);
+const smooth = (t) => t * t * (3 - 2 * t);
+const loadImage = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+
+window.frameCount = meta.frames;
+window.renderFrame = async (i) => {
+  tex.image = await loadImage(`work/landslide_tex/${String(i).padStart(4, "0")}.jpg`);
+  tex.needsUpdate = true;
+  const t = i / (meta.frames - 1);
+  // from the south-west, swinging slowly round to the west (the slide faces west)
+  // high and wide at the start (the whole block, FS spreading), lower and closer on the slide at the end
+  const k = smooth(t);
+  const a = THREE.MathUtils.degToRad(205 + 50 * k);
+  const r = 1000 - 360 * k, h = 720 - 340 * k;
+  const tx = 40 * k, tz = -40 * k;
+  camera.position.set(tx + Math.sin(a) * r, h, tz - Math.cos(a) * r);
+  camera.lookAt(tx + 60, 40, tz);
+  renderer.render(scene, camera);
+  return true;
+};
+window.ready = true;
+</script>
+</body>
+</html>
