@@ -193,6 +193,8 @@
     cv.setAttribute("aria-hidden", "true");
     hm.appendChild(cv);
     R3 = { canvas: cv, ctx: cv.getContext("2d"), levels: [], k: 0, mx: 0, my: 0, mxs: 0, mys: 0, t0: 0, running: false, lensA: 0 };
+    fetch(hero.dataset.topo + "hero-contours-dem.bin").then(function (r) { return r.arrayBuffer(); })
+      .then(function (buf) { R3.dem = new Int16Array(buf); });    // 200 x 100 cells of 50 m, for the glass spots
     return fetch(hero.dataset.topo + "hero-terraces.json").then(function (r) { return r.json(); }).then(function (d) {
       R3.levels = d.levels.map(function (l) { return { z: l.z - d.zmin, index: l.z % 50 === 0, rings: l.rings }; });
       var pl = hero.querySelector(".hero-place");
@@ -225,7 +227,7 @@
     var lens = mode === "lens" || mode === "glass";
     if (mode === "scroll-rise") scrollP = R3.push || 0;
     R3.mxs += (R3.mx - R3.mxs) * 0.05; R3.mys += (R3.my - R3.mys) * 0.05;
-    R3.lensA += ((R3.inside ? 1 : 0) - R3.lensA) * 0.12;
+    if (mode !== "glass") R3.lensA += ((R3.inside ? 1 : 0) - R3.lensA) * 0.12;
     var lx = (R3.px || 0) - (hb.left), ly = (R3.py || 0) - (hb.top), LR = Math.max(W, H) * (mode === "glass" ? 0.075 : 0.12);
     var sway = Math.sin(time / 4200);
     var pushT = mode === "scroll-rise" ? 4 : 14;           // scroll-rise: the push mostly zooms and turns
@@ -252,7 +254,8 @@
     };
     if (lens) {
       // 3D loupe: the terrain under the pointer, risen and tilted, inside a circle
-      var LS = s0 * 1.6, LT = 48 * Math.PI / 180, lct = Math.cos(LT), lst = Math.sin(LT);
+      var GL = mode === "glass";
+      var LS = s0 * (GL ? 1.9 : 1.6), LT = (GL ? 64 : 48) * Math.PI / 180, lct = Math.cos(LT), lst = Math.sin(LT);
       var mX = (lx - ox) / s0, mY = (ly - oy) / s0, LD = LR * 6;
       ex = EXAG * LS * 0.8;
       var zc = 0;                                             // ground height under the pointer (nearest terrace)
@@ -260,7 +263,7 @@
       proj = function (X, Y, Z, o) {
         var x = (X - mX) * LS, y = (Y - mY) * LS;            // oblique parallel view: no distortion
         o[0] = lx + x;
-        o[1] = ly + LR * 0.3 + y * lct - (Z - zc) * lst;
+        o[1] = ly + LR * (GL ? 0.12 : 0.3) + y * lct - (Z - zc) * lst;
       };
       ctx.save();
       ctx.beginPath(); ctx.arc(lx, ly, LR * R3.lensA, 0, Math.PI * 2); ctx.clip();
@@ -353,14 +356,10 @@
     var b = hero.getBoundingClientRect();
     R3.mx = ((e.clientX - b.left) / b.width - 0.5) * 2;
     R3.my = ((e.clientY - b.top) / b.height - 0.5) * 2;
+    if (mode === "glass") return;                            // glass loupes are automatic only
     R3.px = e.clientX; R3.py = e.clientY; R3.inside = true;
-    if (mode === "glass") { G.hover = true; G.phase = "fade"; G.until = 0; }
   });
-  hero.addEventListener("pointerleave", function () {
-    if (!R3) return;
-    R3.inside = false;
-    if (mode === "glass") { G.hover = false; G.phase = "fade"; G.until = performance.now() + 700; }
-  });
+  hero.addEventListener("pointerleave", function () { if (R3 && mode !== "glass") R3.inside = false; });
 
   // Sun position over Freiburg now (NOAA simplified solar position).
   function sunNow(at) {
@@ -388,32 +387,62 @@
   // glass: a loupe appears on a hilly, visible spot (not over the sentence or the
   // map controls), holds ~2.6 s, fades; a short pause; the next one elsewhere.
   // While the pointer is over the map it follows the pointer instead.
-  var G = { phase: "wait", until: 0, x: 0, y: 0, hover: false, last: null };
+  var G = { phase: "wait", t0: 0, x: 0, y: 0, last: [] };
+  var SHOW = 2800, OPEN = 750, CLOSE = 650, PAUSE = 1400;
+  // relief of a map point: elevation range (m) within R metres, from the 50 m DEM
+  function relief(X, Y, R) {
+    if (!R3.dem) return 0;
+    var c0 = Math.max(0, Math.floor((X - R) / 50)), c1 = Math.min(199, Math.ceil((X + R) / 50));
+    var r0 = Math.max(0, Math.floor((Y - R) / 50)), r1 = Math.min(99, Math.ceil((Y + R) / 50));
+    var lo = 1e9, hi = -1e9;
+    for (var r = r0; r <= r1; r++) for (var c = c0; c <= c1; c++) {
+      var dx = (c + 0.5) * 50 - X, dy = (r + 0.5) * 50 - Y;
+      if (dx * dx + dy * dy > R * R) continue;
+      var z = R3.dem[r * 200 + c]; if (z < lo) lo = z; if (z > hi) hi = z;
+    }
+    return hi - lo;
+  }
   function glassSpot() {
     var hm = hero.querySelector(".hero-map"), box = hero.querySelector(".map-box");
     var hb = hm.getBoundingClientRect(), bb = box.getBoundingClientRect(), s0 = bb.width / 10000;
-    var cand = R3.levels.filter(function (l) { return l.z >= 120; });
-    for (var tries = 0; tries < 60; tries++) {
-      var L = cand[Math.floor(Math.random() * cand.length)], ring = L.rings[Math.floor(Math.random() * L.rings.length)];
-      var i = 2 * Math.floor(Math.random() * (ring.length / 2));
-      var x = bb.left + ring[i] * s0, y = bb.top + ring[i + 1] * s0;
+    var pl = hero.querySelector(".hero-place"), pr = pl && pl.getBoundingClientRect();
+    var ctl = hero.querySelector(".map-controls"), cr = ctl && ctl.getBoundingClientRect();
+    var LRpx = Math.max(hm.clientWidth, hm.clientHeight) * 0.075, cands = [];
+    for (var tries = 0, ok = 0; tries < 900 && ok < 70; tries++) {
+      var X = 300 + Math.random() * 9400, Y = 300 + Math.random() * 4400;
+      var x = bb.left + X * s0, y = bb.top + Y * s0;
+      if (x - LRpx < hb.left + 12 || x + LRpx > hb.right - 12 || y - LRpx < hb.top + 12 || y + LRpx > hb.bottom - 12) continue;
       var rx = (x - hb.left) / hb.width, ry = (y - hb.top) / hb.height;
-      if (rx < 0.1 || rx > 0.9 || ry < 0.16 || ry > 0.8) continue;      // fully visible
-      if (rx < 0.42 && ry > 0.55) continue;                             // not over the sentence
-      if (G.last && Math.hypot(x - G.last[0], y - G.last[1]) < hb.width * 0.25) continue;   // move on
-      var pl = hero.querySelector(".hero-place");                        // keep clear of the town label
-      if (pl) { var pr = pl.getBoundingClientRect(); if (x > pr.left - hb.width * 0.09 && x < pr.left + hb.width * 0.24 && Math.abs(y - pr.top) < hb.height * 0.2) continue; }
-      return [x, y];
+      if (rx < 0.45 && ry > 0.5) continue;                                   // the sentence
+      if (pr && x + LRpx > pr.left - 20 && x - LRpx < pr.left + hb.width * 0.17 && Math.abs(y - pr.top) < LRpx + 20) continue;   // town label
+      if (cr && y + LRpx > cr.top - 10 && x + LRpx > cr.left - 10) continue; // map controls
+      var last = G.last[G.last.length - 1];
+      if (last && Math.hypot(x - last[0], y - last[1]) < hb.width * 0.12) continue;   // a new place each time
+      ok++;
+      cands.push([x, y, relief(X, Y, (LRpx / (1.9 * s0)) * 0.9)]);
     }
-    return [hb.left + hb.width * 0.72, hb.top + hb.height * 0.35];
+    // only real relief: a random pick among spots with >= 75 % of the best range (and >= 100 m)
+    var top = cands.reduce(function (m, c) { return Math.max(m, c[2]); }, 0);
+    var good = cands.filter(function (c) { return c[2] >= Math.max(100, top * 0.75); });
+    var pick = good.length ? good[Math.floor(Math.random() * good.length)] : null;
+    return pick ? [pick[0], pick[1]] : [hb.left + hb.width * 0.82, hb.top + hb.height * 0.33];
   }
+  function ease(t) { t = Math.min(1, Math.max(0, t)); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
   function glassStep(now) {
-    if (window.scrollY > 30) { R3.inside = false; G.phase = "wait"; G.until = now + 600; return; }   // the tilt takes over
-    if (G.hover) { R3.inside = true; return; }
-    if (now < G.until) { R3.px = G.x; R3.py = G.y; return; }
-    if (G.phase === "wait") { var p = glassSpot(); G.x = p[0]; G.y = p[1]; G.last = p; R3.px = G.x; R3.py = G.y; R3.inside = true; G.phase = "show"; G.until = now + 2600; }
-    else if (G.phase === "show") { R3.inside = false; G.phase = "fade"; G.until = now + 700; }
-    else { G.phase = "wait"; G.until = now + 900; }
+    if (window.scrollY > 30) { R3.lensA = Math.max(0, R3.lensA - 0.08); G.phase = "wait"; G.t0 = now + 500; return; }   // tilt takes over
+    var t = now - G.t0;
+    if (G.phase === "wait") {
+      R3.lensA = 0;
+      if (t >= 0) {
+        var p = glassSpot(); G.x = p[0]; G.y = p[1];
+        G.last.push(p); if (G.last.length > 2) G.last.shift();
+        G.phase = "show"; G.t0 = now;
+      }
+    } else if (G.phase === "show") {
+      R3.lensA = ease(t / OPEN) * (1 - ease((t - SHOW + CLOSE) / CLOSE));
+      if (t >= SHOW) { G.phase = "wait"; G.t0 = now + PAUSE; R3.lensA = 0; }
+    }
+    R3.px = G.x; R3.py = G.y; R3.inside = R3.lensA > 0;
   }
   function riseLoop(now) {
     if (!R3 || !CANVAS_MODES[mode]) { if (R3) R3.running = false; return; }
@@ -533,7 +562,7 @@
         if (m !== "scroll-rise" && m !== "lens" && m !== "glass") root.classList.add("hfx-rising");
         if (m === "scroll-rise") { pinOn(); R3.k = 0; R3.push = 0; }
         root.classList.toggle("hfx-lens", m === "lens" || m === "glass");
-        if (m === "glass") { G.phase = "wait"; G.until = performance.now() + 1200; G.hover = false; R3.inside = false; R3.lensA = 0; }
+        if (m === "glass") { G.phase = "wait"; G.t0 = performance.now() + 1000; G.last = []; R3.inside = false; R3.lensA = 0; }
         R3.t0 = performance.now();
         if (!R3.running) { R3.running = true; requestAnimationFrame(riseLoop); }
       });

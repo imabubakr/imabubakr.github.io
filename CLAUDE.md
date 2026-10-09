@@ -235,9 +235,12 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   Further preview modes: `intro` (rises once, settles back flat), `sun` (terraces cast paper shadows from the real sun
   over Freiburg now; at night it shows today's 16:00 sun and says so), `lens` (a round 3D loupe that follows the
   pointer over the flat map; map tools stay usable), `scroll-rise` (rises with scroll, then leans away). The owner
-  likes `tilt` (CSS lean on scroll). `glass` (owner's idea, 2026-10-12): small 3D loupes (radius 7.5 % of the hero) pop up by
-  themselves on hilly, visible spots (not over the sentence, the town label or the controls), hold ~2.6 s, fade,
-  next spot ≥ 25 % of the width away; the pointer takes one over; hidden once scrolled, then `tilt`. `scroll-rise` (owner's favourite, refined 2026-10-11): the hero is wrapped in `.hfx-pin`
+  likes `tilt` (CSS lean on scroll). `glass` (owner's idea, 2026-10-12): small 3D loupes (radius 7.5 % of the hero, view
+  inclined 64°) open like an iris (cubic easing, 0.75 s), hold, close (2.8 s in all), pause 1.4 s, then the next.
+  Automatic only: the pointer never gets a loupe (owner's wish). Spots: ~70 visible candidates (not over the sentence,
+  the town label or the controls, ≥ 12 % of the width from the last one), scored by the elevation range inside the
+  loupe from the 50 m DEM; a random pick among those with ≥ 75 % of the best and ≥ 100 m. Hidden once scrolled,
+  then `tilt`. `scroll-rise` (owner's favourite, refined 2026-10-11): the hero is wrapped in `.hfx-pin`
   (hero height + 90vh) and sticks under the nav; pinned progress 0–0.7 rises and turns the map (eased, never jumps
   with the wheel), 0.7–1 pushes in (zoom + slight turn); no shadows (owner disliked the sun effect); handoff: from
   pinned progress 0.72 and while the hero scrolls away, the terraces dissolve and the hero's paper turns transparent
