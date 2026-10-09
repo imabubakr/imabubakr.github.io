@@ -105,23 +105,6 @@
     });
   }
 
-  // CV as PDF: the print stylesheet turns the page into an A4 CV. While printing,
-  // the document title becomes the suggested PDF file name.
-  var printButton = document.querySelector(".print-cv");
-  if (printButton) {
-    var pageTitle = document.title;
-    printButton.hidden = false;
-    printButton.addEventListener("click", function () {
-      window.print();
-    });
-    window.addEventListener("beforeprint", function () {
-      document.title = printButton.dataset.pdfTitle;
-    });
-    window.addEventListener("afterprint", function () {
-      document.title = pageTitle;
-    });
-  }
-
   // Links to #certificates (and arriving with that hash) unfold the certificates.
   var certs = document.getElementById("certificates");
   if (certs) {

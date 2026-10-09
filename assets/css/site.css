@@ -40,8 +40,6 @@
   --accent: #b8380c; /* survey orange, darkened from #D2410F for AA text contrast */
   --accent-mark: #d2410f; /* non-text: location marker, focus ring */
   --tl-edu: #587082; /* timeline: education markers (slate blue, as in dark mode) */
-  --photo-shadow: #1f262b; /* duotone portrait: dark end (neutral, slightly cool ink) */
-  --photo-light: #e9eae6; /* duotone portrait: light end (= paper, no tint) */
   /* land cover for the orbit-to-drone map (muted, map-like) */
   --lc-base: #e2e1d6;
   --lc-urban: #dad6cd;
@@ -77,8 +75,6 @@
     --accent: #ff6a2b;
     --accent-mark: #ff6a2b;
     --tl-edu: #6c7f8c;
-    --photo-shadow: #0e1215;
-    --photo-light: #a9b8c2;
     --lc-base: #161b1e;
     --lc-urban: #1f2529;
     --lc-field: #2a2a22;
@@ -103,8 +99,6 @@
   --accent: #ff6a2b;
   --accent-mark: #ff6a2b;
   --tl-edu: #6c7f8c;
-  --photo-shadow: #0e1215;
-  --photo-light: #a9b8c2;
   --lc-base: #161b1e;
   --lc-urban: #1f2529;
   --lc-field: #2a2a22;
@@ -805,8 +799,8 @@ a:hover {
 }
 
 /* --------------------------------------------------------------- about -- */
-/* About: a short introduction (background, earlier work, current job), the
-   timeline, then the portrait. Text left-aligned in a centred column. */
+/* About: a short introduction (background, earlier work, current job), then
+   the timeline. Text left-aligned in a centred column. */
 .about-body {
   text-align: center;
 }
@@ -824,54 +818,6 @@ a:hover {
 .intro-text p + p {
   margin-top: 0.8em;
 }
-/* Portrait: the whole photo (not cropped) as a duotone in the map's colours:
-   grayscale, shadows lifted to --photo-shadow (lighten), highlights capped at
-   --photo-light (multiply); both change with the theme. A narrow mask fades
-   the edges into the paper, so the photo has no frame. */
-.about-visual {
-  display: flex;
-  justify-content: center;
-  margin-top: 48px;
-}
-.duotone {
-  position: relative;
-  display: block;
-  isolation: isolate;
-}
-.duotone::before,
-.duotone::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.duotone::before {
-  background: var(--photo-shadow);
-  mix-blend-mode: lighten;
-}
-.duotone::after {
-  background: var(--photo-light);
-  mix-blend-mode: multiply;
-}
-.portrait {
-  --fade: linear-gradient(transparent, #000 9%, #000 91%, transparent);
-  -webkit-mask-image: var(--fade), linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
-  -webkit-mask-composite: source-in;
-  mask-image: var(--fade), linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
-  mask-composite: intersect;
-}
-.about-photo {
-  display: block;
-  width: 144px;
-  height: auto;
-  filter: grayscale(1) contrast(1.15);
-}
-@media (min-width: 720px) {
-  .about-photo {
-    width: 168px;
-  }
-}
-
 /* ------------------------------------------------- from orbit to drone -- */
 /* Career story: three chapters scroll past a pinned map (assets/js/descent.js) that
    descends from satellite to drone height. Without JS: the chapters alone. */
@@ -1386,6 +1332,7 @@ dl.cv-list .cv-row {
   display: none;
 }
 .print-cv {
+  display: inline-block;
   margin-top: 18px;
   padding: 4px 6px;
   border: 0;
@@ -1398,6 +1345,14 @@ dl.cv-list .cv-row {
 }
 .print-cv:hover {
   text-decoration-thickness: 2px;
+}
+
+/* The page shows a short CV (.cv-full parts hidden); the PDF and printing show
+   all of it. */
+@media screen {
+  .cv-full {
+    display: none !important;
+  }
 }
 
 /* Printing (or "Save as PDF") gives an A4 Lebenslauf: print header + CV only. */
@@ -1437,7 +1392,6 @@ dl.cv-list .cv-row {
   #contact,
   .lightbox,
   .collar,
-  .cv-personal-group,
   #cv .section-head {
     display: none !important;
   }
