@@ -611,9 +611,9 @@
     } else if (mode === "scroll-rise") {
       // 0 ... 0.7 of the pinned scroll: rise and turn; 0.7 ... 1: push towards the hills
       var pp = pinProgress();
-      R3.kT = smooth(pp / 0.7);
-      R3.pushT = smooth((pp - 0.7) / 0.3);
-      R3.sweepP = (R3.sweepP || 0) + (Math.min(1, Math.max(0, (pp - 0.4) / 0.4)) - (R3.sweepP || 0)) * 0.12;
+      R3.kT = smooth(pp / 0.5);
+      R3.pushT = smooth((pp - 0.45) / 0.35);
+      R3.sweepP = (R3.sweepP || 0) + (Math.min(1, Math.max(0, (pp - 0.28) / 0.32)) - (R3.sweepP || 0)) * 0.12;
       R3.k += (R3.kT - R3.k) * 0.1;                       // eased, never jumps with the wheel
       R3.push = (R3.push || 0) + (R3.pushT - (R3.push || 0)) * 0.1;
       cue.classList.toggle("is-gone", pp > 0.015);
@@ -625,8 +625,9 @@
       // flight's ridge lines (fixed behind the page, also looking east) take over
       var hr = hero.getBoundingClientRect(), navH = parseFloat(getComputedStyle(root).getPropertyValue("--nav-h")) || 57;
       var release = Math.min(1, Math.max(0, (navH - hr.top) / (hr.height * 0.55)));
-      var fadeT = Math.max(0.55 * smooth((pp - 0.72) / 0.28), smooth(release));
-      R3.fade = (R3.fade || 0) + (fadeT - (R3.fade || 0)) * 0.18;
+      // the dissolve runs inside the pin (0.6 -> 1) and is complete before the hero releases
+      var fadeT = Math.max(smooth((pp - 0.6) / 0.4), smooth(release));
+      R3.fade = (R3.fade || 0) + (fadeT - (R3.fade || 0)) * 0.14;
       hero.style.setProperty("--hfx-bg", (1 - R3.fade).toFixed(3));
       R3.canvas.style.opacity = R3.k > 0.004 ? (1 - (OPTS.points ? 0.15 : 0.9) * R3.fade).toFixed(3) : "";   // hidden until it rises
     } else {

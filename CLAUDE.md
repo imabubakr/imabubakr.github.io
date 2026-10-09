@@ -241,8 +241,9 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   the town label or the controls, ≥ 12 % of the width from the last one), scored by the elevation range inside the
   loupe from the 50 m DEM; a random pick among those with ≥ 75 % of the best and ≥ 100 m. Hidden once scrolled,
   then `tilt`. `scroll-rise` (owner's favourite, refined 2026-10-11): the hero is wrapped in `.hfx-pin`
-  (hero height + 90vh) and sticks under the nav; pinned progress 0–0.7 rises and turns the map (eased, never jumps
-  with the wheel), 0.7–1 pushes in (zoom + slight turn); no shadows (owner disliked the sun effect); handoff: from
+  (hero height + 90vh) and sticks under the nav; pinned progress 0–0.5 rises and turns the map (eased, never jumps
+  with the wheel), 0.45–0.8 pushes in, sweep 0.28–0.6, and the sand dissolve runs 0.6–1, so it is complete while the
+  hero is still pinned (owner: it should disappear a bit earlier for a smooth transition); no shadows (owner disliked the sun effect); handoff: from
   pinned progress 0.72 and while the hero scrolls away, the terraces dissolve and the hero's paper turns transparent
   (`--hfx-bg`), so the background flight (also looking east) takes over; while risen the map tools,
   controls, hint and strip ticks step back. Polish (2026-10-12): each layer has a fine card edge (≤ 1.8 px, paper mixed with
