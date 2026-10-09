@@ -199,8 +199,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   tools, then the links). `--nav-h` is 84px on phones, 57px from 900px. The hero strip says `SHEET 01 / 05`
   (`BLATT` in German). Update it if sections are added.
 - Hero: real contours (hero only, faint), graticule meridians, top strip with sheet number, longitude ticks and
-  `EPSG:4326`. "FREIBURG IM BREISGAU" as a map label (ink dot + spaced caps) at the Münster's true position
-  (`build:hero-place`, written by build_hero.py); on phones the name sits left of the dot.
+  `EPSG:4326`. No town label (the owner removed "Freiburg im Breisgau", 2026-10-12; build_hero.py still
+  computes it, but the pages have no `build:hero-place` marker any more).
 - About timeline: a centre
   line that starts at the first phase label (not at the photo); `EDUCATION`/`CAREER` labels sit on the line;
   entries alternate sides (`.tl-l`/`.tl-r`) with diamond markers and short connectors; the current job is

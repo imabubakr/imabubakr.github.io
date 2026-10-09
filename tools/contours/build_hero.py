@@ -6,7 +6,7 @@ and replaces the content between marker comments in each HTML file:
 
     <!-- build:hero-map -->     inline contour + graticule SVGs
     <!-- build:hero-strip -->   longitude ticks/labels for the top neatline strip
-    <!-- build:hero-place -->   "Freiburg im Breisgau" map label at the Münster
+    <!-- build:hero-place -->   (unused since 2026-10-12: the owner removed the town label)
     <!-- build:credit -->       DEM licence credit
 
 Each marker is closed by <!-- /build:name -->.
