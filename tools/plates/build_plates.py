@@ -31,12 +31,12 @@ PLATES = [
     # Pre-rendered videos (tools/media, src None): media already in assets/plates.
     ("lidar-flyaround", None, True, 0,
      ("LiDAR point cloud, Freudenberg",
-      "Freudenberg (Siegerland) from airborne laser scanning: about 2.4 million points, classified into ground, "
-      "vegetation and buildings using height above ground and the official building footprints. "
-      "Data: Geobasis NRW (dl-de/zero-2-0)."),
+      "Freudenberg (Siegerland) from airborne laser scanning: about 2.4 million points with an automated "
+      "classification into ground, vegetation and buildings (height above ground and cadastral building "
+      "footprints). Data: Geobasis NRW (dl-de/zero-2-0)."),
      ("LiDAR-Punktwolke, Freudenberg",
-      "Freudenberg (Siegerland) aus flugzeuggestütztem Laserscanning: rund 2,4 Millionen Punkte, klassifiziert in "
-      "Boden, Vegetation und Gebäude anhand der Höhe über Grund und der amtlichen Gebäudegrundrisse. "
+      "Freudenberg (Siegerland) aus flugzeuggestütztem Laserscanning: rund 2,4 Millionen Punkte mit automatisierter "
+      "Klassifikation in Boden, Vegetation und Gebäude (Höhe über Grund und amtliche Gebäudegrundrisse). "
       "Daten: Geobasis NRW (dl-de/zero-2-0).")),
     ("ortho-buildings", None, True, 0,
      ("Orthophoto and building outlines, Freudenberg",
