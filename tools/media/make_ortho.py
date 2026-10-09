@@ -9,8 +9,8 @@ Writes assets/plates/ortho-buildings.{webm,mp4} and -720.webp (poster/thumbnail)
 
     --errors   a labelled SIMULATION of typical building-segmentation errors, made
                from the official footprints (not model output): attached houses
-               merged, loose rounded outlines on complex buildings; the official
-               footprints stay as thin white reference lines.
+               merged, loose rounded outlines on complex buildings; drawn as white
+               outlines only.
                -> assets/plates/ortho-errors.*
 """
 import glob
@@ -141,12 +141,9 @@ def main():
                 break
             k = min(1, (radius - dist) / 25)                  # each outline fades in over 25 m
             pts = [((x - (cx - vw / 2)) * scale, ((cy + vh / 2) - y) * scale) for x, y in p.exterior.coords]
-            d.polygon(pts, fill=ACCENT + (int(46 * k),))
-            d.line(pts + [pts[0]], fill=ACCENT + (int(235 * k),), width=max(3, round(1.8 * SS)), joint="curve")
-        if errors:  # official footprints on top as thin white reference lines
-            for p in official:
-                pts = [((x - (cx - vw / 2)) * scale, ((cy + vh / 2) - y) * scale) for x, y in p.exterior.coords]
-                d.line(pts + [pts[0]], fill=(255, 255, 255, 215), width=max(2, SS), joint="curve")
+            col = (255, 255, 255) if errors else ACCENT       # errors mode: white outlines only
+            d.polygon(pts, fill=col + (int((30 if errors else 46) * k),))
+            d.line(pts + [pts[0]], fill=col + (int(235 * k),), width=max(3, round(1.8 * SS)), joint="curve")
         frame = Image.alpha_composite(frame.convert("RGBA"), over).convert("RGB")
         frame = frame.resize((W, H), Image.LANCZOS)
         frame.save(frames / f"{i:04d}.png")

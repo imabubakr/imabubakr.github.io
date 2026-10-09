@@ -30,36 +30,13 @@ C3S = "contains modified Copernicus Climate Change Service information 2023"
 PLATES = [
     # Pre-rendered videos (tools/media, src None): media already in assets/plates.
     ("lidar-flyaround", None, True, 0,
-     ("LiDAR point cloud, Freudenberg",
-      "Freudenberg (Siegerland) from airborne laser scanning, about 2.4 million points. The open data only "
-      "separates ground from non-ground, so I classified it in three automated steps: (1) a 1 m terrain model "
-      "from the ground points, with gaps under buildings filled; (2) height above ground for every point; "
-      "(3) points more than 1.5 m above ground inside an official building footprint are buildings, all other "
-      "points more than 0.5 m above ground are vegetation, the rest is ground. Noise points were removed. "
-      "Data: Geobasis NRW (dl-de/zero-2-0)."),
-     ("LiDAR-Punktwolke, Freudenberg",
-      "Freudenberg (Siegerland) aus flugzeuggestütztem Laserscanning, rund 2,4 Millionen Punkte. Die offenen Daten "
-      "unterscheiden nur Boden und Nicht-Boden, daher habe ich sie in drei automatisierten Schritten klassifiziert: "
-      "(1) ein Geländemodell mit 1 m Auflösung aus den Bodenpunkten, Lücken unter Gebäuden gefüllt; (2) die Höhe "
-      "über Grund für jeden Punkt; (3) Punkte mehr als 1,5 m über Grund innerhalb eines amtlichen Gebäudegrundrisses "
-      "sind Gebäude, alle übrigen Punkte mehr als 0,5 m über Grund Vegetation, der Rest Boden. Rauschpunkte wurden "
-      "entfernt. Daten: Geobasis NRW (dl-de/zero-2-0).")),
-    ("ortho-buildings", None, True, 0,
-     ("Orthophoto and building outlines, Freudenberg",
-      "The old town of Freudenberg (Siegerland) in a 10 cm orthophoto (DOP10, 2025) with the official ALKIS "
-      "building footprints. Data: Geobasis NRW (dl-de/zero-2-0)."),
-     ("Orthofoto und Gebäudeumrisse, Freudenberg",
-      "Die Altstadt von Freudenberg (Siegerland) im 10-cm-Orthofoto (DOP10, 2025) mit den amtlichen "
-      "ALKIS-Gebäudegrundrissen. Daten: Geobasis NRW (dl-de/zero-2-0).")),
+     ("LiDAR point cloud, Freudenberg", "Freudenberg (Siegerland) from airborne laser scanning."),
+     ("LiDAR-Punktwolke, Freudenberg", "Freudenberg (Siegerland) aus flugzeuggestütztem Laserscanning.")),
     ("ortho-errors", None, True, 0,
-     ("Typical segmentation errors (simulated)",
-      "Typical errors of building-segmentation models, simulated from the official footprints (white): attached "
-      "houses merged into one polygon and loose outlines on complex roofs (orange). An illustration, not model "
-      "output. Freudenberg, DOP10 2025. Data: Geobasis NRW (dl-de/zero-2-0)."),
-     ("Typische Segmentierungsfehler (simuliert)",
-      "Typische Fehler von Modellen zur Gebäudesegmentierung, simuliert aus den amtlichen Grundrissen (weiß): "
-      "aneinandergebaute Häuser zu einem Polygon verschmolzen und ungenaue Umrisse bei komplexen Dächern (orange). "
-      "Eine Illustration, keine Modellausgabe. Freudenberg, DOP10 2025. Daten: Geobasis NRW (dl-de/zero-2-0).")),
+     ("Building outlines, Freudenberg",
+      "Freudenberg (Siegerland) in a 10 cm orthophoto with simulated building-segmentation outlines."),
+     ("Gebäudeumrisse, Freudenberg",
+      "Freudenberg (Siegerland) im 10-cm-Orthofoto mit simulierten Umrissen einer Gebäudesegmentierung.")),
     ("landslide-sim", None, True, 0,
      ("Landslide simulation, Freudenberg", "A shallow-landslide scenario on real terrain in Freudenberg: LiDAR elevation model (2 m) with the 10 cm orthophoto draped on it, in 3D (heights ×1.6). Rain of up to 150 mm/day saturates the soil, first in hollows (steady-state hydrology, Montgomery & Dietrich 1994, shown in blue); where the factor of safety of the infinite-slope model falls below 1, the slope fails. About 2 900 m³ (5 600 t) slide out and leave an empty scar; the debris particles run out along the terrain with Voellmy friction (μ = 0.3, ξ = 300 m/s²), reaching about 10 m/s and coming to rest after about 60 m and 10 s. The travel angle of 20° agrees with the empirical 23° for this volume (Corominas 1996). Assumed soil: c′ = 4 kPa, φ′ = 33°, depth 1.5 m, T = 30 m²/day; scar and deposit drawn ×3 and ×1.5 deeper. A model scenario, not a recorded event. Data: Geobasis NRW (dl-de/zero-2-0)."),
      ("Rutschungssimulation, Freudenberg", "Ein Szenario für eine flachgründige Rutschung auf realem Gelände in Freudenberg: LiDAR-Höhenmodell (2 m) mit darübergelegtem 10-cm-Orthofoto, in 3D (Höhen ×1,6). Regen von bis zu 150 mm/Tag sättigt den Boden, zuerst in Hangmulden (stationäre Hydrologie nach Montgomery & Dietrich 1994, blau dargestellt); wo der Sicherheitsfaktor des Modells der unendlichen Böschung unter 1 fällt, versagt der Hang. Rund 2 900 m³ (5 600 t) rutschen ab und hinterlassen eine leere Abrissnische; die Partikel fließen mit Voellmy-Reibung (μ = 0,3, ξ = 300 m/s²) über das Gelände ab, erreichen etwa 10 m/s und kommen nach rund 60 m und 10 s zur Ruhe. Das Pauschalgefälle von 20° stimmt mit den empirischen 23° für dieses Volumen überein (Corominas 1996). Angenommener Boden: c′ = 4 kPa, φ′ = 33°, Mächtigkeit 1,5 m, T = 30 m²/Tag; Abrissnische und Ablagerung ×3 bzw. ×1,5 überhöht. Ein Modellszenario, kein beobachtetes Ereignis. Daten: Geobasis NRW (dl-de/zero-2-0).")),
