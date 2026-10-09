@@ -53,6 +53,10 @@ footprints drawing in. Data: Geobasis NRW, dl-de/zero-2-0 (credited in the capti
 houses, loose outlines; official footprints in white) and its caption says so. Captions must stay truthful: the building footprints are official ALKIS data, not model output (the owner
 asked; a false claim would be detectable and risky in applications). They are listed in `PLATES`
 with `src=None` (pre-rendered, skipped by `build_media`).
+Plate 04 is a landslide MODEL SCENARIO (`tools/media/landslide.py`): 2 m DTM from the Freudenberg LiDAR ground
+points, infinite-slope FS with rising wetness m, failure where FS < 1 (largest compact cluster after a morphological
+opening = the scenario's slide), volume/mass from area × 1.5 m, runout by MFD routing limited by the Corominas (1996)
+reach angle; results in work/landslide.json and in the caption, which says it is a scenario with assumed soil values.
 Added 2026-10-10 from the owner's Downloads: vehicle detection video (pre-rendered, `src=None`; source stays in
 ~/Downloads, not in the repo), tree crowns (`tree-crowns.png`), population density Europe (`population-europe.png`,
 cropped from a geemap screenshot to remove the UI; basemap credit in the caption). Captions neutral until the owner
