@@ -8,3 +8,4 @@ tools/contours/work-region/
 tools/cv/node_modules/
 tools/media/work/
 tools/media/node_modules/
+__pycache__/
