@@ -8,8 +8,8 @@
 // says what it is.
 //
 // Section [02] "From orbit to drone": while its chapters scroll past, the camera
-// climbs to orbit (Earth's limb, graticule, coastlines, borders, the Rhine, a
-// Sentinel-2 swath over Freiburg), descends to ~1 km looking straight down
+// climbs to orbit (Earth's limb, 5° graticule, country outlines, a Sentinel-2
+// swath over Freiburg), descends to ~1 km looking straight down
 // (overlapping aerial photo frames) and tilts forward at drone height (a camera
 // viewfinder). The keyframes sit on the chapters' real positions; an
 // altimeter on the right edge follows the height, and the active chapter is
@@ -215,7 +215,7 @@
     var orbA = clamp((alt - 25000) / 75000, 0, 1);
     var mapA = clamp((alt - 8000) / 12000, 0, 1);
     if (orbA > 0) drawGlobe(orbA, view, line);
-    if (mapA > 0 && earth) drawEarth(mapA, view, ink, line);
+    if (mapA > 0 && earth) drawEarth(mapA, view, ink);
     if (alt > 60000) drawSwath(clamp((alt - 60000) / 140000, 0, 1), view, ink, line);
 
     // --- terrain: cross-section lines at fixed distances along the route
@@ -425,14 +425,14 @@
     ctx.lineJoin = "round";
     ctx.lineWidth = 0.8;
     var lat, lon, path, x;
-    for (lat = 20; lat <= 76; lat += 1) {
+    for (lat = 20; lat <= 75; lat += 5) {
       for (path = [], x = -40; x <= 55; x += 0.5) path.push(x, lat);
-      ctx.globalAlpha = a * (lat % 5 ? 0.25 : 0.55);
+      ctx.globalAlpha = a * 0.45;
       strokeLonLat(path, v);
     }
-    for (lon = -40; lon <= 55; lon += 1) {
+    for (lon = -40; lon <= 55; lon += 5) {
       for (path = [], x = 20; x <= 76; x += 0.5) path.push(lon, x);
-      ctx.globalAlpha = a * (lon % 5 ? 0.25 : 0.55);
+      ctx.globalAlpha = a * 0.45;
       strokeLonLat(path, v);
     }
     // limb: the circle where the view grazes the sphere, around the point below the camera
@@ -452,23 +452,14 @@
     ctx.stroke();
     ctx.globalAlpha = 1;
   }
-  // coastlines (ink), land borders (dashed), the Rhine (river blue)
-  function drawEarth(a, v, ink, line) {
+  // country outlines: coastlines and land borders, both solid
+  function drawEarth(a, v, ink) {
     ctx.lineJoin = "round";
-    ctx.strokeStyle = line;
-    ctx.lineWidth = 0.9;
-    ctx.setLineDash([3, 3]);
-    ctx.globalAlpha = 0.8 * a;
-    earth.borders.forEach(function (p) { strokeLonLat(p, v); });
-    ctx.setLineDash([]);
     ctx.strokeStyle = ink;
     ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.6 * a;
+    ctx.globalAlpha = 0.5 * a;
+    earth.borders.forEach(function (p) { strokeLonLat(p, v); });
     earth.coast.forEach(function (p) { strokeLonLat(p, v); });
-    ctx.strokeStyle = color("--tl-edu");
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.9 * a;
-    earth.rhine.forEach(function (p) { strokeLonLat(p, v); });
     ctx.globalAlpha = 1;
   }
   // great-circle destination from lat/lon (deg), bearing (deg), distance (m)

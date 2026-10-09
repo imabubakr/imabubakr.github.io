@@ -1,8 +1,9 @@
-"""Build assets/topo/earth.json: coastlines, land borders and the Rhine around
-Europe for the orbit view of section [02] (assets/js/backdrop.js).
+"""Build assets/topo/earth.json: coastlines and land borders around Europe for
+the orbit view of section [02] (assets/js/backdrop.js). Country outlines only:
+islands and coastline pieces smaller than MIN_SIZE are left out.
 
 Source: Natural Earth 1:50m (public domain), https://www.naturalearthdata.com/
-  ne_50m_coastline, ne_50m_admin_0_boundary_lines_land, ne_50m_rivers_lake_centerlines
+  ne_50m_coastline, ne_50m_admin_0_boundary_lines_land
 
     python3 tools/orbit/build_earth.py <folder with the unzipped shapefiles>
 
@@ -14,10 +15,10 @@ from pathlib import Path
 
 BBOX = (-32, 28, 50, 72)        # lon/lat window seen from ~705 km above Freiburg
 TOL = 0.04                      # simplification tolerance (degrees)
+MIN_SIZE = 1.2                  # drop lines whose bounding box is smaller than this (degrees)
 LAYERS = {
     "coast": ("ne_50m_coastline", None),
     "borders": ("ne_50m_admin_0_boundary_lines_land", None),
-    "rhine": ("ne_50m_rivers_lake_centerlines", "name = 'Rhine'"),
 }
 
 def lines(src, where):
@@ -33,6 +34,10 @@ def lines(src, where):
     for f in feats:
         g = f["geometry"]
         if not g or g["type"] != "LineString" or len(g["coordinates"]) < 2:
+            continue
+        xs = [p[0] for p in g["coordinates"]]
+        ys = [p[1] for p in g["coordinates"]]
+        if max(max(xs) - min(xs), max(ys) - min(ys)) < MIN_SIZE:
             continue
         res.append([round(v, 2) for pt in g["coordinates"] for v in pt])
     return res

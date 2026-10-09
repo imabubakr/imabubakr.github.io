@@ -74,7 +74,8 @@ Section [02] tells the owner's path: satellite data (from 2016) → aerial image
 **page background itself** (`backdrop.js`) does the descent on the right (owner's pick, 2026-10-09: "you nailed it"):
 
 - Keyframes sit on the chapters' real positions (`layoutKeys`): climb to orbit for chapter 1 (705 km, north-up so
-  Europe reads the right way: graticule, limb, Natural Earth coastlines / dashed borders / the Rhine in `--tl-edu`,
+  Europe reads the right way: 5° graticule, limb, country outlines only (Natural Earth coastlines + land borders,
+  solid, no rivers or small islands: owner's wish, 2026-10-09),
   a Sentinel-2 swath of 290 km along a ground track ~13° east of north through Freiburg, Freiburg marked in accent),
   turn back to the route heading on the way down, look straight down from 1 km for chapter 2 (overlapping aerial
   photo frames 1.2 × 0.8 km, 60 % / 30 % overlap, the one below solid, labelled "AERIAL PHOTO · 20 CM"), then tilt
@@ -88,8 +89,8 @@ Section [02] tells the owner's path: satellite data (from 2016) → aerial image
 - Labels never overlap the altimeter (`label()` guard). The figure numbers (frame size, overlap, swath, track angle)
   are illustrative of typical surveys; the chapter spec lines (~705 km · 30 m, ~1 km · 20 cm, ~100 m · ~2 cm) are the
   reference.
-- Data: `assets/topo/earth.json` (40 KB) from `python3 tools/orbit/build_earth.py <folder with Natural Earth 1:50m
-  shapefiles>` (coastline, admin-0 boundary lines, rivers → Rhine). Credit in the footer ("Natural Earth").
+- Data: `assets/topo/earth.json` (24 KB) from `python3 tools/orbit/build_earth.py <folder with Natural Earth 1:50m
+  shapefiles>` (coastline + admin-0 boundary lines; pieces under 1.2° dropped). Credit in the footer ("Natural Earth").
 
 Rejected along the way (don't bring back): an altitude slider explorer, a "Light and water" sun/flood map, a pinned
 OSM land-cover map of Ebringen (descent.js), and a calm three-column strip with resolution icons. The section must be
