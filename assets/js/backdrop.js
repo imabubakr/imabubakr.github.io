@@ -46,6 +46,7 @@
   var STEP = 150, FAR = 14000;
   var CRUISE = 1300;         // height above the highest ground ahead (scene m)
   var ARRIVE_PITCH = 30, ARRIVE_CLIMB = 1500; // contact: look down onto the Feldberg
+  var ARRIVE_ZOOM = 0.7;     // contact: wider lens (focal length x 0.7)
   var R_EARTH = 6371000;
   var CENTER_LL = [48.0, 7.81], CENTER_XY = [20000, 18000]; // region centre
   var ORBIT_H = 705000, AERIAL_H = 1000, DRONE_H = 100;     // as in the chapters' spec lines
@@ -178,7 +179,7 @@
   function target() {
     var max = document.documentElement.scrollHeight - window.innerHeight;
     var p = reduce.matches ? 0.35 : clamp(window.scrollY / (max || 1), 0, 1);
-    var cam = { s: p * (ROUTE_LEN - END_GAP), la: Math.log(CRUISE), pitch: 0, cx: 0.5, cy: 0.26, yaw: ROUTE_BRG, boost: 1 };
+    var cam = { s: p * (ROUTE_LEN - END_GAP), la: Math.log(CRUISE), pitch: 0, cx: 0.5, cy: 0.26, yaw: ROUTE_BRG, boost: 1, zoom: 1 };
     // arriving at the Feldberg (contact): on wide screens the summit moves right
     // of centre, beside the text block on the left
     // and the camera tilts down (ARRIVE_PITCH) and climbs a little, looking onto the summit
@@ -190,6 +191,7 @@
       cam.pitch = (-ARRIVE_PITCH * Math.PI / 180) * ka;
       cam.la = Math.log(CRUISE + ARRIVE_CLIMB * ka);
       cam.cy = 0.26 + 0.1 * ka; // summit lands in the upper third
+      cam.zoom = 1 + (ARRIVE_ZOOM - 1) * ka;
     }
     var t = orbitT();
     if (keys && !reduce.matches && t > 0 && t < 1) {
@@ -227,7 +229,7 @@
     var CX = OX + UX * cam.s, CY = OY + UY * cam.s, CZ = G + alt;
     var cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
     var hx = Math.sin((cam.yaw * Math.PI) / 180), hy = -Math.cos((cam.yaw * Math.PI) / 180), rx = -hy, ry = hx;
-    var F = Math.max(w, h) * 0.42, PX = w * cam.cx, PY = h * cam.cy;
+    var F = Math.max(w, h) * 0.42 * cam.zoom, PX = w * cam.cx, PY = h * cam.cy;
     var out = [0, 0, 0];
     function proj(X, Y, Z) {
       var dx = X - CX, dy = Y - CY, dz = Z - CZ;
@@ -712,7 +714,7 @@
     var goal = target();
     var k = reduce.matches ? 1 : 1 - Math.exp(-dt / 0.2);
     var moving = false;
-    ["s", "la", "pitch", "cx", "cy", "yaw", "boost"].forEach(function (key) {
+    ["s", "la", "pitch", "cx", "cy", "yaw", "boost", "zoom"].forEach(function (key) {
       cur[key] += (goal[key] - cur[key]) * k;
       var eps = key === "s" ? 1 : 1e-3;
       if (Math.abs(goal[key] - cur[key]) > eps) moving = true;
