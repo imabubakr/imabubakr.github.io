@@ -23,8 +23,8 @@
   var NEAR = 300, FAR = 14000, STEP = 150;
   var de = root.lang === "de";
   var T = de
-    ? { title: "Flug über den Schwarzwald · Freiburg → Feldberg", alt: "Höhe", E: "O", dec: "," }
-    : { title: "Flight over the Black Forest · Freiburg → Feldberg", alt: "alt", E: "E", dec: "." };
+    ? { title: "Flug über den Schwarzwald", route: "Freiburg → Feldberg", alt: "Höhe", E: "O", dec: "," }
+    : { title: "Flight over the Black Forest", route: "Freiburg → Feldberg", alt: "alt", E: "E", dec: "." };
 
   var canvas = document.createElement("canvas");
   canvas.className = "backdrop";
@@ -38,8 +38,9 @@
   var hud = document.createElement("p");
   hud.className = "flight-hud";
   hud.setAttribute("aria-hidden", "true");
-  hud.innerHTML = '<span class="fh-title"></span><span class="fh-pos"></span>';
-  hud.firstChild.textContent = T.title;
+  hud.innerHTML = '<span class="fh-title"></span><span></span><span class="fh-pos"></span>';
+  hud.children[0].textContent = T.title;
+  hud.children[1].textContent = T.route;
 
   // ------------------------------------------------------------- data --
   function elev(x, y) {
@@ -92,12 +93,12 @@
     var p = reduce.matches ? 0.35 : Math.min(Math.max(window.scrollY / (max || 1), 0), 1);
     return p * (route[route.length - 1].s - END_GAP);
   }
-  // camera height: ~900 m (exaggerated) above the highest ground in the next 6 km
+  // camera height: ~1300 m (exaggerated) above the highest ground in the next 6 km
   function targetZ(s) {
     var c = at(s), a = at(s + LOOK), len = Math.hypot(a[0] - c[0], a[1] - c[1]) || 1;
     var ux = (a[0] - c[0]) / len, uy = (a[1] - c[1]) / len, hi = 0;
     for (var d = 0; d <= 6000; d += 250) hi = Math.max(hi, elev(c[0] + ux * d, c[1] + uy * d));
-    return (hi - H0) * EX + 900;
+    return (hi - H0) * EX + 1300;
   }
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -119,7 +120,7 @@
     var c = at(s), a = at(s + LOOK), len = Math.hypot(a[0] - c[0], a[1] - c[1]) || 1;
     var ux = (a[0] - c[0]) / len, uy = (a[1] - c[1]) / len; // heading
     var rx = -uy, ry = ux;                                  // to the right on screen
-    var f = Math.max(w, h) * 0.55, horizon = h * 0.3;
+    var f = Math.max(w, h) * 0.42, horizon = h * 0.26;
     var paper = color("--paper"), line = color("--contour");
     var dx = w < 600 ? 6 : 4;
     ctx.lineJoin = "round";
@@ -185,7 +186,7 @@
     // readout: position below the camera and its real altitude
     var ll = lonLat(c[0], c[1]), alt = Math.round(camZ / EX + H0);
     hud.lastChild.textContent =
-      num(ll[1], 4) + "°N " + num(ll[0], 4) + "°" + T.E + " · " + T.alt + " " + alt.toLocaleString(root.lang) + " m";
+      num(ll[1], 3) + "°N " + num(ll[0], 3) + "°" + T.E + " · " + T.alt + " " + alt.toLocaleString(root.lang) + " m";
     var heroGone = !hero || hero.getBoundingClientRect().bottom < h * 0.5;
     hud.classList.toggle("is-on", heroGone && share < 0.3);
   }

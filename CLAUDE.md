@@ -54,10 +54,11 @@ ridge lines of the region DEM (`assets/topo/region-contours.*`) in perspective o
 below the hero, in `--contour`. Scrolling flies Freiburg → Schauinsland → Feldberg (Catmull-Rom route, `ROUTE`); the
 page bottom ends ~5 km before the Feldberg, looking at it. The camera eases towards the scroll position (no jumps),
 near ridges are thicker and stronger than far ones (aerial perspective), it fades out while section [02] is on
-screen, and reduced motion gets one still frame. The camera flies ~900 m (exaggerated) above the highest ground
-ahead so plenty of ridges are on screen (owner: too few ridges made it confusing). Summits within 9 km that are not
+screen, and reduced motion gets one still frame. The camera flies ~1300 m (exaggerated) above the highest ground
+ahead with a wide lens (f = 0.42 × the longer viewport side) so plenty of ridges are on screen (owner: too few
+ridges made it confusing; then "a bit more zoom out"). Summits within 9 km that are not
 hidden by nearer ridges get a mono map label (name + elevation, from `region-contours.json` `places`). A small mono
-readout bottom-left (≥ 1100 px, hidden over the hero and [02]) says what it is: "Flight over the Black Forest ·
+readout bottom-left (≥ 1360 px, three short lines, hidden over the hero and [02]) says what it is: "Flight over the Black Forest ·
 Freiburg → Feldberg" + live lat/lon and altitude (DE: "Flug über den Schwarzwald", `O`, decimal comma). CSS mask: strong in the margins, very faint behind the text column;
 on phones faint everywhere. The old village-outline background (`tools/layers/build_layers.py` → `village.svg`) is no
 longer shown; the script stays because `build_descent.py` uses its OSM download. No bands or per-section layers: the

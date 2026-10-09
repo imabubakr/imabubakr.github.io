@@ -1674,15 +1674,15 @@ dl.cv-list .cv-row {
   mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.2) 30%, rgb(0 0 0 / 0.2) 70%, #000 96%);
 }
 /* Flight readout: says what the background is (route, position, altitude).
-   Desktop only, where the margin is wide enough; hidden over the hero and [02]. */
+   Wide screens only (the margin must hold it); hidden over the hero and [02]. */
 .flight-hud {
   display: none;
 }
-@media (min-width: 1100px) {
+@media (min-width: 1360px) {
   .flight-hud {
     position: fixed;
     bottom: 20px;
-    left: var(--pad);
+    left: 24px;
     z-index: 1;
     display: flex;
     flex-direction: column;
@@ -1700,7 +1700,7 @@ dl.cv-list .cv-row {
     color: var(--ink);
   }
 }
-@media (min-width: 1100px) and (prefers-reduced-motion: no-preference) {
+@media (min-width: 1360px) and (prefers-reduced-motion: no-preference) {
   .flight-hud {
     transition: opacity 0.4s ease;
   }
