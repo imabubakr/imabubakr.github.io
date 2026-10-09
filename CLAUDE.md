@@ -87,6 +87,11 @@ Section [02] tells the owner's path: satellite data (from 2016) → aerial image
 - Looking down (pitch > 45°) the ridge-line spacing follows the screen (a line every ~6.5 px, power-of-2 steps
   of 150 m so lines stay fixed; thinner strokes when dense): the joy plot stays dense from 30 km down to 1 km
   (owner's wish). Level flight keeps the height-based spacing.
+- Performance (owner noticed lag, 2026-10-10): static sphere geometry (graticule, outlines, swath) is converted to
+  scene points once (`toScene`), theme colours are cached (`readColors` on theme change), style writes only on change,
+  camera easing 0.2 s, and adaptive quality while moving (`q` 1–2.5 scales sample spacing and line density when a
+  draw takes > 7 ms; a full-quality frame when the camera rests). Benchmark with Playwright + CDP CPU throttling and
+  `--enable-gpu-rasterization` (without it headless Chromium rasterises in software and every page looks slow).
 - Altimeter (`.ds-alti`, ≥ 900 px): log scale 1000 km → 50 m near the right edge, platforms ticked, accent diamond
   + value follows the camera; the active chapter (`.is-active`) and its platform tick are emphasised.
 - `html.ds-on` (set by backdrop.js unless reduced motion) gives each chapter a screen; `html.orbit-live` while the

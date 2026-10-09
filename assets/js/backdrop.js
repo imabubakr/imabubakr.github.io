@@ -64,7 +64,7 @@
   var ctx = canvas.getContext("2d");
   var w = 0, h = 0, dpr = 1;
   var dem = null, meta = null, earth = null, earthLoading = false;
-  var cur = null, last = 0, running = false;
+  var cur = null, last = 0, running = false, lastFade = "";
   var keys = null, zones = [0.33, 0.66];
   var hud = document.createElement("p");
   hud.className = "flight-hud";
@@ -113,7 +113,12 @@
   }
 
   // ---------------------------------------------------------- helpers --
-  function color(name) { return getComputedStyle(root).getPropertyValue(name).trim(); }
+  var colors = {};
+  function readColors() {
+    var cs = getComputedStyle(root);
+    ["--paper", "--contour", "--ink", "--accent-mark"].forEach(function (n) { colors[n] = cs.getPropertyValue(n).trim(); });
+  }
+  function color(name) { return colors[name]; }
   function smooth(t) { return t * t * (3 - 2 * t); }
   function clamp(v, a, b) { return Math.min(Math.max(v, a), b); }
   function resize() {
@@ -189,7 +194,16 @@
   }
 
   // ------------------------------------------------------------- draw --
+  // Adaptive quality: while moving, a slow machine draws fewer samples and lines
+  // (q 1 ... 2.5) so frames stay smooth; when the camera rests, one sharp frame.
+  var q = 1, qMoving = 1, drawMs = 0;
   function draw(cam) {
+    var t0 = performance.now();
+    drawScene(cam);
+    var ms = performance.now() - t0;
+    drawMs = drawMs ? drawMs * 0.8 + ms * 0.2 : ms;
+  }
+  function drawScene(cam) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
     ex = EX * cam.boost;
@@ -232,7 +246,7 @@
       // stays dense at any height. Steps halve/double, so lines stay put.
       var down = pitchDeg > 45;
       var Hg = Math.max(CZ - sceneZ(CX, CY), 50);
-      var lvl = down ? clamp(Math.log2((6.5 * Hg) / F / STEP), -2, 6) : clamp(Math.log2(alt / CRUISE), -2, 6);
+      var lvl = down ? clamp(Math.log2((6.5 * Math.sqrt(q) * Hg) / F / STEP), -2, 6) : clamp(Math.log2(alt / CRUISE), -2, 6);
       var n0 = Math.floor(lvl), frac = lvl - n0;
       var step = STEP * Math.pow(2, n0);
       var gapPx = (step * F) / Hg;
@@ -271,7 +285,7 @@
         if (k % 2) thin *= 1 - frac;
         var alpha = (0.25 + 0.75 * Math.pow(near, 1.3)) * thin * terrA;
         if (alpha < 0.03) continue;
-        var dl = Math.max(25, ((down ? 5 : 3.5) * dist) / F);
+        var dl = Math.max(25, ((down ? 5 : 3.5) * q * dist) / F);
         dl = 25 * Math.pow(2, Math.round(Math.log2(dl / 25)));
         // the ridge line, and below it its base at sea level: the "curtain"
         // between them hides what lies behind (works level and looking down)
@@ -367,11 +381,13 @@
       alti.querySelectorAll(".is-platform").forEach(function (el) {
         el.classList.toggle("is-active", Number(el.dataset.i) === zone);
       });
-      altiMark.style.top = clamp(altiY(alt), 0, 100).toFixed(2) + "%";
+      var top = clamp(altiY(alt), 0, 100).toFixed(1) + "%";
+      if (altiMark.style.top !== top) altiMark.style.top = top;
       altiMark.firstChild.textContent = fmtHeight(alt);
     }
     var share = orbitShare();
-    canvas.style.setProperty("--fade", String(keys ? 1 : 1 - 0.85 * share));
+    var fade = String(keys ? 1 : Math.round((1 - 0.85 * share) * 100) / 100);
+    if (fade !== lastFade) { canvas.style.setProperty("--fade", fade); lastFade = fade; }
     if (share > 0 && !earth) loadEarth();
     var ll = lonLat(CX, CY), realAlt = alt + G / ex + H0;
     hud.children[0].textContent = T.title;
@@ -423,13 +439,30 @@
     var nx = (P[0] - CENTER_XY[0]) / R_EARTH, ny = (P[1] - CENTER_XY[1]) / R_EARTH, nz = (P[2] + R_EARTH) / R_EARTH;
     return (P[0] - v.CX) * nx + (P[1] - v.CY) * ny + (P[2] - v.alt) * nz < 0;
   }
+  // Static lines on the sphere are converted to scene points once ([x, y, z, ...]).
+  var sphereCache = typeof WeakMap === "function" ? new WeakMap() : null;
+  function toScene(flat) {
+    var hit = sphereCache && sphereCache.get(flat);
+    if (hit) return hit;
+    var out = new Float64Array((flat.length / 2) * 3);
+    for (var i = 0, j = 0; i < flat.length; i += 2, j += 3) {
+      var P = onSphere(flat[i + 1], flat[i]);
+      out[j] = P[0]; out[j + 1] = P[1]; out[j + 2] = P[2];
+    }
+    if (sphereCache) sphereCache.set(flat, out);
+    return out;
+  }
+  // the point (x, y, z) faces the camera
+  function facingXYZ(x, y, z, v) {
+    return (x - v.CX) * (x - CENTER_XY[0]) + (y - v.CY) * (y - CENTER_XY[1]) + (z - v.alt) * (z + R_EARTH) < 0;
+  }
   // stroke a lat/lon path ([lon, lat, lon, lat, ...]), skipping hidden parts
   function strokeLonLat(flat, v) {
+    var P3 = toScene(flat);
     ctx.beginPath();
     var pen = false;
-    for (var i = 0; i < flat.length; i += 2) {
-      var P = onSphere(flat[i + 1], flat[i]);
-      if (facing(P, v) && v.proj(P[0], P[1], P[2])) {
+    for (var i = 0; i < P3.length; i += 3) {
+      if (facingXYZ(P3[i], P3[i + 1], P3[i + 2], v) && v.proj(P3[i], P3[i + 1], P3[i + 2])) {
         if (pen) ctx.lineTo(v.out[0], v.out[1]);
         else ctx.moveTo(v.out[0], v.out[1]);
         pen = true;
@@ -437,21 +470,28 @@
     }
     ctx.stroke();
   }
+  var gratLines = null;
+  function graticule() {
+    if (!gratLines) {
+      gratLines = [];
+      var lat, lon, path, x;
+      for (lat = 20; lat <= 75; lat += 5) {
+        for (path = [], x = -40; x <= 55; x += 0.5) path.push(x, lat);
+        gratLines.push(path);
+      }
+      for (lon = -40; lon <= 55; lon += 5) {
+        for (path = [], x = 20; x <= 76; x += 0.5) path.push(lon, x);
+        gratLines.push(path);
+      }
+    }
+    return gratLines;
+  }
   function drawGlobe(a, v, line) {
     ctx.strokeStyle = line;
     ctx.lineJoin = "round";
     ctx.lineWidth = 0.8;
-    var lat, lon, path, x;
-    for (lat = 20; lat <= 75; lat += 5) {
-      for (path = [], x = -40; x <= 55; x += 0.5) path.push(x, lat);
-      ctx.globalAlpha = a * 0.45;
-      strokeLonLat(path, v);
-    }
-    for (lon = -40; lon <= 55; lon += 5) {
-      for (path = [], x = 20; x <= 76; x += 0.5) path.push(lon, x);
-      ctx.globalAlpha = a * 0.45;
-      strokeLonLat(path, v);
-    }
+    ctx.globalAlpha = a * 0.45;
+    graticule().forEach(function (path) { strokeLonLat(path, v); });
     // limb: the circle where the view grazes the sphere, around the point below the camera
     var phi = Math.acos(R_EARTH / (R_EARTH + v.alt)), rho = R_EARTH * Math.sin(phi), drop = R_EARTH * (1 - Math.cos(phi));
     ctx.globalAlpha = a;
@@ -491,23 +531,30 @@
     return Math.atan2(Math.sin(dl) * Math.cos(p2), Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl)) / RAD;
   }
   // Sentinel-2's 290 km swath along a ground track through Freiburg
-  function drawSwath(a, v, ink, line) {
-    var f = lonLat(FREIBURG[0], FREIBURG[1]), left = [], right = [], track = [];
-    for (var d = -3000e3; d <= 3000e3; d += 50e3) {
-      var P = d < 0 ? dest(f[1], f[0], S2_TRACK + 180, -d) : dest(f[1], f[0], S2_TRACK, d);
-      var N = d + 1e3 < 0 ? dest(f[1], f[0], S2_TRACK + 180, -(d + 1e3)) : dest(f[1], f[0], S2_TRACK, d + 1e3);
-      var b = bearing(P, N);
-      var L = dest(P[0], P[1], b - 90, S2_HALF), R = dest(P[0], P[1], b + 90, S2_HALF);
-      left.push(L[1], L[0]);
-      right.push(R[1], R[0]);
-      track.push(P[1], P[0]);
+  var swath = null;
+  function swathLines() {
+    if (!swath) {
+      var f = lonLat(FREIBURG[0], FREIBURG[1]), left = [], right = [], track = [];
+      for (var d = -3000e3; d <= 3000e3; d += 50e3) {
+        var P = d < 0 ? dest(f[1], f[0], S2_TRACK + 180, -d) : dest(f[1], f[0], S2_TRACK, d);
+        var N = d + 1e3 < 0 ? dest(f[1], f[0], S2_TRACK + 180, -(d + 1e3)) : dest(f[1], f[0], S2_TRACK, d + 1e3);
+        var b = bearing(P, N);
+        var L = dest(P[0], P[1], b - 90, S2_HALF), R = dest(P[0], P[1], b + 90, S2_HALF);
+        left.push(L[1], L[0]);
+        right.push(R[1], R[0]);
+        track.push(P[1], P[0]);
+      }
+      swath = { left: left, right: right, track: track };
     }
+    return swath;
+  }
+  function drawSwath(a, v, ink, line) {
+    var sw = swathLines(), left = sw.left, right = sw.right, track = sw.track;
     // fill between the visible parts of both edges
     function collect(flat) {
-      var pts = [];
-      for (var i = 0; i < flat.length; i += 2) {
-        var S = onSphere(flat[i + 1], flat[i]);
-        if (facing(S, v) && v.proj(S[0], S[1], S[2])) pts.push([v.out[0], v.out[1]]);
+      var pts = [], P3 = toScene(flat);
+      for (var i = 0; i < P3.length; i += 3) {
+        if (facingXYZ(P3[i], P3[i + 1], P3[i + 2], v) && v.proj(P3[i], P3[i + 1], P3[i + 2])) pts.push([v.out[0], v.out[1]]);
       }
       return pts;
     }
@@ -637,18 +684,23 @@
   }
   function num(v, digits) { return Math.abs(v).toFixed(digits).replace(".", T.dec); }
 
-  // Ease the camera towards its target (~0.35 s; height in log space), then stop.
+  // Ease the camera towards its target (~0.2 s; height in log space). While it
+  // moves, quality adapts to the measured draw time (budget ~7 ms); when it
+  // rests, one last frame at full quality.
   function frame(now) {
     var dt = Math.min((now - last) / 1000, 0.1);
     last = now;
     var goal = target();
-    var k = reduce.matches ? 1 : 1 - Math.exp(-dt / 0.35);
+    var k = reduce.matches ? 1 : 1 - Math.exp(-dt / 0.2);
     var moving = false;
     ["s", "la", "pitch", "cx", "cy", "yaw", "boost"].forEach(function (key) {
       cur[key] += (goal[key] - cur[key]) * k;
       var eps = key === "s" ? 1 : 1e-3;
       if (Math.abs(goal[key] - cur[key]) > eps) moving = true;
     });
+    if (drawMs > 7) qMoving = Math.min(2.5, qMoving * 1.15);
+    else if (drawMs < 4) qMoving = Math.max(1, qMoving * 0.95);
+    q = moving ? qMoving : 1;
     draw(cur);
     if (moving) requestAnimationFrame(frame);
     else running = false;
@@ -676,11 +728,12 @@
         document.body.appendChild(hud);
         if (orbit) document.body.appendChild(alti);
         resize();
+        readColors();
         cur = target();
         draw(cur);
         window.addEventListener("resize", function () { resize(); draw(cur); });
         window.addEventListener("scroll", function () { if (!reduce.matches) kick(); }, { passive: true });
-        var redraw = function () { draw(cur); };
+        var redraw = function () { readColors(); draw(cur); };
         new MutationObserver(redraw).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
         window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redraw);
         if (document.fonts) document.fonts.ready.then(function () { layoutKeys(); redraw(); });
