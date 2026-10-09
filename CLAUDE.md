@@ -8,6 +8,8 @@ One page per language: English at `/` (`index.html`), German at `/de/` (`de/inde
 - GitHub Pages, classic mode: the root of `main` is published as-is (`.nojekyll`, no build step).
   Pushing to `main` puts changes live at https://imabubakr.github.io/.
 - Local preview: `python3 -m http.server 8000` in the repo root, then open `localhost:8000/` and `localhost:8000/de/`.
+  It sends no `Cache-Control`, so browsers may run stale JS/CSS: hard-reload. CSS/JS links carry `?v=YYYYMMDDx`;
+  bump it in `index.html`, `de/index.html` (and `404.html` for CSS) whenever those files change.
 - Old URLs are redirect stubs and must keep working: `about.html` → `/#about`; `resume.html`, `contact.html`,
   `projects.html` → `/#cv`; `geo.html` → `/`. Keep section ids (`about`, `cv`, `contact`) stable; both languages share them.
 
@@ -117,7 +119,8 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 - Order of the page: hero (who) → About (story + timeline) → From orbit to drone (career story) → CV (details) →
   Visualizations (work samples) → Contact (action) → footer collar.
 - Nav: a modern bar in Plex Sans: name left, `About  Orbit  CV  Visuals  Contact` centred (DE: Über mich, Orbit,
-  Lebenslauf, Grafiken, Kontakt), `EN DE` + a `light dark` switch (DE `hell dunkel`; `.theme-switch`, two buttons, the active one underlined) right. Translucent paper with backdrop blur;
+  Lebenslauf, Grafiken, Kontakt), `EN DE | ☀ Light ☾ Dark` right (DE `Hell`/`Dunkel`; `.theme-switch`, two buttons; icons only on phones).
+  Language and theme options are styled like the section links (same type, muted, active = ink + accent bar). Translucent paper with backdrop blur;
   links muted, the current one ink with a 2px `--accent-mark` bar on the nav's bottom edge. Phones: two rows (name +
   tools, then the links). `--nav-h` is 84px on phones, 57px from 900px. The hero strip says `SHEET 01 / 05`
   (`BLATT` in German). Update it if sections are added.

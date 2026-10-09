@@ -316,64 +316,102 @@ a:hover {
   }
 }
 
+/* Language and theme look like the section links: same type, muted, the
+   active option in ink with the accent bar on the bar's bottom edge. A short
+   hairline separates the two groups. Phones: theme as icons only. */
 .nav-tools {
   grid-area: tools;
   justify-self: end;
+  align-self: stretch;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: stretch;
 }
-.lang {
-  display: inline-flex;
-  font: 400 0.75rem/1 var(--font-mono);
-  letter-spacing: 0.04em;
+.lang,
+.theme-switch {
+  display: flex;
+  gap: 2px;
 }
-.lang a {
-  /* WCAG 2.5.8: at least 24 x 24 px touch targets. */
+.theme-switch {
+  position: relative;
+  margin-left: 13px;
+  padding-left: 12px;
+}
+.theme-switch::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: 16px;
+  margin-top: -8px;
+  background: var(--grid);
+}
+.lang a,
+.theme-switch button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 30px;
-  min-height: 32px;
-  color: var(--muted);
-  text-decoration: none;
-}
-.lang a:hover,
-.lang a[aria-current] {
-  color: var(--ink);
-}
-.lang a[aria-current] {
-  text-decoration: underline;
-  text-decoration-color: var(--accent-mark);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 5px;
-}
-
-/* Theme: two options side by side, like the language switch. */
-.theme-switch {
-  display: inline-flex;
-  margin-left: 8px;
-}
-.theme-switch button {
-  min-width: 30px;
-  min-height: 32px;
-  padding: 0 4px;
+  gap: 6px;
+  min-width: 32px;
+  min-height: 32px; /* WCAG 2.5.8: touch targets >= 24px */
+  padding: 0 5px;
   border: 0;
   background: none;
   color: var(--muted);
-  font: 400 0.75rem/1 var(--font-mono);
-  letter-spacing: 0.04em;
+  font: inherit;
+  text-decoration: none;
   cursor: pointer;
 }
+.lang a::after,
+.theme-switch button::after {
+  content: "";
+  position: absolute;
+  right: 5px;
+  bottom: 6px;
+  left: 5px;
+  height: 2px;
+  background: var(--accent-mark);
+  transform: scaleX(0);
+}
+.lang a:hover,
 .theme-switch button:hover,
+.lang a[aria-current],
 .theme-switch button[aria-pressed="true"] {
   color: var(--ink);
 }
-.theme-switch button[aria-pressed="true"] {
-  text-decoration: underline;
-  text-decoration-color: var(--accent-mark);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 5px;
+.lang a[aria-current]::after,
+.theme-switch button[aria-pressed="true"]::after {
+  transform: scaleX(1);
+}
+.theme-switch svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 599px) {
+  .theme-switch .opt-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lang a,
+  .theme-switch button {
+    transition: color 0.15s ease;
+  }
+  .lang a::after,
+  .theme-switch button::after {
+    transition: transform 0.2s ease;
+  }
 }
 
 @media (min-width: 900px) {
@@ -396,6 +434,10 @@ a:hover {
   }
   .nav-list a {
     padding: 17px 0 18px;
+  }
+  .lang a::after,
+  .theme-switch button::after {
+    bottom: 0;
   }
 }
 
