@@ -235,7 +235,11 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   Further preview modes: `intro` (rises once, settles back flat), `sun` (terraces cast paper shadows from the real sun
   over Freiburg now; at night it shows today's 16:00 sun and says so), `lens` (a round 3D loupe that follows the
   pointer over the flat map; map tools stay usable), `scroll-rise` (rises with scroll, then leans away). The owner
-  likes `tilt` (CSS lean on scroll). The draw effect animates a split
+  likes `tilt` (CSS lean on scroll). `scroll-rise` (owner's favourite, refined 2026-10-11): the hero is wrapped in `.hfx-pin`
+  (hero height + 90vh) and sticks under the nav; pinned progress 0–0.7 rises and turns the map (eased, never jumps
+  with the wheel), 0.7–1 pushes in (zoom + slight turn); soft paper shadows from a fixed afternoon sun (az 225°,
+  alt 30°; map-border points cast no shadow, the lowest layer none, terraces opaque); while risen the map tools,
+  controls, hint and strip ticks step back. The draw effect animates a split
   copy of the contour paths (overlay svg) and removes it afterwards, so the map tools are untouched.
 - Hero map tools (`assets/js/hero-map.js`, one engine for hero and fullscreen viewer): hovering shows lat/lon +
   elevation in the strip (replacing `EPSG:4326`); two clicks/taps draw an accent survey line and open the elevation

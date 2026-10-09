@@ -12,7 +12,8 @@
 //   intro   rises once on load, holds, and settles back to the flat map
 //   sun     the 3D terraces cast shadows from the real sun over Freiburg right now
 //   lens    flat map; the terrain around the pointer lifts like a 3D magnifier
-//   scroll-rise  the map rises as you scroll, then leans away into the flight
+//   scroll-rise  the hero pins while you scroll: the map rises and turns to the Black
+//           Forest, the camera pushes in, then the page continues (soft afternoon shadows)
 // Reduced motion: no animation (the static hero stays as it is).
 (function () {
   var root = document.documentElement;
@@ -220,14 +221,15 @@
     var scrollP = Math.min(1, Math.max(0, window.scrollY / (hero.offsetHeight * 0.9)));
     var k = R3.k;
     var lens = mode === "lens";
-    if (mode === "scroll-rise") scrollP = Math.max(0, (window.scrollY - hero.offsetHeight * 0.35) / (hero.offsetHeight * 0.6));
+    if (mode === "scroll-rise") scrollP = R3.push || 0;
     R3.mxs += (R3.mx - R3.mxs) * 0.05; R3.mys += (R3.my - R3.mys) * 0.05;
     R3.lensA += ((R3.inside ? 1 : 0) - R3.lensA) * 0.12;
     var lx = (R3.px || 0) - (hb.left), ly = (R3.py || 0) - (hb.top), LR = Math.max(W, H) * 0.12;
     var sway = Math.sin(time / 4200);
-    var tilt = (k * TILT + scrollP * 14 + R3.mys * 4 * k) * Math.PI / 180;   // 0 = straight down
-    var yaw = (k * (YAW + sway * 2.5) + R3.mxs * 8 * k) * Math.PI / 180;
-    var s = s0 * (1 + k * ZOOM);                       // zoom in a little as the view tilts
+    var pushT = mode === "scroll-rise" ? 4 : 14;           // scroll-rise: the push mostly zooms and turns
+    var tilt = (k * TILT + scrollP * pushT + R3.mys * 4 * k) * Math.PI / 180;   // 0 = straight down
+    var yaw = (k * (YAW + sway * 2.5) + R3.mxs * 8 * k + (mode === "scroll-rise" ? scrollP * 10 : 0)) * Math.PI / 180;
+    var s = s0 * (1 + k * ZOOM + (mode === "scroll-rise" ? scrollP * 0.3 : 0));   // zoom in as the view tilts (and on the push)
     var ex = k * EXAG * s;                             // px per metre of height
     var ct = Math.cos(tilt), st = Math.sin(tilt), cyw = Math.cos(yaw), syw = Math.sin(yaw);
     var D = Math.max(W, H) * 1.6;                      // viewer distance (px)
@@ -264,9 +266,10 @@
     }
     // sun: shadow offset (screen px per 10 m terrace step), from the real sun position
     var shadow = null;
-    if (mode === "sun" && R3.sun && R3.sun.alt > 1 && k > 0.01) {
-      var len = Math.min(320, (10 * EXAG) / Math.tan(R3.sun.alt * Math.PI / 180));   // map metres
-      var az = R3.sun.az * Math.PI / 180, ddx = -Math.sin(az) * len, ddy = Math.cos(az) * len;
+    var sunUse = mode === "sun" ? R3.sun : mode === "scroll-rise" ? { az: 225, alt: 30 } : null;
+    if (sunUse && sunUse.alt > 1 && k > 0.01) {
+      var len = Math.min(320, (10 * EXAG) / Math.tan(sunUse.alt * Math.PI / 180));   // map metres
+      var az = sunUse.az * Math.PI / 180, ddx = -Math.sin(az) * len, ddy = Math.cos(az) * len;
       var a0 = [0, 0], a1 = [0, 0];
       proj(5000, 2500, 0, a0); proj(5000 + ddx, 2500 + ddy, 0, a1);
       shadow = [(a1[0] - a0[0]) * k, (a1[1] - a0[1]) * k];
@@ -277,7 +280,8 @@
     for (var n = 0; n < lv.length; n++) {
       var L = lv[n], Z = L.z * ex;
       // fill: the whole layer; stroke: only the contour, not the map border
-      var fillPath = new Path2D(), linePath = new Path2D();
+      // the lowest layer covers the whole map: it rests on the base, no shadow
+      var fillPath = new Path2D(), linePath = new Path2D(), shadowPath = shadow && n > 0 ? new Path2D() : null;
       for (var r = 0; r < L.rings.length; r++) {
         var ring = L.rings[r], pen = false, prevEdge = false;
         for (var i = 0; i < ring.length; i += 2) {
@@ -285,21 +289,23 @@
           var edge = X <= 15 || X >= 9985 || Y <= 15 || Y >= 4985;
           proj(X, Y, Z, o);
           if (i) fillPath.lineTo(o[0], o[1]); else fillPath.moveTo(o[0], o[1]);
+          if (shadowPath) {                                  // map-border points do not cast: no edge streaks
+            var sx2 = edge ? o[0] : o[0] + shadow[0], sy2 = edge ? o[1] : o[1] + shadow[1];
+            if (i) shadowPath.lineTo(sx2, sy2); else shadowPath.moveTo(sx2, sy2);
+          }
           if (pen && !(edge && prevEdge)) linePath.lineTo(o[0], o[1]); else linePath.moveTo(o[0], o[1]);
           pen = true; prevEdge = edge;
         }
         fillPath.closePath();
+        if (shadowPath) shadowPath.closePath();
       }
-      if (shadow) {                                          // cast shadow onto the layer below
-        ctx.save();
-        ctx.translate(shadow[0], shadow[1]);
-        ctx.globalAlpha = isDark ? 0.55 : 0.09;
+      if (shadowPath) {                                      // cast shadow onto the layer below
+        ctx.globalAlpha = (isDark ? 0.55 : 0.09) * Math.min(1, k * 2);
         ctx.fillStyle = "#000";
-        ctx.fill(fillPath, "evenodd");
-        ctx.restore();
+        ctx.fill(shadowPath, "evenodd");
         ctx.fillStyle = paper;
       }
-      if (k > 0.001 || lens) { ctx.globalAlpha = lens ? 1 : Math.min(1, k * 3); ctx.fillStyle = paper; ctx.fill(fillPath, "evenodd"); }
+      if (k > 0.001 || lens) { ctx.globalAlpha = 1; ctx.fillStyle = paper; ctx.fill(fillPath, "evenodd"); }
       ctx.globalAlpha = L.index ? 0.85 : 0.45;
       ctx.lineWidth = L.index ? 1.2 : 0.6;
       ctx.stroke(linePath);
@@ -381,8 +387,15 @@
     } else if (mode === "lens") {
       R3.k = 0;
     } else if (mode === "scroll-rise") {
-      R3.k = smooth(window.scrollY / (hero.offsetHeight * 0.45));
-      root.classList.toggle("hfx-rising", R3.k > 0.005);
+      // 0 ... 0.7 of the pinned scroll: rise and turn; 0.7 ... 1: push towards the hills
+      var pp = pinProgress();
+      R3.kT = smooth(pp / 0.7);
+      R3.pushT = smooth((pp - 0.7) / 0.3);
+      R3.k += (R3.kT - R3.k) * 0.14;                      // eased, never jumps with the wheel
+      R3.push = (R3.push || 0) + (R3.pushT - (R3.push || 0)) * 0.14;
+      if (R3.k < 1e-3 && R3.kT === 0) R3.k = 0;
+      root.classList.toggle("hfx-rising", R3.k > 0.004);
+      root.classList.toggle("hfx-risen", R3.k > 0.04);
     } else {
       R3.k = smooth((t - 0.7) / 2.6);
     }
@@ -396,12 +409,38 @@
     R3.mx = ((e.clientX - b.left) / b.width - 0.5) * 2;
     R3.my = ((e.clientY - b.top) / b.height - 0.5) * 2;
   });
+  // --------------------------------------------------------------- pinning --
+  // scroll-rise: the hero sits in a taller wrapper and sticks under the nav while
+  // the scroll inside the wrapper drives the rise (PIN = extra scroll distance).
+  var pin = null;
+  function pinOn() {
+    if (pin) return;
+    pin = document.createElement("div");
+    pin.className = "hfx-pin";
+    hero.parentNode.insertBefore(pin, hero);
+    pin.appendChild(hero);
+    root.classList.add("hfx-pinned");
+  }
+  function pinOff() {
+    if (!pin) return;
+    pin.parentNode.insertBefore(hero, pin);
+    pin.remove();
+    pin = null;
+    root.classList.remove("hfx-pinned", "hfx-risen");
+  }
+  function pinProgress() {
+    if (!pin) return 0;
+    var r = pin.getBoundingClientRect(), dist = pin.offsetHeight - hero.offsetHeight;
+    return Math.min(1, Math.max(0, -r.top / Math.max(dist, 1)));
+  }
+
   // ------------------------------------------------------------------ play --
   var timers = [];
   function reset() {
     timers.forEach(clearTimeout); timers = [];
     root.classList.remove("hfx-drawing", "hfx-drawn", "hfx-scanning", "hfx-words", "hfx-words-in", "hfx-ul-on", "hfx-light-on", "hfx-rising", "hfx-lens");
     if (R3) R3.ctx.clearRect(0, 0, R3.canvas.width, R3.canvas.height);
+    if (mode !== "scroll-rise") pinOff();
     if (overlay) overlay.remove(), (overlay = null);
     scanLine.style.left = "";
     hero.style.removeProperty("--scan");
@@ -443,6 +482,7 @@
       buildRise().then(function () {
         if (m === "sun") R3.sun = sunNow();
         if (m !== "scroll-rise" && m !== "lens") root.classList.add("hfx-rising");
+        if (m === "scroll-rise") { pinOn(); R3.k = 0; R3.push = 0; }
         root.classList.toggle("hfx-lens", m === "lens");
         R3.t0 = performance.now();
         if (!R3.running) { R3.running = true; requestAnimationFrame(riseLoop); }

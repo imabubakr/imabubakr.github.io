@@ -2271,3 +2271,39 @@ html.hfx-rising.hfx-lens .hero-places {
 html.hfx-lens .hfx-rise {
   opacity: 1;
 }
+/* scroll-rise: the hero sticks under the nav inside a taller wrapper */
+.hfx-pin {
+  height: calc(var(--hero-h) + 90vh);
+}
+.hfx-pin .hero {
+  position: sticky;
+  top: var(--nav-h);
+}
+@media (max-width: 719px) {
+  .hfx-pin {
+    height: calc(var(--hero-h) + 60vh);
+  }
+}
+/* while risen: no map tools, controls and hint step back */
+html.hfx-risen .hero-map {
+  pointer-events: none;
+}
+html.hfx-risen .map-controls,
+html.hfx-risen .map-hint,
+html.hfx-risen .strip-crs {
+  opacity: 0;
+  pointer-events: none;
+}
+.map-controls,
+.map-hint {
+  transition: opacity 0.4s ease;
+}
+html.hfx-rising .ridges {
+  opacity: 0;
+}
+html.hfx-risen .hero-strip .ticks {
+  opacity: 0;
+}
+.hero-strip .ticks {
+  transition: opacity 0.4s ease;
+}
