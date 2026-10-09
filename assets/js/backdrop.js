@@ -45,6 +45,7 @@
   var ex = EX;               // exaggeration in use: EX x the descent's boost (set per frame)
   var STEP = 150, FAR = 14000;
   var CRUISE = 1300;         // height above the highest ground ahead (scene m)
+  var ARRIVE_PITCH = 30, ARRIVE_CLIMB = 1500; // contact: look down onto the Feldberg
   var R_EARTH = 6371000;
   var CENTER_LL = [48.0, 7.81], CENTER_XY = [20000, 18000]; // region centre
   var ORBIT_H = 705000, AERIAL_H = 1000, DRONE_H = 100;     // as in the chapters' spec lines
@@ -180,10 +181,15 @@
     var cam = { s: p * (ROUTE_LEN - END_GAP), la: Math.log(CRUISE), pitch: 0, cx: 0.5, cy: 0.26, yaw: ROUTE_BRG, boost: 1 };
     // arriving at the Feldberg (contact): on wide screens the summit moves right
     // of centre, beside the text block on the left
-    if (contact && w >= 900) {
+    // and the camera tilts down (ARRIVE_PITCH) and climbs a little, looking onto the summit
+    if (contact) {
       var cr = contact.getBoundingClientRect();
       var seen = Math.max(0, Math.min(cr.bottom, h) - Math.max(cr.top, 0)) / h;
-      cam.cx = 0.5 + 0.17 * smooth(clamp(seen * 1.3, 0, 1));
+      var ka = reduce.matches ? 0 : smooth(clamp(seen * 1.3, 0, 1));
+      if (w >= 900) cam.cx = 0.5 + 0.17 * ka;
+      cam.pitch = (-ARRIVE_PITCH * Math.PI / 180) * ka;
+      cam.la = Math.log(CRUISE + ARRIVE_CLIMB * ka);
+      cam.cy = 0.26 + 0.1 * ka; // summit lands in the upper third
     }
     var t = orbitT();
     if (keys && !reduce.matches && t > 0 && t < 1) {

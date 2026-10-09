@@ -216,7 +216,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 - Contact = the end of the flight. Owner found a big centred orange email "too much in one face" and covering the
   Feldberg, so: desktop (≥ 900 px) a small, quiet, left-aligned block (title, invitation line, three key-value rows
   Email / LinkedIn / GitHub in ink at 15 px, mono labels, small "copy" button) like the orbit chapters, while
-  backdrop.js turns the camera (`cam.cx` → 0.67) so the Feldberg and its summit label stand fully visible on the right
+  backdrop.js turns the camera (`cam.cx` → 0.67), tilts it down 30° and climbs 1500 scene m (`ARRIVE_PITCH`,
+  `ARRIVE_CLIMB`; owner wanted a more nadir view), easing in as Contact scrolls into view, so the Feldberg and its summit label stand fully visible on the right
   (`html.arrive-live`: mask strong on the right). Phones: rows low in the section, summit above. Readout: "Arrived at
   the Feldberg" / "Am Feldberg angekommen". This section is the one exception to centred section heads.
 - Footer: one calm centred block (owner, 2026-10-10: the old one was too busy; no scale bar, no CRS line): mono
