@@ -14,6 +14,8 @@
 //   lens    flat map; the terrain around the pointer lifts like a 3D magnifier
 //   scroll-rise  the hero pins while you scroll: the map rises and turns to the Black
 //           Forest, the camera pushes in, then the page continues (soft afternoon shadows)
+//   glass   small glass loupes appear by themselves on hilly spots, show the terrain in
+//           3D for a moment and fade; the pointer can take one over; tilt on scroll
 // Reduced motion: no animation (the static hero stays as it is).
 (function () {
   var root = document.documentElement;
@@ -24,14 +26,14 @@
   var de = root.lang === "de";
   var h1 = hero.querySelector("h1");
   var mapEls = [hero.querySelector(".hero-map"), hero.querySelector(".hero-places")];
-  var MODES = ["intro", "tilt", "sun", "lens", "scroll-rise", "rise", "scan", "light", "none"];
+  var MODES = ["glass", "scroll-rise", "tilt", "lens", "intro", "rise", "scan", "none"];
   var LABEL = de
-    ? { title: "Startbereich (Vorschau)", intro: "intro", sun: "sonne", lens: "lupe", "scroll-rise": "scroll-3d", rise: "aufsteigen", none: "ohne", draw: "zeichnen", scan: "scan", tilt: "kippen", light: "licht", accent: "akzent", "draw+accent": "zeichnen+akzent", replay: "wiederholen ↺" }
-    : { title: "Hero (preview)", intro: "intro", sun: "sun", lens: "lens", "scroll-rise": "scroll-3d", rise: "rise", none: "none", draw: "draw", scan: "scan", tilt: "tilt", light: "light", accent: "accent", "draw+accent": "draw+accent", replay: "replay ↺" };
+    ? { title: "Startbereich (Vorschau)", glass: "glas", intro: "intro", sun: "sonne", lens: "lupe", "scroll-rise": "scroll-3d", rise: "aufsteigen", none: "ohne", draw: "zeichnen", scan: "scan", tilt: "kippen", light: "licht", accent: "akzent", "draw+accent": "zeichnen+akzent", replay: "wiederholen ↺" }
+    : { title: "Hero (preview)", glass: "glass", intro: "intro", sun: "sun", lens: "lens", "scroll-rise": "scroll-3d", rise: "rise", none: "none", draw: "draw", scan: "scan", tilt: "tilt", light: "light", accent: "accent", "draw+accent": "draw+accent", replay: "replay ↺" };
 
   var mode = new URLSearchParams(location.search).get("hero");
   if (MODES.indexOf(mode) < 0) { try { mode = localStorage.getItem("hero-preview"); } catch (e) {} }
-  if (MODES.indexOf(mode) < 0) mode = "intro";
+  if (MODES.indexOf(mode) < 0) mode = "glass";
   var smooth = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
 
   // -------------------------------------------------- words of the sentence --
@@ -167,7 +169,7 @@
 
   // ------------------------------------------------------------------ tilt --
   function onScroll() {
-    var p = mode === "tilt" ? Math.min(1, Math.max(0, window.scrollY / (hero.offsetHeight * 0.9))) : 0;
+    var p = mode === "tilt" || mode === "glass" ? Math.min(1, Math.max(0, window.scrollY / (hero.offsetHeight * 0.9))) : 0;
     mapEls.forEach(function (el) {
       if (!el) return;
       el.style.transform = p ? "perspective(1100px) rotateX(" + (58 * smooth(p)).toFixed(2) + "deg) scale(" + (1 + 0.12 * p).toFixed(3) + ")" : "";
@@ -220,11 +222,11 @@
     var s0 = bb.width / 10000, ox = bb.left - hb.left, oy = bb.top - hb.top;   // flat map: px = ox + x * s0
     var scrollP = Math.min(1, Math.max(0, window.scrollY / (hero.offsetHeight * 0.9)));
     var k = R3.k;
-    var lens = mode === "lens";
+    var lens = mode === "lens" || mode === "glass";
     if (mode === "scroll-rise") scrollP = R3.push || 0;
     R3.mxs += (R3.mx - R3.mxs) * 0.05; R3.mys += (R3.my - R3.mys) * 0.05;
     R3.lensA += ((R3.inside ? 1 : 0) - R3.lensA) * 0.12;
-    var lx = (R3.px || 0) - (hb.left), ly = (R3.py || 0) - (hb.top), LR = Math.max(W, H) * 0.12;
+    var lx = (R3.px || 0) - (hb.left), ly = (R3.py || 0) - (hb.top), LR = Math.max(W, H) * (mode === "glass" ? 0.075 : 0.12);
     var sway = Math.sin(time / 4200);
     var pushT = mode === "scroll-rise" ? 4 : 14;           // scroll-rise: the push mostly zooms and turns
     var tilt = (k * TILT + scrollP * pushT + R3.mys * 4 * k) * Math.PI / 180;   // 0 = straight down
@@ -352,8 +354,13 @@
     R3.mx = ((e.clientX - b.left) / b.width - 0.5) * 2;
     R3.my = ((e.clientY - b.top) / b.height - 0.5) * 2;
     R3.px = e.clientX; R3.py = e.clientY; R3.inside = true;
+    if (mode === "glass") { G.hover = true; G.phase = "fade"; G.until = 0; }
   });
-  hero.addEventListener("pointerleave", function () { if (R3) R3.inside = false; });
+  hero.addEventListener("pointerleave", function () {
+    if (!R3) return;
+    R3.inside = false;
+    if (mode === "glass") { G.hover = false; G.phase = "fade"; G.until = performance.now() + 700; }
+  });
 
   // Sun position over Freiburg now (NOAA simplified solar position).
   function sunNow(at) {
@@ -377,7 +384,37 @@
       (de ? "HÖHE " : "ALT ") + Math.round(altd) + "°";
     return { az: azd, alt: altd, label: label };
   }
-  var CANVAS_MODES = { rise: 1, intro: 1, sun: 1, lens: 1, "scroll-rise": 1 };
+  var CANVAS_MODES = { rise: 1, intro: 1, sun: 1, lens: 1, "scroll-rise": 1, glass: 1 };
+  // glass: a loupe appears on a hilly, visible spot (not over the sentence or the
+  // map controls), holds ~2.6 s, fades; a short pause; the next one elsewhere.
+  // While the pointer is over the map it follows the pointer instead.
+  var G = { phase: "wait", until: 0, x: 0, y: 0, hover: false, last: null };
+  function glassSpot() {
+    var hm = hero.querySelector(".hero-map"), box = hero.querySelector(".map-box");
+    var hb = hm.getBoundingClientRect(), bb = box.getBoundingClientRect(), s0 = bb.width / 10000;
+    var cand = R3.levels.filter(function (l) { return l.z >= 120; });
+    for (var tries = 0; tries < 60; tries++) {
+      var L = cand[Math.floor(Math.random() * cand.length)], ring = L.rings[Math.floor(Math.random() * L.rings.length)];
+      var i = 2 * Math.floor(Math.random() * (ring.length / 2));
+      var x = bb.left + ring[i] * s0, y = bb.top + ring[i + 1] * s0;
+      var rx = (x - hb.left) / hb.width, ry = (y - hb.top) / hb.height;
+      if (rx < 0.1 || rx > 0.9 || ry < 0.16 || ry > 0.8) continue;      // fully visible
+      if (rx < 0.42 && ry > 0.55) continue;                             // not over the sentence
+      if (G.last && Math.hypot(x - G.last[0], y - G.last[1]) < hb.width * 0.25) continue;   // move on
+      var pl = hero.querySelector(".hero-place");                        // keep clear of the town label
+      if (pl) { var pr = pl.getBoundingClientRect(); if (x > pr.left - hb.width * 0.09 && x < pr.left + hb.width * 0.24 && Math.abs(y - pr.top) < hb.height * 0.2) continue; }
+      return [x, y];
+    }
+    return [hb.left + hb.width * 0.72, hb.top + hb.height * 0.35];
+  }
+  function glassStep(now) {
+    if (window.scrollY > 30) { R3.inside = false; G.phase = "wait"; G.until = now + 600; return; }   // the tilt takes over
+    if (G.hover) { R3.inside = true; return; }
+    if (now < G.until) { R3.px = G.x; R3.py = G.y; return; }
+    if (G.phase === "wait") { var p = glassSpot(); G.x = p[0]; G.y = p[1]; G.last = p; R3.px = G.x; R3.py = G.y; R3.inside = true; G.phase = "show"; G.until = now + 2600; }
+    else if (G.phase === "show") { R3.inside = false; G.phase = "fade"; G.until = now + 700; }
+    else { G.phase = "wait"; G.until = now + 900; }
+  }
   function riseLoop(now) {
     if (!R3 || !CANVAS_MODES[mode]) { if (R3) R3.running = false; return; }
     var t = (now - R3.t0) / 1000;
@@ -386,6 +423,9 @@
       if (t > 6.6) { root.classList.remove("hfx-rising"); R3.canvas.getContext("2d").clearRect(0, 0, R3.canvas.width, R3.canvas.height); R3.running = false; return; }
     } else if (mode === "lens") {
       R3.k = 0;
+    } else if (mode === "glass") {
+      R3.k = 0;
+      glassStep(now);
     } else if (mode === "scroll-rise") {
       // 0 ... 0.7 of the pinned scroll: rise and turn; 0.7 ... 1: push towards the hills
       var pp = pinProgress();
@@ -490,9 +530,10 @@
     } else if (CANVAS_MODES[m]) {
       buildRise().then(function () {
         if (m === "sun") R3.sun = sunNow();
-        if (m !== "scroll-rise" && m !== "lens") root.classList.add("hfx-rising");
+        if (m !== "scroll-rise" && m !== "lens" && m !== "glass") root.classList.add("hfx-rising");
         if (m === "scroll-rise") { pinOn(); R3.k = 0; R3.push = 0; }
-        root.classList.toggle("hfx-lens", m === "lens");
+        root.classList.toggle("hfx-lens", m === "lens" || m === "glass");
+        if (m === "glass") { G.phase = "wait"; G.until = performance.now() + 1200; G.hover = false; R3.inside = false; R3.lensA = 0; }
         R3.t0 = performance.now();
         if (!R3.running) { R3.running = true; requestAnimationFrame(riseLoop); }
       });
