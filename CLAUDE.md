@@ -180,7 +180,7 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   one-line description under the job taken from their site. Keep it factual.
 - Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
   "View certificates" link or the `#certificates` hash; hidden in print.
-- About: two paragraphs only, in the owner's own wording (2026-10-10): "I am a geospatial professional." → most of
+- About: one paragraph, in the owner's own wording (2026-10-10): "I am a geospatial professional." → most of
   the career with EO data from satellites and aircraft, today mainly drone sensors (RGB, LiDAR) → work at the
   intersection of remote sensing, data engineering and machine learning (large datasets, and separately data pipelines
   + backends: different kinds of work; Google Earth Engine not named, owner's wish; no "elevation data", the owner rarely uses it) → Beagle Systems since 11/2025. Then the timeline. No facts block, no
