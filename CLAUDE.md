@@ -81,6 +81,9 @@ Section [02] tells the owner's path: satellite data (from 2016) → aerial image
   photo frames 1.2 × 0.8 km, 60 % / 30 % overlap, the one below solid, labelled "AERIAL PHOTO · 20 CM"), then tilt
   forward at 100 m for chapter 3 (a camera viewfinder: corner brackets + centre cross, "DRONE CAMERA · ~2 CM"),
   and level out to the normal flight after the section.
+- Looking down (pitch > 45°) the ridge-line spacing follows the screen (a line every ~6.5 px, power-of-2 steps
+  of 150 m so lines stay fixed; thinner strokes when dense): the joy plot stays dense from 30 km down to 1 km
+  (owner's wish). Level flight keeps the height-based spacing.
 - Altimeter (`.ds-alti`, ≥ 900 px): log scale 1000 km → 50 m near the right edge, platforms ticked, accent diamond
   + value follows the camera; the active chapter (`.is-active`) and its platform tick are emphasised.
 - `html.ds-on` (set by backdrop.js unless reduced motion) gives each chapter a screen; `html.orbit-live` while the

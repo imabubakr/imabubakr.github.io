@@ -222,8 +222,15 @@
     var terrA = clamp((90000 - alt) / 60000, 0, 1);
     var drawn = [];
     if (terrA > 0) {
-      var lvl = clamp(Math.log2(alt / CRUISE), -2, 6), n0 = Math.floor(lvl), frac = lvl - n0;
+      // line spacing: in level flight it grows with height; looking down (the
+      // descent) it follows the screen, a line every ~6.5 px, so the joy plot
+      // stays dense at any height. Steps halve/double, so lines stay put.
+      var down = pitchDeg > 45;
+      var Hg = Math.max(CZ - sceneZ(CX, CY), 50);
+      var lvl = down ? clamp(Math.log2((6.5 * Hg) / F / STEP), -2, 6) : clamp(Math.log2(alt / CRUISE), -2, 6);
+      var n0 = Math.floor(lvl), frac = lvl - n0;
       var step = STEP * Math.pow(2, n0);
+      var gapPx = (step * F) / Hg;
       // ground distances covered by the view (bottom and top screen edges)
       var aBot = -cam.pitch + Math.atan((h - PY) / F), aTop = -cam.pitch - Math.atan(PY / F);
       var H = Math.max(CZ, 1);
@@ -231,7 +238,7 @@
       var aMax = aTop <= 0.02 ? FAR : Math.min(Math.max(FAR, alt * 3), H / Math.tan(aTop));
       aMin = cam.s + aMin - 2 * step;
       aMax = cam.s + aMax + 2 * step;
-      while ((aMax - aMin) / step > 160) { step *= 2; n0++; frac = 0; }
+      while ((aMax - aMin) / step > (down ? 420 : 160)) { step *= 2; n0++; frac = 0; }
       var g = meta.grid, W = g.cols * g.cell_m[0], Hm = g.rows * g.cell_m[1];
       var fogFar = Math.max(FAR, alt * 4);
       ctx.lineJoin = "round";
@@ -259,18 +266,21 @@
         if (k % 2) thin *= 1 - frac;
         var alpha = (0.25 + 0.75 * Math.pow(near, 1.3)) * thin * terrA;
         if (alpha < 0.03) continue;
-        var dl = Math.max(25, (3.5 * dist) / F);
+        var dl = Math.max(25, ((down ? 5 : 3.5) * dist) / F);
         dl = 25 * Math.pow(2, Math.round(Math.log2(dl / 25)));
         // the ridge line, and below it its base at sea level: the "curtain"
         // between them hides what lies behind (works level and looking down)
+        var fill = cam.pitch > -1.2; // looking (almost) straight down nothing hides anything
         var pts = [], basePts = [], top = Infinity;
         for (var l = Math.ceil(lo / dl) * dl; l <= hi; l += dl) {
           var X = px + RX * l, Y = py + RY * l;
           if (!proj(X, Y, sceneZ(X, Y))) continue;
           var sx = out[0], sy = out[1];
           pts.push(sx, sy);
-          if (proj(X, Y, -H0 * EX)) basePts.push(out[0], Math.max(out[1], sy));
-          else basePts.push(sx, h + 4);
+          if (fill) {
+            if (proj(X, Y, -H0 * EX)) basePts.push(out[0], Math.max(out[1], sy));
+            else basePts.push(sx, h + 4);
+          }
           if (sy < top) top = sy;
         }
         if (pts.length < 4 || top > h + 2) continue;
@@ -278,18 +288,20 @@
         for (var j = 0; j < pts.length; j += 2) { minX = Math.min(minX, pts[j]); maxX = Math.max(maxX, pts[j]); }
         if (maxX < 0 || minX > w) continue;
         drawn.push([a - cam.s, pts]);
-        ctx.beginPath();
-        ctx.moveTo(pts[0], pts[1]);
-        for (j = 2; j < pts.length; j += 2) ctx.lineTo(pts[j], pts[j + 1]);
-        for (j = basePts.length - 2; j >= 0; j -= 2) ctx.lineTo(basePts[j], basePts[j + 1]);
-        ctx.closePath();
-        ctx.globalAlpha = 1;
-        if (cam.pitch > -1.2) ctx.fill(); // looking (almost) straight down nothing hides anything
+        if (fill) {
+          ctx.beginPath();
+          ctx.moveTo(pts[0], pts[1]);
+          for (j = 2; j < pts.length; j += 2) ctx.lineTo(pts[j], pts[j + 1]);
+          for (j = basePts.length - 2; j >= 0; j -= 2) ctx.lineTo(basePts[j], basePts[j + 1]);
+          ctx.closePath();
+          ctx.globalAlpha = 1;
+          ctx.fill();
+        }
         ctx.beginPath(); // stroke the ridge only, not the curtain's edges
         ctx.moveTo(pts[0], pts[1]);
         for (j = 2; j < pts.length; j += 2) ctx.lineTo(pts[j], pts[j + 1]);
         ctx.globalAlpha = alpha;
-        ctx.lineWidth = 0.6 + 1.1 * near * near;
+        ctx.lineWidth = down ? Math.min(0.6 + 1.1 * near * near, 0.35 + gapPx * 0.12) : 0.6 + 1.1 * near * near;
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
