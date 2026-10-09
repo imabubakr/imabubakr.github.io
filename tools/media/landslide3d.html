@@ -7,84 +7,188 @@
 </head>
 <body>
 <script type="module">
-// Landslide scenario in 3D: the 2 m terrain window as a mesh, each frame's map
-// (FS colours, scar, runout; hillshade baked in) draped on it. After the failure
-// the scar sinks by the soil depth and the deposit builds up where the debris has
-// arrived (both x meta.vis for visibility). Driven by render_landslide3d.mjs.
+// Landslide scenario in 3D, rendered frame by frame by render_landslide3d.mjs.
+// Terrain: the 2 m DTM window as a lit mesh with soft shadows; each frame's map
+// (soil water, FS, scar, debris) is its texture. After the failure the scar sinks
+// and the deposit builds up (x meta.vis / meta.vis_dep); debris particles follow
+// the Voellmy trajectories from landslide.py. Rain streaks and a darker sky
+// during the storm; a short push-in and shake at the failure.
 import * as THREE from "three";
 
 const W = 1600, H = 900, EXAG = 1.6;
+const smooth = (t) => { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
 const meta = await (await fetch("work/ls_dem.json")).json();
-const bin = async (f) => new Float32Array(await (await fetch(f)).arrayBuffer());
+const bin = async (f, T = Float32Array) => new T(await (await fetch(f)).arrayBuffer());
 const dem = await bin("work/ls_dem.bin");
-const scar = await bin("work/ls_scar.bin");   // -soil depth inside the scar
-const dep = await bin("work/ls_dep.bin");     // deposit thickness (m)
-const arr = await bin("work/ls_arr.bin");     // arrival time of the debris (s)
+const scar = await bin("work/ls_scar.bin");
+const dep = await bin("work/ls_dep.bin");
+const arr = await bin("work/ls_arr.bin");
+const part = await bin("work/ls_part.bin");
+const partOff = await bin("work/ls_part_off.bin", Int32Array);
 const { rows, cols, cell } = meta;
 const sizeX = (cols - 1) * cell, sizeZ = (rows - 1) * cell;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1);
 renderer.setSize(W, H);
-renderer.setClearColor(0x0e1215);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
 document.body.appendChild(renderer.domElement);
 
-// terrain mesh: x east, y up, z south; row 0 = north edge
+const scene = new THREE.Scene();
+const CLEAR = new THREE.Color(0x0e1215), STORM = new THREE.Color(0x1b2329);
+scene.fog = new THREE.Fog(0x0e1215, 900, 2600);
+
+// ---------------------------------------------------------------- terrain --
 const geo = new THREE.PlaneGeometry(sizeX, sizeZ, cols - 1, rows - 1);
 geo.rotateX(-Math.PI / 2);
 const pos = geo.attributes.position;
-for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) pos.setY(r * cols + c, dem[r * cols + c] * EXAG);
-geo.computeVertexNormals();
+const heights = new Float32Array(dem.length);
+function setHeights(fail, simT) {
+  for (let k = 0; k < dem.length; k++) {
+    const grow = Math.min(1, Math.max(0, (simT - arr[k]) / meta.ramp));
+    heights[k] = (dem[k] + meta.vis * fail * scar[k] + meta.vis_dep * dep[k] * grow) * EXAG;
+    pos.setY(k, heights[k]);
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+}
+setHeights(0, 0);
+const tex = new THREE.Texture();
+tex.colorSpace = THREE.SRGBColorSpace;
+tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+const terrain = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95, metalness: 0 }));
+terrain.castShadow = terrain.receiveShadow = true;
+scene.add(terrain);
 
-// a dark base block under the terrain, so the edges read as a cut-out
-const skirt = new THREE.Group();
-const sideMat = new THREE.MeshBasicMaterial({ color: 0x232c33, side: THREE.DoubleSide });
+// base block under the terrain
+const sideMat = new THREE.MeshStandardMaterial({ color: 0x2a343b, roughness: 1, side: THREE.DoubleSide });
 function side(points) {
   const g = new THREE.BufferGeometry(), v = [];
   for (let i = 0; i < points.length - 1; i++) {
     const [ax, ay, az] = points[i], [bx, by, bz] = points[i + 1];
-    v.push(ax, ay, az, bx, by, bz, bx, -20, bz, ax, ay, az, bx, -20, bz, ax, -20, az);
+    v.push(ax, ay, az, bx, by, bz, bx, -30, bz, ax, ay, az, bx, -30, bz, ax, -30, az);
   }
   g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
-  skirt.add(new THREE.Mesh(g, sideMat));
+  g.computeVertexNormals();
+  scene.add(new THREE.Mesh(g, sideMat));
 }
 const P = (r, c) => [c * cell - sizeX / 2, dem[r * cols + c] * EXAG, r * cell - sizeZ / 2];
 const edge = (fn, n) => Array.from({ length: n }, (_, i) => fn(i));
-side(edge((c) => P(0, c), cols));
-side(edge((c) => P(rows - 1, c), cols));
-side(edge((r) => P(r, 0), rows));
-side(edge((r) => P(r, cols - 1), rows));
+side(edge((c) => P(0, c), cols)); side(edge((c) => P(rows - 1, c), cols));
+side(edge((r) => P(r, 0), rows)); side(edge((r) => P(r, cols - 1), rows));
 
-const tex = new THREE.Texture();
-tex.colorSpace = THREE.SRGBColorSpace;
-tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex }));
-const scene = new THREE.Scene();
-scene.add(mesh, skirt);
+// ----------------------------------------------------------------- light ----
+const hemi = new THREE.HemisphereLight(0xdfe8ee, 0x3a3128, 1.1);
+const sun = new THREE.DirectionalLight(0xfff3e0, 1.7);
+sun.position.set(-500, 520, -420);          // from the north-west, like the hillshade
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left: -520, right: 520, top: 360, bottom: -360, near: 50, far: 2200 });
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.6;
+scene.add(hemi, sun);
 
+// ------------------------------------------------------------------ rain ----
+const RAIN = 5000;
+const rainGeo = new THREE.BufferGeometry();
+const rainPos = new Float32Array(RAIN * 6), rainSeed = new Float32Array(RAIN * 3);
+for (let i = 0; i < RAIN; i++) {
+  rainSeed[i * 3] = (Math.random() - 0.5) * sizeX * 1.2;
+  rainSeed[i * 3 + 1] = (Math.random() - 0.5) * sizeZ * 1.6;
+  rainSeed[i * 3 + 2] = Math.random();
+}
+rainGeo.setAttribute("position", new THREE.BufferAttribute(rainPos, 3));
+const rainMat = new THREE.LineBasicMaterial({ color: 0xbfd3e2, transparent: true, opacity: 0, depthWrite: false });
+const rain = new THREE.LineSegments(rainGeo, rainMat);
+scene.add(rain);
+function updateRain(time, amount) {
+  rainMat.opacity = 0.45 * amount;
+  rain.visible = amount > 0.01;
+  const top = 520, fall = 240;              // streaks fall ~240 m/s in video time (reads as heavy rain)
+  for (let i = 0; i < RAIN; i++) {
+    const x = rainSeed[i * 3], z = rainSeed[i * 3 + 1];
+    const y = top - ((rainSeed[i * 3 + 2] * top + time * fall) % top);
+    const j = i * 6;
+    rainPos[j] = x; rainPos[j + 1] = y; rainPos[j + 2] = z;
+    rainPos[j + 3] = x - 1.2; rainPos[j + 4] = y + 9; rainPos[j + 5] = z + 0.6;
+  }
+  rainGeo.attributes.position.needsUpdate = true;
+}
+
+// -------------------------------------------------------------- particles ---
+const NP = meta.particles;
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(NP * 3), pCol = new Float32Array(NP * 3);
+// soil and rock colours (sRGB), converted to linear for the renderer
+const shades = ["#8a5a35", "#6e4a30", "#a46a3c", "#5a4232", "#c0703a"].map((h) => new THREE.Color(h));
+for (let i = 0; i < NP; i++) {
+  const c = shades[i % shades.length].clone().multiplyScalar(0.8 + 0.4 * Math.random());
+  pCol[i * 3] = c.r; pCol[i * 3 + 1] = c.g; pCol[i * 3 + 2] = c.b;
+}
+pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute("color", new THREE.BufferAttribute(pCol, 3));
+const pMat = new THREE.PointsMaterial({ size: 2.8, vertexColors: true, sizeAttenuation: true, transparent: true, opacity: 0 });
+const debris = new THREE.Points(pGeo, pMat);
+scene.add(debris);
+function heightAt(r, c) {
+  const r0 = Math.max(0, Math.min(rows - 2, Math.floor(r))), c0 = Math.max(0, Math.min(cols - 2, Math.floor(c)));
+  const fr = r - r0, fc = c - c0, k = r0 * cols + c0;
+  const a = heights[k] * (1 - fc) + heights[k + 1] * fc;
+  const b = heights[k + cols] * (1 - fc) + heights[k + cols + 1] * fc;
+  return a * (1 - fr) + b * fr;
+}
+function updateParticles(simT, fail, t) {
+  // particles fade once the flow has come to rest: the deposit stays in the terrain
+  pMat.opacity = fail * (1 - smooth((t - 14.8) / 1.4));
+  debris.visible = pMat.opacity > 0.01;
+  for (let i = 0; i < NP; i++) {
+    const a = partOff[i], b = partOff[i + 1];
+    let j = a;
+    while (j < b - 1 && part[(j + 1) * 3 + 2] <= simT) j++;
+    let r = part[j * 3], c = part[j * 3 + 1];
+    if (j < b - 1) {                                     // interpolate to the next point
+      const t0 = part[j * 3 + 2], t1 = part[(j + 1) * 3 + 2];
+      const f = Math.max(0, Math.min(1, (simT - t0) / Math.max(t1 - t0, 1e-3)));
+      r += (part[(j + 1) * 3] - r) * f; c += (part[(j + 1) * 3 + 1] - c) * f;
+    }
+    pPos[i * 3] = c * cell - sizeX / 2;
+    pPos[i * 3 + 1] = heightAt(r, c) + 1.2 + (i % 7) * 0.35;
+    pPos[i * 3 + 2] = r * cell - sizeZ / 2;
+  }
+  pGeo.attributes.position.needsUpdate = true;
+}
+
+// ---------------------------------------------------------------- camera ----
 const camera = new THREE.PerspectiveCamera(36, W / H, 1, 6000);
-const smooth = (t) => t * t * (3 - 2 * t);
 const loadImage = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
 
 window.frameCount = meta.frames;
 window.renderFrame = async (i) => {
   tex.image = await loadImage(`work/landslide_tex/${String(i).padStart(4, "0")}.jpg`);
   tex.needsUpdate = true;
-  const { fail, sim_t } = meta.timeline[i];
-  for (let k = 0; k < dem.length; k++) {
-    const grow = Math.min(1, Math.max(0, (sim_t - arr[k]) / meta.ramp));
-    pos.setY(k, (dem[k] + meta.vis * fail * scar[k] + meta.vis_dep * dep[k] * grow) * EXAG);
-  }
-  pos.needsUpdate = true;
-  const t = i / (meta.frames - 1);
-  // from the south-west, swinging slowly round to the west (the slide faces west)
-  // high and wide at the start (the whole block, FS spreading), lower and closer on the slide at the end
-  const k = smooth(t);
+  const { fail, sim_t, rain: rainAmt, t } = meta.timeline[i];
+  setHeights(fail, sim_t);
+  // storm: darker sky and dimmer sun while it rains, clearing after the slide
+  const storm = rainAmt * (1 - smooth((t - 9.5) / 3));
+  const sky = CLEAR.clone().lerp(STORM, storm);
+  renderer.setClearColor(sky);
+  scene.fog.color.copy(sky);
+  sun.intensity = 1.7 - 1.0 * storm;
+  hemi.intensity = 1.1 - 0.35 * storm;
+  updateRain(t, storm);
+  updateParticles(sim_t, fail, t);
+  // camera: slow orbit in the storm, push-in at the failure, settle on the scar
+  const k = smooth(i / (meta.frames - 1));
+  const push = smooth((t - 8.2) / 2.2);
   const a = THREE.MathUtils.degToRad(205 + 50 * k);
-  const r = 1000 - 540 * k, h = 720 - 360 * k;
-  const tx = 63 * k, tz = -67 * k;             // ends on the scar (E 420913, N 5638707)
-  camera.position.set(tx + Math.sin(a) * r, h, tz - Math.cos(a) * r);
+  const r = 1000 - 300 * k - 240 * push, h = 720 - 200 * k - 160 * push;
+  const tx = 63 * k, tz = -67 * k;
+  const shake = Math.max(0, 1 - Math.abs(t - 8.7) / 0.6) * 2.2;
+  camera.position.set(tx + Math.sin(a) * r + shake * Math.sin(i * 2.1), h + shake * Math.cos(i * 1.7), tz - Math.cos(a) * r);
   camera.lookAt(tx + 20 * (1 - k), 50 - 15 * k, tz);
   renderer.render(scene, camera);
   return true;

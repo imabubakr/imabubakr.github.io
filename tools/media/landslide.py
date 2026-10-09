@@ -179,6 +179,46 @@ def runout(d, source):
     return reach, weight, np.sqrt(np.maximum(v2, 0)), tarr
 
 
+# --------------------------------------------------------------- particles --
+def trajectories(d, source, n=6000, seed=3):
+    """Debris particles for the 3D view: each starts on a random scar cell and
+    walks downslope (neighbour chosen with probability ~ (tan slope)^4, as in the
+    MFD routing), with the same Voellmy velocity update, until it stops.
+    Returns a list of [(row, col, t), ...] in window-independent grid coordinates."""
+    rng = np.random.default_rng(seed)
+    rs, cs = np.nonzero(source)
+    out = []
+    for _ in range(n):
+        k = rng.integers(len(rs))
+        r, c = int(rs[k]), int(cs[k])
+        jr, jc = rng.uniform(-0.5, 0.5, 2)
+        v2, t = 0.0, rng.uniform(0, 0.8)           # small start-time spread: the slope breaks up
+        path = [(r + jr, c + jc, t)]
+        for _step in range(400):
+            z = d[r, c]
+            cand = []
+            for (dr, dc), st in zip(OFFS, STEP):
+                rr, cc = r + dr, c + dc
+                if not (0 < rr < d.shape[0] - 1 and 0 < cc < d.shape[1] - 1):
+                    continue
+                dz = z - d[rr, cc]
+                if dz > 0:
+                    cand.append((rr, cc, (dz / st) ** 4, dz, st))
+            if not cand:
+                break
+            p = np.array([x[2] for x in cand]); p /= p.sum()
+            rr, cc, _, dz, st = cand[rng.choice(len(cand), p=p)]
+            nv = v2 + 2 * G * (dz - MU * st) - 2 * G * st * v2 / XI
+            if nv <= 0 and not source[rr, cc]:
+                break
+            nv = max(nv, 0.0)
+            t += st / max(0.5 * (math.sqrt(v2) + math.sqrt(nv)), 0.3)
+            v2, r, c = nv, rr, cc
+            path.append((r + rng.uniform(-0.45, 0.45), c + rng.uniform(-0.45, 0.45), t))
+        out.append(path)
+    return out
+
+
 # -------------------------------------------------------------------- scan ---
 def scan():
     d = dtm(); beta = slope(d); sca = catchment(d)
@@ -193,14 +233,14 @@ def scan():
 
 
 # ------------------------------------------------------------------ render ---
-W, H, FPS, SECONDS = 1600, 900, 30, 16
+W, H, FPS, SECONDS = 1600, 900, 30, 17
 WIN_C = (420850.0, 5638640.0)     # window centre (E, N)
 WIN_W = 900.0
 SRC_HINT = (420913.0, 5638707.0)
 ACCENT = (210, 65, 15)
-SCAR = (112, 82, 60)              # exposed ground in the scar
+SCAR = (150, 112, 78)             # exposed ground in the scar
 MONO = "/System/Library/Fonts/Menlo.ttc"
-T_RAIN, T_FAIL, T_FLOW, T_FLOW_END = (1.5, 8.0), 8.5, 9.2, 13.8   # seconds in the video
+T_RAIN, T_FAIL, T_FLOW, T_FLOW_END = (1.5, 8.0), 8.5, 9.0, 14.5   # seconds in the video
 RAMP_S = 2.5                      # a cell's deposit builds up over this much simulated time
 
 
@@ -262,12 +302,38 @@ def simulate():
     return d, beta, sca, source, reach, weight, tarr, dep, res
 
 
+def orthophoto(sl):
+    """DOP10 orthophoto (Geobasis NRW) cut to the render window, as a W x H float RGB array."""
+    import rasterio
+    from rasterio.merge import merge
+    x0 = X0 + sl[1].start * CELL; x1 = X0 + sl[1].stop * CELL
+    y1 = Y1 - sl[0].start * CELL; y0 = Y1 - sl[0].stop * CELL
+    srcs = [rasterio.open(f) for f in sorted(glob.glob(str(WORK / "dop10rgbi_32_*.jp2")))]
+    a, _ = merge(srcs, bounds=(x0, y0, x1, y1), indexes=[1, 2, 3], res=0.4)
+    im = Image.fromarray(np.moveaxis(a, 0, -1)).resize((W, H), Image.LANCZOS)
+    return np.asarray(im).astype(np.float32)
+
+
 def render():
     d, beta, sca, source, reach, weight, tarr, dep, res = simulate()
     sl = window_slice()
     dw, bw, aw = d[sl], beta[sl], sca[sl]
     srcw, rw, ww, tw, depw = source[sl], reach[sl], weight[sl], tarr[sl], dep[sl]
     t_end = res["travel_s"]
+    # particles (window grid coordinates) for the 3D page
+    paths = trajectories(d, source)
+    r_off, c_off = sl[0].start, sl[1].start
+    flat, offs = [], [0]
+    for pth in paths:
+        for r, c, tt in pth:
+            flat += [r - r_off, c - c_off, tt]
+        offs.append(len(flat) // 3)
+    (WORK / "ls_part.bin").write_bytes(np.array(flat, np.float32).tobytes())
+    (WORK / "ls_part_off.bin").write_bytes(np.array(offs, np.int32).tobytes())
+    # flow duration: 95 % of the debris particles have stopped (a few stragglers creep on)
+    t_end = float(np.percentile([p[-1][2] for p in paths], 95))
+    res["travel_s"] = t_end
+    (WORK / "landslide.json").write_text(json.dumps(res, indent=1))
     # geometry for the 3D page: base heights, scar (-z), deposit (+), arrival time
     base = dw.astype(np.float32)
     zmin = float(base.min())
@@ -282,6 +348,7 @@ def render():
     for p in (tex, pan):
         shutil.rmtree(p, ignore_errors=True); p.mkdir(parents=True)
     up = lambda a: np.asarray(Image.fromarray(np.asarray(a, np.float32)).resize((W, H), Image.BILINEAR))
+    ortho = orthophoto(sl)                    # real DOP10 colours as the ground texture
     mono = lambda s: ImageFont.truetype(MONO, s)
     f_small, f_mid, f_big = mono(17), mono(20), mono(26)
     src_up = up(srcw) > 0.5
@@ -292,27 +359,32 @@ def render():
         t = i / FPS
         q = Q_MAX * smooth((t - T_RAIN[0]) / (T_RAIN[1] - T_RAIN[0]))
         fail = smooth((t - T_FAIL) / 0.7)
-        sim_t = t_end * smooth((t - T_FLOW) / (T_FLOW_END - T_FLOW)) if t > T_FLOW else 0.0
-        timeline.append({"fail": fail, "sim_t": sim_t})
+        sim_t = t_end * min(max((t - T_FLOW) / (T_FLOW_END - T_FLOW), 0.0), 1.0)   # simulated time, linear
+        timeline.append({"fail": fail, "sim_t": sim_t, "rain": q / Q_MAX, "t": t})
         m = wetness(bw, aw, q)
         fs = factor_of_safety(bw, m)
         # hillshade of the current surface (scar and deposit change the shading)
         grow = np.clip((sim_t - np.where(np.isfinite(tw), tw, 1e9)) / RAMP_S, 0, 1)
         surf = dw + VIS * fail * scar + VIS_DEP * depw * grow
         hs = up(hillshade(surf))
-        img = np.dstack([40 + hs * 200] * 3)
+        # the 3D page lights the terrain itself; the orthophoto already carries its own shading
+        img = ortho * (0.8 + 0.25 * hs[..., None])
+        # soil water: darker and bluer where saturated (hollows first); dries out after the event
+        mu = up(m)[..., None] * (1 - 0.7 * fail)
+        img = img * (1 - 0.32 * mu ** 2) + np.array([40, 95, 160]) * 0.32 * mu ** 2
         fsu = up(fs)
-        warn = (np.clip((1.5 - fsu) / 0.5, 0, 1) * (fsu >= 1))[..., None] * (1 - 0.6 * fail)
+        clear = smooth((t - T_FAIL - 0.8) / 2.5)          # after the slide: back to the plain landscape
+        warn = (np.clip((1.5 - fsu) / 0.5, 0, 1) * (fsu >= 1))[..., None] * (1 - 0.6 * fail) * (1 - clear)
         img = img * (1 - 0.55 * warn) + np.array([235, 160, 40]) * 0.55 * warn
-        bad = (fsu < 1)[..., None] * (0.75 - 0.5 * fail)
+        bad = (fsu < 1)[..., None] * (0.7 - 0.4 * fail) * (1 - clear)
         img = img * (1 - bad) + np.array([200, 40, 30]) * bad
         if fail > 0:   # exposed ground in the scar, keeps the new shading
             s = src_up[..., None] * fail
-            img = img * (1 - 0.7 * s) + (np.array(SCAR) * (0.55 + 0.6 * hs[..., None])) * 0.7 * s
+            img = img * (1 - 0.92 * s) + (np.array(SCAR) * (0.55 + 0.6 * hs[..., None])) * 0.92 * s
         if sim_t > 0:  # debris where it has arrived
             on = (arr_up <= sim_t) & (wgt_up > 0) & ~src_up
             inten = np.clip(wgt_up / wmax, 0.3, 1)[..., None] * on[..., None]
-            img = img * (1 - 0.8 * inten) + (np.array(ACCENT) * (0.6 + 0.5 * hs[..., None])) * 0.8 * inten
+            img = img * (1 - 0.8 * inten) + (np.array([150, 92, 52]) * (0.6 + 0.5 * hs[..., None])) * 0.8 * inten
         Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(tex / f"{i:04d}.jpg", quality=92)
 
         # panel layer (symbols and SI units: reads in both languages)
@@ -348,6 +420,7 @@ def render():
             print("frame", i)
     (WORK / "ls_dem.json").write_text(json.dumps({"rows": dw.shape[0], "cols": dw.shape[1], "cell": CELL,
                                                     "frames": n_frames, "vis": VIS, "vis_dep": VIS_DEP, "ramp": RAMP_S,
+                                                    "particles": len(paths),
                                                     "timeline": timeline}))
 
 
@@ -362,10 +435,12 @@ def compose3d():
         im.convert("RGB").save(out / f.name)
     pat = str(out / "%04d.png")
     run = lambda *a: subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *a], check=True)
-    run("-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-c:v", "libvpx-vp9", "-crf", "33", "-b:v", "0",
-        "-row-mt", "1", str(OUT / "landslide-sim.webm"))
+    # rain streaks are expensive for a codec: fixed bitrate (two-pass VP9), ~5 MB
+    vp9 = ["-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-c:v", "libvpx-vp9", "-b:v", "2400k", "-row-mt", "1", "-an"]
+    run(*vp9, "-pass", "1", "-passlogfile", str(WORK / "ls2pass"), "-f", "null", "/dev/null")
+    run(*vp9, "-pass", "2", "-passlogfile", str(WORK / "ls2pass"), str(OUT / "landslide-sim.webm"))
     run("-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-c:v", "libx264",
-        "-preset", "slow", "-crf", "23", str(OUT / "landslide-sim.mp4"))
+        "-preset", "slow", "-b:v", "2800k", "-maxrate", "3500k", "-bufsize", "6000k", "-an", str(OUT / "landslide-sim.mp4"))
     Image.open(files[-1]).convert("RGB").resize((720, 405), Image.LANCZOS).save(
         OUT / "landslide-sim-720.webp", quality=80, method=6)
     print("done")

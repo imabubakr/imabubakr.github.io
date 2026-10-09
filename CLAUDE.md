@@ -57,8 +57,10 @@ Plate 04 is a landslide MODEL SCENARIO (`tools/media/landslide.py`, see its docs
 LiDAR ground points; steady-state hydrology m = min(1, q·a/(T·sinβ)) with MFD catchment area (hollows saturate first);
 infinite-slope FS; the slide = compact FS<1 cluster at peak rain (150 mm/d, an extreme event); volume/mass from area
 × 1.5 m; runout = Voellmy mass point on MFD paths (μ 0.3, ξ 300) with velocity and arrival time, cross-checked with
-Corominas (1996); deposit volume-conserving. Rendered in 3D (three.js): the scar sinks (×3) and the deposit builds up
-(×1.5) in the mesh. Results in work/landslide.json and in the caption, which says it is a scenario with assumed values.
+Corominas (1996); deposit volume-conserving. Rendered in 3D (three.js, `landslide3d.html`): DOP10 orthophoto as ground texture, sun with soft shadows,
+rain streaks and a darker sky during the storm, soil water in blue, ~6000 debris particles on Voellmy trajectories,
+a push-in and slight shake at the failure, FS colours fade after the slide; the scar sinks (×3) and the deposit
+builds up (×1.5) in the mesh. Encoded at a fixed bitrate (rain is expensive), ~5 MB. Results in work/landslide.json and in the caption, which says it is a scenario with assumed values.
 Added 2026-10-10 from the owner's Downloads: vehicle detection video (pre-rendered, `src=None`; source stays in
 ~/Downloads, not in the repo), tree crowns (`tree-crowns.png`), population density Europe (`population-europe.png`,
 cropped from a geemap screenshot to remove the UI; basemap credit in the caption). Captions neutral until the owner
