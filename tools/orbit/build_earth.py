@@ -1,6 +1,7 @@
 """Build assets/topo/earth.json: coastlines and land borders around Europe for
 the orbit view of section [02] (assets/js/backdrop.js). Country outlines only:
-islands and coastline pieces smaller than MIN_SIZE are left out.
+islands smaller than MIN_SIZE are left out; every land border is kept (each
+border between two countries is its own line, many of them short).
 
 Source: Natural Earth 1:50m (public domain), https://www.naturalearthdata.com/
   ne_50m_coastline, ne_50m_admin_0_boundary_lines_land
@@ -15,13 +16,13 @@ from pathlib import Path
 
 BBOX = (-32, 28, 50, 72)        # lon/lat window seen from ~705 km above Freiburg
 TOL = 0.04                      # simplification tolerance (degrees)
-MIN_SIZE = 1.2                  # drop lines whose bounding box is smaller than this (degrees)
+MIN_SIZE = 1.2                  # drop coastline pieces whose bounding box is smaller than this (degrees)
 LAYERS = {
-    "coast": ("ne_50m_coastline", None),
-    "borders": ("ne_50m_admin_0_boundary_lines_land", None),
+    "coast": ("ne_50m_coastline", None, MIN_SIZE),
+    "borders": ("ne_50m_admin_0_boundary_lines_land", None, 0),
 }
 
-def lines(src, where):
+def lines(src, where, min_size):
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / "out.geojson"
         cmd = ["ogr2ogr", "-f", "GeoJSON", str(out), str(src), "-clipsrc", *map(str, BBOX),
@@ -30,21 +31,30 @@ def lines(src, where):
             cmd += ["-where", where]
         subprocess.run(cmd, check=True, capture_output=True)
         feats = json.loads(out.read_text())["features"]
-    res = []
+    # clipping can still leave MultiLineStrings (the long mainland coasts): split them here
+    parts = []
     for f in feats:
         g = f["geometry"]
-        if not g or g["type"] != "LineString" or len(g["coordinates"]) < 2:
+        if not g:
             continue
-        xs = [p[0] for p in g["coordinates"]]
-        ys = [p[1] for p in g["coordinates"]]
-        if max(max(xs) - min(xs), max(ys) - min(ys)) < MIN_SIZE:
+        if g["type"] == "LineString":
+            parts.append(g["coordinates"])
+        elif g["type"] == "MultiLineString":
+            parts.extend(g["coordinates"])
+    res = []
+    for c in parts:
+        if len(c) < 2:
             continue
-        res.append([round(v, 2) for pt in g["coordinates"] for v in pt])
+        xs = [p[0] for p in c]
+        ys = [p[1] for p in c]
+        if max(max(xs) - min(xs), max(ys) - min(ys)) < min_size:
+            continue
+        res.append([round(v, 2) for pt in c for v in pt[:2]])
     return res
 
 def main():
     src = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
-    data = {k: lines(src / f"{name}.shp", where) for k, (name, where) in LAYERS.items()}
+    data = {k: lines(src / f"{name}.shp", where, size) for k, (name, where, size) in LAYERS.items()}
     data["source"] = "Natural Earth 1:50m (public domain)"
     out = Path(__file__).resolve().parents[2] / "assets/topo/earth.json"
     out.write_text(json.dumps(data, separators=(",", ":")))

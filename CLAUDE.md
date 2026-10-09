@@ -89,8 +89,8 @@ Section [02] tells the owner's path: satellite data (from 2016) → aerial image
 - Labels never overlap the altimeter (`label()` guard). The figure numbers (frame size, overlap, swath, track angle)
   are illustrative of typical surveys; the chapter spec lines (~705 km · 30 m, ~1 km · 20 cm, ~100 m · ~2 cm) are the
   reference.
-- Data: `assets/topo/earth.json` (24 KB) from `python3 tools/orbit/build_earth.py <folder with Natural Earth 1:50m
-  shapefiles>` (coastline + admin-0 boundary lines; pieces under 1.2° dropped). Credit in the footer ("Natural Earth").
+- Data: `assets/topo/earth.json` (47 KB) from `python3 tools/orbit/build_earth.py <folder with Natural Earth 1:50m
+  shapefiles>` (coastline + all admin-0 land borders; only coastline pieces under 1.2° dropped; multi-part lines are split). Credit in the footer ("Natural Earth").
 
 Rejected along the way (don't bring back): an altitude slider explorer, a "Light and water" sun/flood map, a pinned
 OSM land-cover map of Ebringen (descent.js), and a calm three-column strip with resolution icons. The section must be
