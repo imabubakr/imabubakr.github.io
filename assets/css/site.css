@@ -40,19 +40,6 @@
   --accent: #b8380c; /* survey orange, darkened from #D2410F for AA text contrast */
   --accent-mark: #d2410f; /* non-text: location marker, focus ring */
   --tl-edu: #587082; /* timeline: education markers (slate blue, as in dark mode) */
-  /* land cover for the orbit-to-drone map (muted, map-like) */
-  --lc-base: #e2e1d6;
-  --lc-urban: #dad6cd;
-  --lc-field: #e6dcb6;
-  --lc-meadow: #cdd5a9;
-  --lc-orchard: #bccb93;
-  --lc-vineyard: #cbb98f;
-  --lc-garden: #c6d1a3;
-  --lc-scrub: #aebd8f;
-  --lc-forest: #8fa67b;
-  --lc-water: #8fb0c8;
-  --lc-road: #f6f5ef;
-  --lc-building: #b9aea1;
 
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -75,18 +62,6 @@
     --accent: #ff6a2b;
     --accent-mark: #ff6a2b;
     --tl-edu: #6c7f8c;
-    --lc-base: #161b1e;
-    --lc-urban: #1f2529;
-    --lc-field: #2a2a22;
-    --lc-meadow: #232d22;
-    --lc-orchard: #263223;
-    --lc-vineyard: #2f2a21;
-    --lc-garden: #25301f;
-    --lc-scrub: #283323;
-    --lc-forest: #1f3122;
-    --lc-water: #20384b;
-    --lc-road: #3a4247;
-    --lc-building: #5b6268;
     color-scheme: dark;
   }
 }
@@ -99,18 +74,6 @@
   --accent: #ff6a2b;
   --accent-mark: #ff6a2b;
   --tl-edu: #6c7f8c;
-  --lc-base: #161b1e;
-  --lc-urban: #1f2529;
-  --lc-field: #2a2a22;
-  --lc-meadow: #232d22;
-  --lc-orchard: #263223;
-  --lc-vineyard: #2f2a21;
-  --lc-garden: #25301f;
-  --lc-scrub: #283323;
-  --lc-forest: #1f3122;
-  --lc-water: #20384b;
-  --lc-road: #3a4247;
-  --lc-building: #5b6268;
   color-scheme: dark;
 }
 
@@ -819,8 +782,12 @@ a:hover {
   margin-top: 0.8em;
 }
 /* ------------------------------------------------- from orbit to drone -- */
-/* Career story: three chapters scroll past a pinned map (assets/js/descent.js) that
-   descends from satellite to drone height. Without JS: the chapters alone. */
+/* Career story: three chapters scroll past on the left while the page
+   background (assets/js/backdrop.js) climbs to orbit and descends to drone
+   height on the right, showing what each platform covers. backdrop.js adds
+   html.ds-on (chapters get a screen each, the active one is emphasised),
+   html.orbit-live while the section is on screen, and the altimeter.
+   Without JS or under reduced motion: the chapters as a plain list. */
 .ds-chapters {
   max-width: 60ch;
   margin: 0 auto;
@@ -852,183 +819,40 @@ a:hover {
   color: var(--accent);
   font: 400 0.75rem/1.5 var(--font-mono);
 }
-.ds-figure {
-  margin: 0;
-}
-.ds-figure[hidden] {
-  display: none;
-}
-.ds-stage {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  background: var(--lc-base);
-}
-.ds-canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.ds-readout {
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-  padding: 2px 8px;
-  background: var(--paper);
-  color: var(--ink);
-  font: 400 0.6875rem/1.5 var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-}
-.ds-figure figcaption {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-.ds-figure figcaption a {
-  color: inherit;
-}
-
-/* With the map: chapters get room to scroll past it, the active one is emphasised. */
-.ds-ready .ds-ch {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 62vh;
-  margin: 0;
-  opacity: 0.35;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .ds-ready .ds-ch {
-    transition: opacity 0.4s ease;
-  }
-}
-.ds-ready .ds-ch.is-active {
-  opacity: 1;
-}
-/* phones: the map pins under the nav, chapters scroll below it */
-.ds-ready .ds-figure {
-  position: sticky;
-  top: calc(var(--nav-h) + 4px);
-  z-index: 2;
-  padding: 8px 0;
-  background: var(--paper);
-}
-.ds-ready .ds-figure figcaption {
-  display: none;
-}
-@media (min-width: 900px) {
-  #orbit.ds-ready .descent {
-    display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    gap: 48px;
-    align-items: start;
-    max-width: 1100px;
-  }
-  #orbit.ds-ready .ds-figure {
-    grid-column: 2;
-    grid-row: 1;
-    top: calc(var(--nav-h) + 48px);
-    padding: 0;
-    background: none;
-  }
-  #orbit.ds-ready .ds-figure figcaption {
-    display: block;
-  }
-  #orbit.ds-ready .ds-chapters {
-    grid-column: 1;
-    grid-row: 1;
-    margin: 0;
-  }
-  #orbit.ds-ready .ds-ch {
-    min-height: 80vh;
-  }
-}
-
-/* Preview (2026-10-09): two alternatives to the pinned map, switched by
-   html[data-orbit] (backdrop.js, temporary picker bottom-right).
-   descent: no map; the page background itself climbs to orbit and descends to
-            drone height while the chapters scroll past on the left.
-   strip:   a calm row of three steps with a small resolution icon each. */
-.ds-icon {
-  display: none;
-}
-html[data-orbit="descent"] #orbit .ds-figure,
-html[data-orbit="strip"] #orbit .ds-figure {
-  display: none !important;
-}
-html[data-orbit="descent"] #orbit .descent {
-  display: block;
+html.ds-on #orbit .descent {
   max-width: 1100px;
 }
-html[data-orbit="descent"] #orbit .ds-chapters {
+html.ds-on #orbit .ds-chapters {
   max-width: 400px;
   margin: 0;
 }
-html[data-orbit="descent"] #orbit .ds-ch {
+html.ds-on #orbit .ds-ch {
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-height: 100vh;
   margin: 0;
+  opacity: 0.35;
 }
-html[data-orbit="descent"] #orbit .ds-ch:first-child {
+html.ds-on #orbit .ds-ch:first-child {
   min-height: 80vh;
 }
-html[data-orbit="strip"] #orbit .descent {
-  display: block;
-  max-width: 1000px;
-}
-html[data-orbit="strip"] .ds-hint {
-  display: none;
-}
-html[data-orbit="strip"] #orbit .ds-chapters {
-  display: grid;
-  gap: 40px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-@media (min-width: 760px) {
-  html[data-orbit="strip"] #orbit .ds-chapters {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 48px;
-  }
-}
-html[data-orbit="strip"] #orbit .ds-ch {
-  display: block;
-  min-height: 0;
-  margin: 0;
+html.ds-on #orbit .ds-ch.is-active {
   opacity: 1;
 }
-html[data-orbit="strip"] .ds-icon {
-  display: block;
-  width: 56px;
-  height: 56px;
-  margin-bottom: 16px;
-  overflow: visible;
+@media (prefers-reduced-motion: no-preference) {
+  html.ds-on #orbit .ds-ch {
+    transition: opacity 0.4s ease;
+  }
 }
-.ds-icon-px {
-  fill: var(--ink);
+@media (prefers-reduced-motion: reduce) {
+  html.ds-on #orbit .ds-ch {
+    min-height: 0;
+    margin-top: 36px;
+    opacity: 1;
+  }
 }
-.ds-icon-grid path,
-.ds-icon-frame {
-  fill: none;
-  stroke: var(--grid);
-  stroke-width: 1;
-}
-.ds-icon-shape {
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-}
-.ds-icon-box {
-  fill: none;
-  stroke: var(--accent-mark);
-  stroke-width: 1.25;
-  stroke-dasharray: 3 3;
-}
-/* descent: inside [02] the background is the picture, stronger on the right */
+/* inside [02] the background is the picture: stronger, kept off the text */
 html.orbit-live .backdrop {
   --bg-op: 0.85;
   -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 0.18) 0%, rgb(0 0 0 / 0.18) 34%, #000 52%);
@@ -1041,46 +865,86 @@ html.orbit-live .backdrop {
     mask-image: none;
   }
 }
-.orbit-picker {
-  position: fixed;
-  right: 12px;
-  bottom: 12px;
-  z-index: 30;
+
+/* Altimeter: a log scale of height above ground (1000 km at the top, 50 m at
+   the bottom) near the right edge; labels on the left, the three platforms
+   ticked; the marker (accent diamond + value on the right) follows the camera. Only while [02] is on screen, from 900px. */
+.ds-alti {
+  display: none;
+}
+@media (min-width: 900px) {
+  .ds-alti {
+    position: fixed;
+    top: calc(var(--nav-h) + 12vh);
+    right: 84px;
+    bottom: 14vh;
+    z-index: 1;
+    display: block;
+    width: 1px;
+    background: var(--grid);
+    color: var(--muted);
+    font: 400 0.625rem/1 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    pointer-events: none;
+    opacity: 0;
+  }
+  html.orbit-live .ds-alti {
+    opacity: 1;
+  }
+}
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .ds-alti {
+    transition: opacity 0.4s ease;
+  }
+}
+.ds-alti-tick,
+.ds-alti-mark {
+  position: absolute;
+  right: 0;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 2px 4px;
-  max-width: calc(100vw - 24px);
-  padding: 4px 8px;
-  border: 1px solid var(--grid);
-  background: var(--paper);
-  font: 400 0.6875rem/1 var(--font-mono);
+  gap: 8px;
+  white-space: nowrap;
+  transform: translateY(-50%);
 }
-.orbit-picker span {
-  margin-right: 4px;
-  color: var(--muted);
+.ds-alti-tick::after {
+  content: "";
+  width: 5px;
+  height: 1px;
+  background: var(--muted);
 }
-.orbit-picker button {
-  min-height: 28px;
-  padding: 0 6px;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font: inherit;
-  cursor: pointer;
-}
-.orbit-picker button:hover,
-.orbit-picker button[aria-pressed="true"] {
+.ds-alti-tick.is-platform {
   color: var(--ink);
 }
-.orbit-picker button[aria-pressed="true"] {
-  text-decoration: underline;
-  text-decoration-color: var(--accent-mark);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
+.ds-alti-tick.is-platform::after {
+  width: 9px;
+  background: var(--ink);
+}
+.ds-alti-tick.is-active {
+  color: var(--accent);
+}
+.ds-alti-mark {
+  right: auto;
+  left: -4px;
+  flex-direction: row-reverse;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.ds-alti-mark::after {
+  content: "";
+  width: 9px;
+  height: 9px;
+  background: var(--accent-mark);
+  transform: rotate(45deg);
+}
+.ds-alti-mark span {
+  margin-left: 4px;
+  padding: 2px 4px;
+  background: var(--paper);
 }
 @media print {
-  .orbit-picker {
+  .ds-alti {
     display: none !important;
   }
 }
