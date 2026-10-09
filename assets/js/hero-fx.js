@@ -31,6 +31,9 @@
     ? { title: "Startbereich (Vorschau)", glass: "glas", intro: "intro", sun: "sonne", lens: "lupe", "scroll-rise": "scroll-3d", rise: "aufsteigen", none: "ohne", draw: "zeichnen", scan: "scan", tilt: "kippen", light: "licht", accent: "akzent", "draw+accent": "zeichnen+akzent", replay: "wiederholen ↺" }
     : { title: "Hero (preview)", glass: "glass", intro: "intro", sun: "sun", lens: "lens", "scroll-rise": "scroll-3d", rise: "rise", none: "none", draw: "draw", scan: "scan", tilt: "tilt", light: "light", accent: "accent", "draw+accent": "draw+accent", replay: "replay ↺" };
 
+  // scroll-3d extras on trial (toggles in the picker): scan sweep, dissolve into points, trig points
+  var OPTS = { sweep: true, points: true, trig: true };
+  try { var so = JSON.parse(localStorage.getItem("hero-fx-opts") || "null"); if (so) OPTS = so; } catch (e) {}
   var mode = new URLSearchParams(location.search).get("hero");
   if (MODES.indexOf(mode) < 0) { try { mode = localStorage.getItem("hero-preview"); } catch (e) {} }
   if (MODES.indexOf(mode) < 0) mode = "glass";
@@ -220,58 +223,68 @@
       return R3;
     });
   }
-  // Drone mapping mission over the model: a lawnmower survey of a block on the west-facing
-  // slope in front of the camera (map metres), flown 40 m above the ground (hero DEM).
-  // Planned lanes faint, flown lanes solid, the drone a small dot with a soft ring.
-  var SURVEY = { x0: 6000, x1: 6750, y0: 2300, y1: 2850, lanes: 6, agl: 40 };
-  var routePts = null;
   function demAt(X, Y) {
     var c = Math.min(198.999, Math.max(0, X / 50 - 0.5)), r = Math.min(98.999, Math.max(0, Y / 50 - 0.5));
     var c0 = Math.floor(c), r0 = Math.floor(r), fc = c - c0, fr = r - r0, d = R3.dem, i = r0 * 200 + c0;
     var a = d[i] + (d[i + 1] - d[i]) * fc, b = d[i + 200] + (d[i + 201] - d[i + 200]) * fc;
     return a + (b - a) * fr;
   }
-  function buildSurvey() {
-    var S = SURVEY, way = [], dy = (S.y1 - S.y0) / (S.lanes - 1);
-    for (var l = 0; l < S.lanes; l++) {                      // lanes up and down the slope (west-east),
-      var Y = S.y0 + l * dy, up = l % 2 === 0;               // along the camera's line of sight
-      way.push([up ? S.x0 : S.x1, Y], [up ? S.x1 : S.x0, Y]);
+  // Dissolve: the layer as fine points (like a LiDAR point cloud), slightly scattered,
+  // appearing as the lines fade and vanishing towards the end of the handoff.
+  function drawPoints(L, Z, proj, dis, col) {
+    var ctx = R3.ctx, o = [0, 0], A = Math.min(1, dis * 4) * (1 - smooth((dis - 0.55) / 0.45));
+    if (A <= 0.01) return;
+    ctx.fillStyle = col; ctx.globalAlpha = A * (L.index ? 0.9 : 0.6);
+    var sz = L.index ? 2 : 1.6, spread = 18 * dis;
+    for (var r = 0; r < L.rings.length; r++) {
+      var g = L.rings[r];
+      for (var i = 0; i < g.length - 2; i += 2) {
+        var X0 = g[i], Y0 = g[i + 1], X1 = g[i + 2], Y1 = g[i + 3];
+        var n = Math.max(1, Math.round(Math.hypot(X1 - X0, Y1 - Y0) / 30));
+        for (var j = 0; j < n; j++) {
+          var h = Math.sin((X0 * 12.9898 + Y0 * 78.233 + j * 37.7) * 0.01) * 43758.5453; h -= Math.floor(h);
+          var h2 = Math.sin((X0 * 3.17 + Y0 * 9.31 + j * 11.1) * 0.01) * 24634.6345; h2 -= Math.floor(h2);
+          proj(X0 + (X1 - X0) * j / n, Y0 + (Y1 - Y0) * j / n, Z, o);
+          ctx.fillRect(o[0] + (h - 0.5) * spread, o[1] + (h2 - 0.3) * spread, sz, sz);
+        }
+      }
     }
-    var pts = [];
-    for (var w = 1; w < way.length; w++) {
-      var a = way[w - 1], b = way[w], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 25));
-      for (var j = 0; j < n; j++) pts.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]);
-    }
-    pts.push(way[way.length - 1]);
-    var g = pts.map(function (p) { return demAt(p[0], p[1]); });
-    pts.forEach(function (p, q) {                            // terrain following, lightly smoothed
-      var sum = 0, n = 0;
-      for (var e = Math.max(0, q - 2); e <= Math.min(g.length - 1, q + 2); e++) { sum += g[e]; n++; }
-      p[2] = sum / n + S.agl;
-    });
-    return pts;
   }
-  function drawFlightPath(proj, ex, k) {
+  // Survey control points: the three highest summits (DEM local maxima, >= 1.5 km apart),
+  // drawn as trig-point triangles with their height.
+  var trigPts = null;
+  function findTrig() {
+    var d = R3.dem, peaks = [];
+    for (var r = 3; r < 97; r++) for (var c = 3; c < 197; c++) {
+      var z = d[r * 200 + c], top = true;
+      for (var dr = -3; dr <= 3 && top; dr++) for (var dc = -3; dc <= 3; dc++) if (d[(r + dr) * 200 + c + dc] > z) { top = false; break; }
+      if (top) peaks.push([(c + 0.5) * 50, (r + 0.5) * 50, z]);
+    }
+    peaks.sort(function (a, b) { return b[2] - a[2]; });
+    var out = [];
+    peaks.forEach(function (p) {
+      if (out.length < 3 && out.every(function (q) { return Math.hypot(p[0] - q[0], p[1] - q[1]) > 1500; })) out.push(p);
+    });
+    return out;
+  }
+  function drawTrig(proj, ex, A) {
+    if (!trigPts) trigPts = findTrig();
     var ctx = R3.ctx, css = getComputedStyle(root), o = [0, 0];
-    if (!routePts) routePts = buildSurvey();
-    var P = routePts.map(function (p) { proj(p[0], p[1], (p[2] - R3.zmin) * ex, o); return [o[0], o[1]]; });
-    var head = R3.pathP * (P.length - 1), hi = Math.floor(head), f = head - hi;
-    var accent = css.getPropertyValue("--accent-mark").trim(), appear = Math.min(1, R3.pathP * 5);
+    var ink = css.getPropertyValue("--ink").trim(), paper = css.getPropertyValue("--paper").trim();
     ctx.save();
-    ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = accent;
-    ctx.globalAlpha = 0.35 * appear; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);      // the plan
-    ctx.beginPath(); P.forEach(function (p, i) { if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); }); ctx.stroke();
-    ctx.setLineDash([]); ctx.globalAlpha = 0.9 * appear; ctx.lineWidth = 1.5;          // flown lanes
-    ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]);
-    for (var i = 1; i <= hi; i++) ctx.lineTo(P[i][0], P[i][1]);
-    var hx = P[hi][0], hy = P[hi][1];
-    if (hi < P.length - 1) { hx += (P[hi + 1][0] - hx) * f; hy += (P[hi + 1][1] - hy) * f; }
-    ctx.lineTo(hx, hy); ctx.stroke();
-    // the drone: a small dot with a soft ring
-    ctx.globalAlpha = appear * (R3.pathP < 0.999 ? 1 : 0.6); ctx.fillStyle = accent;
-    ctx.beginPath(); ctx.arc(hx, hy, 3.2, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 0.45 * appear; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(hx, hy, 7, 0, Math.PI * 2); ctx.stroke();
+    ctx.font = '500 10px "IBM Plex Mono", monospace';
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "1px";
+    trigPts.forEach(function (p, i) {
+      proj(p[0], p[1], (p[2] - R3.zmin) * ex, o);
+      var x = o[0], y = o[1] - 2;
+      ctx.globalAlpha = A;
+      ctx.beginPath(); ctx.moveTo(x, y - 7); ctx.lineTo(x + 6, y + 3.5); ctx.lineTo(x - 6, y + 3.5); ctx.closePath();
+      ctx.fillStyle = paper; ctx.fill(); ctx.strokeStyle = ink; ctx.lineWidth = 1.3; ctx.stroke();
+      ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(x, y - 0.5, 1.4, 0, Math.PI * 2); ctx.fill();
+      var t = Math.round(p[2]) + " m";
+      ctx.lineWidth = 3; ctx.strokeStyle = paper; ctx.lineJoin = "round"; ctx.textAlign = "left";
+      ctx.strokeText(t, x + 10, y + 2); ctx.fillText(t, x + 10, y + 2);
+    });
     ctx.restore();
   }
   function mixColor(a, b, t) {                               // two #rrggbb colours
@@ -358,6 +371,7 @@
     var lv = R3.levels;
     var SR = mode === "scroll-rise";
     var labelA = SR ? smooth((k - 0.45) / 0.4) : 0, placed = [];
+    var accentMark = css.getPropertyValue("--accent-mark").trim();
     var labelCol = css.getPropertyValue(isDark ? "--muted" : "--contour").trim();
     // paper-model edge: each layer's card thickness (10 m) seen from the side, a touch darker
     var edgeCol = SR ? mixColor(paper, line, isDark ? 0.3 : 0.22) : null;
@@ -406,9 +420,23 @@
         var depth = cnt ? Math.min(1, Math.max(0, (yNear - cy0 / cnt) / Math.max(1, yNear - yFar))) : 0;
         a *= 1 - 0.45 * k * depth;
       }
-      ctx.globalAlpha = a;
+      var dis = SR && OPTS.points ? R3.fade : 0;             // dissolving: lines give way to points
+      ctx.globalAlpha = a * (1 - Math.min(1, dis * 3));
       ctx.lineWidth = L.index ? 1.2 : 0.6;
       ctx.stroke(linePath);
+      if (dis > 0.01) drawPoints(L, Z, proj, dis, line);
+      if (SR && OPTS.sweep && R3.sweepP > 0 && R3.sweepP < 1) {  // scan sweep: a light band west -> east
+        var Xs = 3800 + R3.sweepP * 6400;
+        [[260, 0.28, 1.2], [70, 0.95, 1.5]].forEach(function (b) {
+          var c = [[Xs - b[0], -500], [Xs + b[0], -500], [Xs + b[0], 5500], [Xs - b[0], 5500]];
+          ctx.save(); ctx.beginPath();
+          c.forEach(function (q, i) { proj(q[0], q[1], Z, tmp); if (i) ctx.lineTo(tmp[0], tmp[1]); else ctx.moveTo(tmp[0], tmp[1]); });
+          ctx.closePath(); ctx.clip();
+          ctx.strokeStyle = accentMark; ctx.globalAlpha = b[1] * Math.sin(Math.PI * R3.sweepP); ctx.lineWidth = b[2];
+          ctx.stroke(linePath); ctx.restore();
+        });
+        ctx.strokeStyle = line;
+      }
       if (SR && L.index && L.anchor && labelA > 0.01) {      // height label on the 50 m contours
         proj(L.anchor[0], L.anchor[1], Z, tmp);
         var lxp = tmp[0], lyp = tmp[1], clear = lxp > 30 && lxp < W - 60 && lyp > 24 && lyp < H - 24 &&
@@ -428,8 +456,8 @@
         }
       }
     }
-    // drone flight path over the model during the push-in (scroll-rise)
-    if (SR && R3.dem && R3.pathP > 0.01) drawFlightPath(proj, ex, k);
+    // survey control points (trig points) on the summits
+    if (SR && OPTS.trig && R3.dem && labelA > 0.01) drawTrig(proj, ex, labelA * (1 - R3.fade));
     if (lens) {
       ctx.restore();
       if (R3.lensA > 0.02) {                                  // the loupe's rim and a centre tick
@@ -575,7 +603,7 @@
       var pp = pinProgress();
       R3.kT = smooth(pp / 0.7);
       R3.pushT = smooth((pp - 0.7) / 0.3);
-      R3.pathP = (R3.pathP || 0) + (Math.min(1, Math.max(0, (pp - 0.5) / 0.38)) - (R3.pathP || 0)) * 0.1;
+      R3.sweepP = (R3.sweepP || 0) + (Math.min(1, Math.max(0, (pp - 0.4) / 0.4)) - (R3.sweepP || 0)) * 0.12;
       R3.k += (R3.kT - R3.k) * 0.1;                       // eased, never jumps with the wheel
       R3.push = (R3.push || 0) + (R3.pushT - (R3.push || 0)) * 0.1;
       cue.classList.toggle("is-gone", pp > 0.015);
@@ -590,7 +618,7 @@
       var fadeT = Math.max(0.55 * smooth((pp - 0.72) / 0.28), smooth(release));
       R3.fade = (R3.fade || 0) + (fadeT - (R3.fade || 0)) * 0.18;
       hero.style.setProperty("--hfx-bg", (1 - R3.fade).toFixed(3));
-      R3.canvas.style.opacity = R3.k > 0.004 ? (1 - 0.9 * R3.fade).toFixed(3) : "";   // hidden until it rises
+      R3.canvas.style.opacity = R3.k > 0.004 ? (1 - (OPTS.points ? 0.55 : 0.9) * R3.fade).toFixed(3) : "";   // hidden until it rises
     } else {
       R3.k = smooth((t - 0.7) / 2.6);
     }
@@ -705,13 +733,23 @@
   picker.setAttribute("aria-label", LABEL.title);
   picker.innerHTML = "<span>" + LABEL.title + "</span>" + MODES.map(function (m) {
     return '<button type="button" data-hero="' + m + '">' + LABEL[m] + "</button>";
-  }).join("") + '<button type="button" data-replay>' + LABEL.replay + "</button>";
+  }).join("") + '<button type="button" data-replay>' + LABEL.replay + "</button>" +
+    '<span>· 3d:</span>' + ["sweep", "points", "trig"].map(function (o) {
+      return '<button type="button" data-opt="' + o + '">' + (de ? { sweep: "scan", points: "punkte", trig: "festpunkte" } : { sweep: "sweep", points: "points", trig: "trig" })[o] + "</button>";
+    }).join("");
   function syncPicker() {
     picker.querySelectorAll("[data-hero]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.hero === mode)); });
+    picker.querySelectorAll("[data-opt]").forEach(function (b) { b.setAttribute("aria-pressed", String(!!OPTS[b.dataset.opt])); });
   }
   picker.addEventListener("click", function (e) {
     var b = e.target.closest("button");
     if (!b) return;
+    if (b.dataset.opt) {
+      OPTS[b.dataset.opt] = !OPTS[b.dataset.opt];
+      try { localStorage.setItem("hero-fx-opts", JSON.stringify(OPTS)); } catch (err) {}
+      syncPicker();
+      return;
+    }
     if (b.dataset.hero) { mode = b.dataset.hero; try { localStorage.setItem("hero-preview", mode); } catch (err) {} }
     syncPicker();
     if (window.scrollY > 10 && mode !== "tilt") window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });

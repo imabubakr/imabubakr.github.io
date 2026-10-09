@@ -249,12 +249,12 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   --contour), far lines fade (atmospheric depth), no sway while scrolling, softer easing (0.1), a mono "scroll" cue
   with a falling accent tick at the bottom (hidden once scrolling starts), canvas hidden until the rise begins.
   Height labels ("450 m") on the 50 m terraces, anchored at each level's westernmost vertex (facing the camera), drawn
-  with their layer so higher layers cover them, no overlaps, not over the sentence. A drone mapping mission
-  (`SURVEY` in hero-fx.js, map metres) flies a lawnmower pattern over one west-facing slope in front of the camera:
-  6 lanes up and down the slope (along the line of sight, so they read as a survey grid), 40 m above the terrain
-  (hero DEM, lightly smoothed); faint dashed plan, solid flown lanes, the drone a small accent dot with a soft ring;
-  progress follows the pinned scroll 0.5–0.88 so it finishes before the handoff. (A long route line and a camera
-  footprint looked odd and were dropped.) The draw effect animates a split
+  with their layer so higher layers cover them, no overlaps, not over the sentence. No drone (every drawn flight line looked
+  odd over the paper model; the owner dropped it). Extras on trial, toggled in the picker (`OPTS`, `localStorage
+  hero-fx-opts`): `sweep` (an accent band passes west→east across the model during pinned progress 0.4–0.8, clipped
+  per layer so it respects occlusion), `points` (at the handoff the contour lines give way to fine scattered points,
+  like a LiDAR cloud, before the flight takes over), `trig` (the three highest DEM summits ≥ 1.5 km apart as trig
+  triangles with their height). The draw effect animates a split
   copy of the contour paths (overlay svg) and removes it afterwards, so the map tools are untouched.
 - Hero map tools (`assets/js/hero-map.js`, one engine for hero and fullscreen viewer): hovering shows lat/lon +
   elevation in the strip (replacing `EPSG:4326`); two clicks/taps draw an accent survey line and open the elevation
