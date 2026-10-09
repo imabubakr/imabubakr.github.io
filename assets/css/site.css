@@ -39,8 +39,9 @@
   --grid: #c9cbc5;
   --accent: #b8380c; /* survey orange, darkened from #D2410F for AA text contrast */
   --accent-mark: #d2410f; /* non-text: location marker, focus ring */
-  --photo-shadow: #4b3b2c; /* duotone portrait: dark end (contour brown) */
-  --photo-light: #ece6da; /* duotone portrait: light end (warm paper) */
+  --tl-edu: #587082; /* timeline: education markers (slate blue, as in dark mode) */
+  --photo-shadow: #1f262b; /* duotone portrait: dark end (neutral, slightly cool ink) */
+  --photo-light: #e9eae6; /* duotone portrait: light end (= paper, no tint) */
   /* land cover for the orbit-to-drone map (muted, map-like) */
   --lc-base: #e2e1d6;
   --lc-urban: #dad6cd;
@@ -75,11 +76,10 @@
     --grid: #232c33;
     --accent: #ff6a2b;
     --accent-mark: #ff6a2b;
+    --tl-edu: #6c7f8c;
     --photo-shadow: #0e1215;
     --photo-light: #a9b8c2;
-    --photo-shadow: #0e1215;
-  --photo-light: #a9b8c2;
-  --lc-base: #161b1e;
+    --lc-base: #161b1e;
     --lc-urban: #1f2529;
     --lc-field: #2a2a22;
     --lc-meadow: #232d22;
@@ -102,6 +102,7 @@
   --grid: #232c33;
   --accent: #ff6a2b;
   --accent-mark: #ff6a2b;
+  --tl-edu: #6c7f8c;
   --photo-shadow: #0e1215;
   --photo-light: #a9b8c2;
   --lc-base: #161b1e;
@@ -861,13 +862,13 @@ a:hover {
 }
 .about-photo {
   display: block;
-  width: 208px;
+  width: 144px;
   height: auto;
   filter: grayscale(1) contrast(1.15);
 }
 @media (min-width: 720px) {
   .about-photo {
-    width: 248px;
+    width: 168px;
   }
 }
 
@@ -1066,7 +1067,7 @@ a:hover {
   transform: rotate(45deg);
 }
 .tl-edu::before {
-  background: var(--contour);
+  background: var(--tl-edu);
 }
 .tl-now::before {
   background: var(--accent-mark);

@@ -84,7 +84,9 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 | `--paper` | `#e9eae6` | `#0e1215` | background |
 | `--ink` | `#141719` | `#e4e6e7` | text, work markers |
 | `--muted` | `#4e5358` | `#8d979e` | secondary text, dates, labels |
-| `--contour` | `#8a6a4a` | `#6c7f8c` | contour lines, education markers |
+| `--contour` | `#8a6a4a` | `#6c7f8c` | contour lines, village outlines |
+| `--tl-edu` | `#587082` | `#6c7f8c` | timeline education diamonds (slate blue in both themes: cool / ink / orange) |
+| `--photo-shadow` / `--photo-light` | `#1f262b` / `#e9eae6` | `#0e1215` / `#a9b8c2` | portrait duotone; light theme is neutral (owner disliked the warm/yellow tint) |
 | `--grid` | `#c9cbc5` | `#232c33` | hairlines (nav, strip, footer), graticule |
 | `--accent` | `#b8380c` | `#ff6a2b` | links and accent **text** |
 | `--accent-mark` | `#d2410f` | `#ff6a2b` | non-text: location marker, current-job marker, focus ring |
@@ -139,7 +141,7 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   (satellite data, MapTransfer, Karuna), then what the current Beagle job involves. No job pitch (the owner is not
   job-hunting). Text → timeline → portrait below the timeline (owner's choice, 2026-10-09).
 - Portrait: the **uncropped** square selfie `me.jpg` → `assets/img/portrait-{320,640}.webp` (owner disliked the
-  crop). Shown as a duotone in map colours (`.duotone`, `--photo-shadow` / `--photo-light` per theme) with soft
+  crop). Shown small (144/168 px) as a duotone (`.duotone`, `--photo-shadow` / `--photo-light` per theme) with soft
   only the outer ~9% of the edges faded into the paper by a CSS mask (`.portrait`); the owner wants the photo
   clearly visible, not washed out. The print header uses it too.
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
