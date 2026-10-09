@@ -18,6 +18,8 @@ from pathlib import Path
 
 from PIL import Image
 
+Image.MAX_IMAGE_PIXELS = None  # freiburg4.png is a 125-megapixel poster
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "assets/plates"
 
@@ -29,27 +31,42 @@ PLATES = [
     ("storm-emir", "storm.gif", True, 0.5,
      ("Storm Emir", f"Storm Emir, November 2023: wind field over Europe. Data: ERA5; {C3S}."),
      ("Sturm Emir", f'Sturm Emir, November 2023: Windfeld über Europa. Daten: ERA5; <span lang="en">{C3S}</span>.')),
+    ("wind-europe", "europe9.png", False, 0,
+     ("Wind over Europe", "Wind speed and direction over Europe, drawn as streamlines."),
+     ("Wind über Europa", "Windgeschwindigkeit und -richtung über Europa als Stromlinien.")),
     ("aurora", "aurora_rotation.gif", True, 0.3,
      ("Auroras over the North Pole", "Auroras over the North Pole, visualized in Python from NOAA data."),
      ("Polarlichter über dem Nordpol", "Polarlichter über dem Nordpol, in Python aus NOAA-Daten visualisiert.")),
-    ("aral-sea", "aral.gif", True, 0.0,
-     ("Aral Sea, 1985–2019", "The shrinking Aral Sea, time-lapse from 1985 to 2019."),
-     ("Aralsee, 1985–2019", "Der schrumpfende Aralsee im Zeitraffer, 1985 bis 2019.")),
-    ("glacier", "glacier8.png", False, 0,
-     ("Mýrdalsjökull, 1980 and 2018", "Mýrdalsjökull, Iceland: glacier outlines of 1980 and 2018 over an ArcticDEM hillshade."),
-     ("Mýrdalsjökull, 1980 und 2018", "Mýrdalsjökull, Island: Gletscherumrisse von 1980 und 2018 über einer ArcticDEM-Schummerung.")),
+    ("moon-phases", "moon-phases.png", False, 0,
+     ("Moon phases, 2023", "The phase of the Moon for every day of 2023."),
+     ("Mondphasen 2023", "Die Mondphase für jeden Tag des Jahres 2023.")),
     ("landslide-world", "80.jpg", False, 0,
      ("Landslide susceptibility", "Global landslide susceptibility, from slight to severe."),
      ("Rutschungsanfälligkeit", "Weltweite Anfälligkeit für Hangrutschungen, von gering bis hoch.")),
+    ("landslide-scandinavia", "norway-land.png", False, 0,
+     ("Landslide risk, Scandinavia", "Landslide risk across Scandinavia and Finland, from moderate to severe."),
+     ("Rutschungsrisiko, Skandinavien", "Risiko für Hangrutschungen in Skandinavien und Finnland, von mittel bis hoch.")),
+    ("drought-us", "drought5.png", False, 0,
+     ("Drought in the United States", "Drought across the contiguous United States. Data: U.S. Drought Monitor, valid until November 7, 2023."),
+     ("Dürre in den USA", 'Dürre in den Vereinigten Staaten (ohne Alaska und Hawaii). Daten: <span lang="en">U.S. Drought Monitor</span>, Stand 7. November 2023.')),
     ("lidar-dem", "lidar.gif", True, 0.6,
      ("From LiDAR to DSM and DEM", "From LiDAR to DSM and DEM: unveiling the hidden terrain."),
      ("Vom LiDAR zu DOM und DGM", "Vom LiDAR zu DOM und DGM: das verborgene Gelände sichtbar gemacht.")),
+    ("elevation-germany", "germay.jpeg", False, 0,
+     ("Elevation circles, Germany", "The elevation of Germany as a grid of circles: the larger the circle, the higher the ground."),
+     ("Höhenkreise, Deutschland", "Die Höhe Deutschlands als Raster aus Kreisen: je größer der Kreis, desto höher das Gelände.")),
     ("etna", "mount_etna.png", False, 0,
      ("Mount Etna", "Mount Etna, Sicily, drawn as stacked contour layers."),
      ("Ätna", "Der Ätna auf Sizilien als gestapelte Höhenschichten.")),
     ("world-ridges", "ridge-lines (3).png", False, 0,
      ("Ridge lines of the world", "Ridge lines showing the topography of the world."),
      ("Ridgelines der Welt", "Ridgeline-Darstellung der Topografie der Welt.")),
+    ("freiburg-altstadt", "freiburg4.png", False, 0,
+     ("Freiburg old town", "A street map of Freiburg's old town (Altstadt)."),
+     ("Freiburger Altstadt", "Stadtplan der Freiburger Altstadt.")),
+    ("freiburg-streets", "osm8.png", False, 0,
+     ("Street network of Freiburg", "Street network of Freiburg im Breisgau."),
+     ("Straßennetz von Freiburg", "Straßennetz von Freiburg im Breisgau.")),
 ]
 
 # Sharper stills for animated plates (thumbnail / preview), where a larger frame exists.
