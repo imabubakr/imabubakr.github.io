@@ -2083,3 +2083,161 @@ html.arrive-live .backdrop {
     display: none !important;
   }
 }
+
+/* ------------------------------------------- hero effects (PREVIEW) -- */
+/* assets/js/hero-fx.js; the owner is trying them before choosing. */
+.hfx-picker {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+  max-width: calc(100vw - 24px);
+  padding: 4px 8px;
+  border: 1px solid var(--grid);
+  background: var(--paper);
+  font: 400 0.6875rem/1 var(--font-mono);
+}
+.hfx-picker span {
+  margin-right: 4px;
+  color: var(--muted);
+}
+.hfx-picker button {
+  min-height: 28px;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+.hfx-picker button:hover,
+.hfx-picker button[aria-pressed="true"] {
+  color: var(--ink);
+}
+.hfx-picker button[aria-pressed="true"] {
+  text-decoration: underline;
+  text-decoration-color: var(--accent-mark);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.hfx-w {
+  display: inline-block;
+}
+html.hfx-words .hfx-w {
+  opacity: 0;
+  transform: translateY(0.35em);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+html.hfx-words.hfx-words-in .hfx-w {
+  opacity: 1;
+  transform: none;
+}
+/* draw: the real contours hide while the split copy draws itself */
+html.hfx-drawing svg.topo:not(.hfx-draw) .topo-c,
+html.hfx-drawing svg.topo:not(.hfx-draw) .topo-i {
+  opacity: 0;
+}
+html.hfx-drawing svg.topo:not(.hfx-draw) .topo-l,
+html.hfx-drawing .hero-places,
+html.hfx-drawing .grat {
+  opacity: 0;
+  transition: opacity 0.8s ease 2.2s;
+}
+html.hfx-drawing.hfx-drawn svg.topo:not(.hfx-draw) .topo-l,
+html.hfx-drawing.hfx-drawn .hero-places,
+html.hfx-drawing.hfx-drawn .grat {
+  opacity: 1;
+}
+.hfx-draw path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+html.hfx-drawn .hfx-draw path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1.6s cubic-bezier(0.45, 0, 0.2, 1) var(--delay);
+}
+/* scan: the map is revealed behind a moving line */
+html.hfx-scanning .hero-map,
+html.hfx-scanning .hero-places {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--scan) - 4%), transparent var(--scan));
+  mask-image: linear-gradient(90deg, #000 calc(var(--scan) - 4%), transparent var(--scan));
+}
+.hfx-scan {
+  position: absolute;
+  top: var(--strip-h);
+  bottom: 0;
+  left: var(--scan, -10%);
+  z-index: 2;
+  width: 2px;
+  background: var(--accent-mark);
+  box-shadow: 0 0 18px 4px color-mix(in srgb, var(--accent-mark) 45%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+html.hfx-scanning .hfx-scan {
+  opacity: 0.9;
+}
+/* tilt: the map leans back as the hero scrolls away */
+.hero-map,
+.hero-places {
+  transform-origin: 50% 100%;
+}
+/* light: relief shading under the contours */
+.hfx-light {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+html.hfx-light-on .hfx-light {
+  opacity: 1;
+}
+/* accent: a survey line under "all things spatial" */
+.hfx-hl {
+  position: relative;
+  white-space: nowrap;
+}
+/* the line draws from left to right, then the two end ticks appear (survey style) */
+.hfx-hl::after,
+.hfx-hl::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+.hfx-hl::after {
+  bottom: -0.1em;
+  height: 2px;
+  background: var(--accent-mark);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+.hfx-hl::before {
+  bottom: -0.2em;
+  height: 0.22em;
+  border-left: 2px solid var(--accent-mark);
+  border-right: 2px solid var(--accent-mark);
+  opacity: 0;
+}
+html.hfx-ul-on .hfx-hl::after {
+  transform: none;
+  transition: transform 0.9s cubic-bezier(0.45, 0, 0.2, 1);
+}
+html.hfx-ul-on .hfx-hl::before {
+  opacity: 1;
+  transition: opacity 0.3s ease 0.8s;
+}
+@media print {
+  .hfx-picker,
+  .hfx-scan {
+    display: none !important;
+  }
+}

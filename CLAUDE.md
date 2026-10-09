@@ -225,6 +225,10 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 - CV layout: German Lebenslauf, **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.
+- **Hero effects PREVIEW (2026-10-11):** `assets/js/hero-fx.js` + "hero effects (PREVIEW)" block in site.css, picker
+  bottom-left (`?hero=none|draw|scan|tilt|light|accent|draw+accent`, `localStorage.hero-preview`). The owner is
+  trying them; once he picks, keep the chosen code, remove the picker and the rest. The draw effect animates a split
+  copy of the contour paths (overlay svg) and removes it afterwards, so the map tools are untouched.
 - Hero map tools (`assets/js/hero-map.js`, one engine for hero and fullscreen viewer): hovering shows lat/lon +
   elevation in the strip (replacing `EPSG:4326`); two clicks/taps draw an accent survey line and open the elevation
   profile panel (paper background, no border). Never block page scrolling on touch in the hero (no drag gestures).
