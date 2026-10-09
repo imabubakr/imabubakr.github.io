@@ -2311,3 +2311,50 @@ html.hfx-risen .hero-strip .ticks {
 html.hfx-pinned .hero {
   background: color-mix(in srgb, var(--paper) calc(var(--hfx-bg, 1) * 100%), transparent);
 }
+/* scroll cue (scroll-rise) */
+.hfx-cue {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  z-index: 2;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font: 400 0.6875rem/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+html.hfx-cue-on .hfx-cue {
+  display: flex;
+}
+.hfx-cue.is-gone {
+  opacity: 0;
+}
+.hfx-cue i {
+  position: relative;
+  width: 1px;
+  height: 26px;
+  overflow: hidden;
+  background: var(--grid);
+}
+.hfx-cue i::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 10px;
+  background: var(--accent-mark);
+  animation: hfx-cue 1.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+@keyframes hfx-cue {
+  from { top: -10px; }
+  to { top: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hfx-cue i::after { animation: none; top: 8px; }
+}

@@ -205,6 +205,11 @@
       return R3;
     });
   }
+  function mixColor(a, b, t) {                               // two #rrggbb colours
+    var pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16), o = [];
+    for (var sh = 16; sh >= 0; sh -= 8) o.push(Math.round(((pa >> sh) & 255) * (1 - t) + ((pb >> sh) & 255) * t));
+    return "rgb(" + o.join(",") + ")";
+  }
   function inLevel(L, x, y) {                                 // even-odd test over all rings
     var inside = false;
     for (var r = 0; r < L.rings.length; r++) {
@@ -229,7 +234,7 @@
     R3.mxs += (R3.mx - R3.mxs) * 0.05; R3.mys += (R3.my - R3.mys) * 0.05;
     if (mode !== "glass") R3.lensA += ((R3.inside ? 1 : 0) - R3.lensA) * 0.12;
     var lx = (R3.px || 0) - (hb.left), ly = (R3.py || 0) - (hb.top), LR = Math.max(W, H) * (mode === "glass" ? 0.075 : 0.12);
-    var sway = Math.sin(time / 4200);
+    var sway = mode === "scroll-rise" ? 0 : Math.sin(time / 4200);
     var pushT = mode === "scroll-rise" ? 4 : 14;           // scroll-rise: the push mostly zooms and turns
     var tilt = (k * TILT + scrollP * pushT + R3.mys * 4 * k) * Math.PI / 180;   // 0 = straight down
     var yaw = (k * (YAW + sway * 2.5) + R3.mxs * 8 * k + (mode === "scroll-rise" ? scrollP * 10 : 0)) * Math.PI / 180;
@@ -282,6 +287,13 @@
     var isDark = css.getPropertyValue("--paper").trim().toLowerCase() === "#0e1215";
     var o = [0, 0];
     var lv = R3.levels;
+    var SR = mode === "scroll-rise";
+    // paper-model edge: each layer's card thickness (10 m) seen from the side, a touch darker
+    var edgeCol = SR ? mixColor(paper, line, isDark ? 0.3 : 0.22) : null;
+    var tmp = [0, 0], tmp2 = [0, 0];
+    proj(5000, 2500, 0, tmp); proj(5000, 2500, 10 * ex, tmp2);
+    var thick = SR ? Math.min(1.8, Math.max(0, tmp[1] - tmp2[1])) : 0;   // a fine card edge, not walls
+    proj(5000, -2000, 0, tmp); var yFar = tmp[1]; proj(5000, 7000, 0, tmp); var yNear = tmp[1];
     for (var n = 0; n < lv.length; n++) {
       var L = lv[n], Z = L.z * ex;
       // fill: the whole layer; stroke: only the contour, not the map border
@@ -310,8 +322,20 @@
         ctx.fill(shadowPath, "evenodd");
         ctx.fillStyle = paper;
       }
+      if (SR && thick > 0.6 && n > 0) {                       // the card's edge, under the layer
+        ctx.save(); ctx.translate(0, thick); ctx.globalAlpha = Math.min(1, k * 1.5);
+        ctx.fillStyle = edgeCol; ctx.fill(fillPath, "evenodd"); ctx.restore();
+      }
       if (k > 0.001 || lens) { ctx.globalAlpha = 1; ctx.fillStyle = paper; ctx.fill(fillPath, "evenodd"); }
-      ctx.globalAlpha = L.index ? 0.85 : 0.45;
+      var a = L.index ? 0.85 : 0.45;
+      if (SR && k > 0.01) {                                   // atmospheric depth: far lines recede
+        var cy0 = 0, cnt = 0;
+        var rr0 = L.rings[0];
+        for (var q = 1; q < rr0.length; q += 16) { proj(rr0[q - 1], rr0[q], Z, tmp); cy0 += tmp[1]; cnt++; }
+        var depth = cnt ? Math.min(1, Math.max(0, (yNear - cy0 / cnt) / Math.max(1, yNear - yFar))) : 0;
+        a *= 1 - 0.45 * k * depth;
+      }
+      ctx.globalAlpha = a;
       ctx.lineWidth = L.index ? 1.2 : 0.6;
       ctx.stroke(linePath);
     }
@@ -460,8 +484,9 @@
       var pp = pinProgress();
       R3.kT = smooth(pp / 0.7);
       R3.pushT = smooth((pp - 0.7) / 0.3);
-      R3.k += (R3.kT - R3.k) * 0.14;                      // eased, never jumps with the wheel
-      R3.push = (R3.push || 0) + (R3.pushT - (R3.push || 0)) * 0.14;
+      R3.k += (R3.kT - R3.k) * 0.1;                       // eased, never jumps with the wheel
+      R3.push = (R3.push || 0) + (R3.pushT - (R3.push || 0)) * 0.1;
+      cue.classList.toggle("is-gone", pp > 0.015);
       if (R3.k < 1e-3 && R3.kT === 0) R3.k = 0;
       root.classList.toggle("hfx-rising", R3.k > 0.004);
       root.classList.toggle("hfx-risen", R3.k > 0.04);
@@ -473,7 +498,7 @@
       var fadeT = Math.max(0.55 * smooth((pp - 0.72) / 0.28), smooth(release));
       R3.fade = (R3.fade || 0) + (fadeT - (R3.fade || 0)) * 0.18;
       hero.style.setProperty("--hfx-bg", (1 - R3.fade).toFixed(3));
-      R3.canvas.style.opacity = (1 - 0.9 * R3.fade).toFixed(3);
+      R3.canvas.style.opacity = R3.k > 0.004 ? (1 - 0.9 * R3.fade).toFixed(3) : "";   // hidden until it rises
     } else {
       R3.k = smooth((t - 0.7) / 2.6);
     }
@@ -487,6 +512,13 @@
     R3.mx = ((e.clientX - b.left) / b.width - 0.5) * 2;
     R3.my = ((e.clientY - b.top) / b.height - 0.5) * 2;
   });
+  // scroll cue for scroll-rise: a small mono "scroll" with a falling tick
+  var cue = document.createElement("div");
+  cue.className = "hfx-cue";
+  cue.setAttribute("aria-hidden", "true");
+  cue.innerHTML = "<span>" + (de ? "scrollen" : "scroll") + "</span><i></i>";
+  hero.appendChild(cue);
+
   // --------------------------------------------------------------- pinning --
   // scroll-rise: the hero sits in a taller wrapper and sticks under the nav while
   // the scroll inside the wrapper drives the rise (PIN = extra scroll distance).
@@ -518,7 +550,7 @@
     timers.forEach(clearTimeout); timers = [];
     root.classList.remove("hfx-drawing", "hfx-drawn", "hfx-scanning", "hfx-words", "hfx-words-in", "hfx-ul-on", "hfx-light-on", "hfx-rising", "hfx-lens");
     if (R3) R3.ctx.clearRect(0, 0, R3.canvas.width, R3.canvas.height);
-    if (mode !== "scroll-rise") { pinOff(); hero.style.removeProperty("--hfx-bg"); if (R3) R3.canvas.style.opacity = ""; }
+    if (mode !== "scroll-rise") { root.classList.remove("hfx-cue-on"); pinOff(); hero.style.removeProperty("--hfx-bg"); if (R3) R3.canvas.style.opacity = ""; }
     if (overlay) overlay.remove(), (overlay = null);
     scanLine.style.left = "";
     hero.style.removeProperty("--scan");
@@ -560,7 +592,7 @@
       buildRise().then(function () {
         if (m === "sun") R3.sun = sunNow();
         if (m !== "scroll-rise" && m !== "lens" && m !== "glass") root.classList.add("hfx-rising");
-        if (m === "scroll-rise") { pinOn(); R3.k = 0; R3.push = 0; }
+        if (m === "scroll-rise") { pinOn(); R3.k = 0; R3.push = 0; root.classList.add("hfx-cue-on"); }
         root.classList.toggle("hfx-lens", m === "lens" || m === "glass");
         if (m === "glass") { G.phase = "wait"; G.t0 = performance.now() + 1000; G.last = []; R3.inside = false; R3.lensA = 0; }
         R3.t0 = performance.now();

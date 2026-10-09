@@ -245,7 +245,9 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   with the wheel), 0.7–1 pushes in (zoom + slight turn); no shadows (owner disliked the sun effect); handoff: from
   pinned progress 0.72 and while the hero scrolls away, the terraces dissolve and the hero's paper turns transparent
   (`--hfx-bg`), so the background flight (also looking east) takes over; while risen the map tools,
-  controls, hint and strip ticks step back. The draw effect animates a split
+  controls, hint and strip ticks step back. Polish (2026-10-12): each layer has a fine card edge (≤ 1.8 px, paper mixed with
+  --contour), far lines fade (atmospheric depth), no sway while scrolling, softer easing (0.1), a mono "scroll" cue
+  with a falling accent tick at the bottom (hidden once scrolling starts), canvas hidden until the rise begins. The draw effect animates a split
   copy of the contour paths (overlay svg) and removes it afterwards, so the map tools are untouched.
 - Hero map tools (`assets/js/hero-map.js`, one engine for hero and fullscreen viewer): hovering shows lat/lon +
   elevation in the strip (replacing `EPSG:4326`); two clicks/taps draw an accent survey line and open the elevation
