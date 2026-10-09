@@ -81,10 +81,9 @@ Section [02] tells the owner's path: satellite data (from 2016) → aerial image
   photo frames 1.2 × 0.8 km, 60 % / 30 % overlap, the one below solid, labelled "AERIAL PHOTO · 20 CM"), then tilt
   forward at 100 m for chapter 3 (a camera viewfinder: corner brackets + centre cross, "DRONE CAMERA · ~2 CM"),
   and level out to the normal flight after the section.
-- The zoom into Freiburg (30 km → 6 km) is tilted to ~60° with a relief boost (keyframe column 7: ×1.4 at 30 km,
-  ×1.3 at 6 km, ×1.2 at the 1 km aerial stop, ×1 by drone height; `ex = EX × boost`; ×4 and ×2 were too much for
-  the owner), so the joy plot shows the
-  Black Forest rising (owner's wish). Country outlines fade out above 60 km (they are not draped on the terrain).
+- The zoom into Freiburg (30 km → 6 km) is tilted to ~60° with relief close to real (keyframe column 7 = factor on EX:
+  0.58 at 30 km and 6 km, i.e. ~1.5× real, 0.7 at the 1 km aerial stop, 1 by drone height; `ex = EX × factor`).
+  The owner found ×4, ×2 and ×1.4 boosts all too exaggerated. Country outlines fade out above 60 km (they are not draped on the terrain).
 - Looking down (pitch > 45°) the ridge-line spacing follows the screen (a line every ~6.5 px, power-of-2 steps
   of 150 m so lines stay fixed; thinner strokes when dense): the joy plot stays dense from 30 km down to 1 km
   (owner's wish). Level flight keeps the height-based spacing.

@@ -137,8 +137,8 @@
   }
 
   // Keyframes of the descent, placed on the chapters: [t, height, pitch°, screen x, screen y,
-  // heading°, relief boost]. The zoom into Freiburg is tilted (~60°) with extra relief so the
-  // joy plot shows the mountains; the boost eases back to 1 by drone height. The camera holds each platform's height while its chapter is centred; in orbit
+  // heading°, relief factor]. The zoom into Freiburg is tilted (~60°) so the joy plot shows the
+  // mountains, with relief close to real (0.58 x EX = 1.5x); the factor eases back to 1 by drone height. The camera holds each platform's height while its chapter is centred; in orbit
   // it faces north (so Europe reads the right way up) and turns back to the route on the way down.
   function layoutKeys() {
     if (!orbit || chapters.length < 3 || reduce.matches) return;
@@ -151,11 +151,11 @@
     var k = [
       [0, CRUISE, 0, 0.5, 0.26, ROUTE_BRG, 1],
       [Math.max(0.04, c[0] - 0.35 * g1), ORBIT_H, -58, 0.66, 0.62, 0, 1],
-      [c[0] + 0.15 * g1, ORBIT_H, -62, 0.66, 0.62, 0, 1.1],
-      [c[0] + 0.55 * g1, 30000, -60, 0.66, 0.58, ROUTE_BRG, 1.4],
-      [c[1] - 0.35 * g1, 6000, -62, 0.66, 0.56, ROUTE_BRG, 1.3],
-      [c[1] - 0.12 * g1, AERIAL_H, -89, 0.66, 0.5, ROUTE_BRG, 1.2],
-      [c[1] + 0.2 * g2, AERIAL_H, -89, 0.66, 0.5, ROUTE_BRG, 1.2],
+      [c[0] + 0.15 * g1, ORBIT_H, -62, 0.66, 0.62, 0, 0.6],
+      [c[0] + 0.55 * g1, 30000, -60, 0.66, 0.58, ROUTE_BRG, 0.58],
+      [c[1] - 0.35 * g1, 6000, -62, 0.66, 0.56, ROUTE_BRG, 0.58],
+      [c[1] - 0.12 * g1, AERIAL_H, -89, 0.66, 0.5, ROUTE_BRG, 0.7],
+      [c[1] + 0.2 * g2, AERIAL_H, -89, 0.66, 0.5, ROUTE_BRG, 0.7],
       [c[2] - 0.1 * g2, DRONE_H, -28, 0.66, 0.42, ROUTE_BRG, 1],
       [c[2] + 0.3 * g3, DRONE_H, -24, 0.66, 0.42, ROUTE_BRG, 1],
       [1, CRUISE, 0, 0.5, 0.26, ROUTE_BRG, 1],
