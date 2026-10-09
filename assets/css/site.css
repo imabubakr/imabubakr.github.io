@@ -352,33 +352,34 @@ a:hover {
 .theme-toggle {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 2px 0 6px;
   border: 0;
   background: none;
   color: var(--muted);
+  font: 400 0.75rem/1 var(--font-mono);
+  letter-spacing: 0.04em;
   cursor: pointer;
 }
 .theme-toggle:hover {
   color: var(--ink);
 }
 .theme-toggle svg {
-  width: 17px;
-  height: 17px;
+  width: 15px;
+  height: 15px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.theme-toggle .icon-sun,
-.theme-toggle[aria-pressed="true"] .icon-moon {
-  display: none;
+/* "dark" is on (aria-pressed) when the moon is filled. */
+.theme-toggle[aria-pressed="true"] {
+  color: var(--ink);
 }
-.theme-toggle[aria-pressed="true"] .icon-sun {
-  display: block;
+.theme-toggle[aria-pressed="true"] svg {
+  fill: currentColor;
 }
 
 @media (min-width: 900px) {
@@ -767,23 +768,17 @@ a:hover {
 }
 
 /* --------------------------------------------------------------- about -- */
-/* About: a short introduction (background, earlier work, current job) next to
-   the portrait, then the timeline. Phones stack the photo above the text. */
+/* About: a short introduction (background, earlier work, current job), the
+   timeline, then the portrait. Text left-aligned in a centred column. */
 .about-body {
   text-align: center;
 }
 #about .section-head {
   margin-bottom: 32px;
 }
-.intro {
-  display: grid;
-  justify-items: center;
-  gap: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-}
 .intro-text {
   max-width: 62ch;
+  margin: 0 auto;
   text-align: left;
 }
 .intro-text p {
@@ -792,18 +787,15 @@ a:hover {
 .intro-text p + p {
   margin-top: 0.8em;
 }
-@media (min-width: 720px) {
-  .intro {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 40px;
-  }
-}
-
 /* Portrait: the whole photo (not cropped) as a duotone in the map's colours:
    grayscale, shadows lifted to --photo-shadow (lighten), highlights capped at
-   --photo-light (multiply); both change with the theme. A radial mask fades
+   --photo-light (multiply); both change with the theme. A narrow mask fades
    the edges into the paper, so the photo has no frame. */
+.about-visual {
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
+}
 .duotone {
   position: relative;
   display: block;
@@ -825,8 +817,8 @@ a:hover {
   mix-blend-mode: multiply;
 }
 .portrait {
-  --fade: linear-gradient(transparent, #000 22%, #000 78%, transparent);
-  -webkit-mask-image: var(--fade), linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  --fade: linear-gradient(transparent, #000 9%, #000 91%, transparent);
+  -webkit-mask-image: var(--fade), linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
   -webkit-mask-composite: source-in;
   mask-image: var(--fade), linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
   mask-composite: intersect;

@@ -117,7 +117,7 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 - Order of the page: hero (who) → About (story + timeline) → From orbit to drone (career story) → CV (details) →
   Visualizations (work samples) → Contact (action) → footer collar.
 - Nav: a modern bar in Plex Sans: name left, `About  Orbit  CV  Visuals  Contact` centred (DE: Über mich, Orbit,
-  Lebenslauf, Grafiken, Kontakt), `EN DE` + a moon/sun icon toggle right. Translucent paper with backdrop blur;
+  Lebenslauf, Grafiken, Kontakt), `EN DE` + a visible theme toggle (moon icon + "dark"/"dunkel"; moon filled when on) right. Translucent paper with backdrop blur;
   links muted, the current one ink with a 2px `--accent-mark` bar on the nav's bottom edge. Phones: two rows (name +
   tools, then the links). `--nav-h` is 84px on phones, 57px from 900px. The hero strip says `SHEET 01 / 05`
   (`BLATT` in German). Update it if sections are added.
@@ -134,10 +134,11 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   "View certificates" link or the `#certificates` hash; hidden in print.
 - About: a **short** introduction in two paragraphs (owner's wish, 2026-10-09): background + earlier work
   (satellite data, MapTransfer, Karuna), then what the current Beagle job involves. No job pitch (the owner is not
-  job-hunting). Portrait beside the text (above it on phones), then the timeline.
+  job-hunting). Text → timeline → portrait below the timeline (owner's choice, 2026-10-09).
 - Portrait: the **uncropped** square selfie `me.jpg` → `assets/img/portrait-{320,640}.webp` (owner disliked the
   crop). Shown as a duotone in map colours (`.duotone`, `--photo-shadow` / `--photo-light` per theme) with soft
-  edges faded into the paper by a CSS mask (`.portrait`), so it has no frame. The print header uses it too.
+  only the outer ~9% of the edges faded into the paper by a CSS mask (`.portrait`); the owner wants the photo
+  clearly visible, not washed out. The print header uses it too.
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.
