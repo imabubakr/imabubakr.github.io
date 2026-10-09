@@ -1489,9 +1489,13 @@ html.arrive-live .backdrop {
 .print-head {
   display: none;
 }
+.print-cv-row {
+  margin-top: 18px;
+  color: var(--muted);
+  font: 400 0.8125rem/1.5 var(--font-mono);
+}
 .print-cv {
   display: inline-block;
-  margin-top: 18px;
   padding: 4px 6px;
   border: 0;
   background: none;
@@ -1506,11 +1510,25 @@ html.arrive-live .backdrop {
 }
 
 /* The page shows a short CV (.cv-full parts hidden); the PDF and printing show
-   all of it. */
+   all of it, ending German-style with place, date and a blank signature line
+   (.cv-sign; no signature image online, the owner signs the copy he sends). */
 @media screen {
-  .cv-full {
+  .cv-full,
+  .cv-sign {
     display: none !important;
   }
+}
+.cv-sign {
+  margin-top: 10mm;
+  break-inside: avoid;
+}
+.cv-sign-line {
+  width: 60mm;
+  margin-top: 12mm;
+  padding-top: 1.5mm;
+  border-top: 0.5pt solid #4e5358;
+  color: #4e5358;
+  font-size: 7.5pt;
 }
 
 /* Printing (or "Save as PDF") gives an A4 Lebenslauf: print header + CV only. */
@@ -1547,6 +1565,7 @@ html.arrive-live .backdrop {
   #plates,
   .cv-certs,
   .cv-more,
+  .print-cv-row,
   #contact,
   .lightbox,
   .collar,

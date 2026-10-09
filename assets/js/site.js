@@ -131,6 +131,13 @@
     });
   }
 
+  // CV signature block (print/PDF only): today's date in the page's language.
+  document.querySelectorAll(".cv-sign-date").forEach(function (el) {
+    var de = document.documentElement.lang === "de";
+    el.textContent = new Date().toLocaleDateString(de ? "de-DE" : "en-GB",
+      de ? { day: "2-digit", month: "2-digit", year: "numeric" } : { day: "numeric", month: "long", year: "numeric" });
+  });
+
   // Contact: copy the email address (shown only where the clipboard API exists).
   var copyBtn = document.querySelector(".contact-copy");
   if (copyBtn && navigator.clipboard && window.isSecureContext) {
