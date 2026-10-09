@@ -178,6 +178,13 @@
     var max = document.documentElement.scrollHeight - window.innerHeight;
     var p = reduce.matches ? 0.35 : clamp(window.scrollY / (max || 1), 0, 1);
     var cam = { s: p * (ROUTE_LEN - END_GAP), la: Math.log(CRUISE), pitch: 0, cx: 0.5, cy: 0.26, yaw: ROUTE_BRG, boost: 1 };
+    // arriving at the Feldberg (contact): on wide screens the summit moves right
+    // of centre, beside the text block on the left
+    if (contact && w >= 900) {
+      var cr = contact.getBoundingClientRect();
+      var seen = Math.max(0, Math.min(cr.bottom, h) - Math.max(cr.top, 0)) / h;
+      cam.cx = 0.5 + 0.17 * smooth(clamp(seen * 1.3, 0, 1));
+    }
     var t = orbitT();
     if (keys && !reduce.matches && t > 0 && t < 1) {
       var i = 1;

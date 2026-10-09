@@ -213,10 +213,12 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 - Print / PDF: a two-page A4 CV (print header with photo + full CV, always light). Check it after CV changes
   (two pages), then rebuild the PDFs.
 - 404: "Off the map." on Null Island (0.0000°N 0.0000°E).
-- Contact = the end of the flight (owner's pick): the section is tall with its text low, so the Feldberg (with its
-  summit label) stands above it; backdrop.js sets `html.arrive-live` (stronger background) and the readout says
-  "Arrived at the Feldberg" / "Am Feldberg angekommen". One invitation line as `.section-sub`, the email with a
-  "copy email" button (shown only with the clipboard API; "copied ✓"), LinkedIn ↗ and GitHub ↗.
+- Contact = the end of the flight. Owner found a big centred orange email "too much in one face" and covering the
+  Feldberg, so: desktop (≥ 900 px) a small, quiet, left-aligned block (title, invitation line, three key-value rows
+  Email / LinkedIn / GitHub in ink at 15 px, mono labels, small "copy" button) like the orbit chapters, while
+  backdrop.js turns the camera (`cam.cx` → 0.67) so the Feldberg and its summit label stand fully visible on the right
+  (`html.arrive-live`: mask strong on the right). Phones: rows low in the section, summit above. Readout: "Arrived at
+  the Feldberg" / "Am Feldberg angekommen". This section is the one exception to centred section heads.
 - Footer: one calm centred block (owner, 2026-10-10: the old one was too busy; no scale bar, no CRS line): mono
   "© 2026 Muhammad Abu Bakar · Freiburg im Breisgau", the privacy line, data credits in small type (the Copernicus
   DEM statement is required by its licence), "Back to top ↑". The flight readout hides while the footer is on screen.

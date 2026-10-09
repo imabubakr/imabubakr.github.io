@@ -1327,56 +1327,68 @@ dl.cv-list .cv-row {
 }
 
 /* ------------------------------------------------------------- contact -- */
-/* The end of the flight: the background arrives at the Feldberg (backdrop.js
-   adds html.arrive-live, which lets the landscape show more strongly here).
-   One invitation line, the email with a copy button, two profile links. */
+/* The end of the flight. Desktop: a small, quiet block on the left (like the
+   orbit chapters) while the Feldberg stands on the right; backdrop.js adds
+   html.arrive-live and turns the camera so the summit sits right of centre.
+   Phones: the block sits low, the summit above it. Text in ink, normal size. */
 #contact {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   min-height: 92vh;
-  padding-top: 48vh; /* the summit stands in the space above the text */
+  padding-top: 44vh;
   padding-bottom: clamp(64px, 8cqw, 120px);
 }
-.contact-body {
-  text-align: center;
+#contact .section-head {
+  margin-bottom: 20px;
 }
-.contact-mailrow {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+#contact .section-sub {
+  max-width: 36ch;
 }
-@media (min-width: 720px) {
-  /* the address stays centred, the copy button sits beside it */
-  .contact-mailrow {
-    position: relative;
-    display: block;
-    width: fit-content;
-    margin: 0 auto;
-  }
-  .contact-copy {
-    position: absolute;
-    top: 50%;
-    left: calc(100% + 12px);
-    transform: translateY(-40%);
-    white-space: nowrap;
-  }
+.contact-list {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
 }
-.contact-mail {
-  font-size: clamp(1.25rem, 1rem + 1cqw, 1.75rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  text-underline-offset: 6px;
+.contact-row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 3px 0;
+}
+.contact-row dt {
+  color: var(--muted);
+  font: 400 0.6875rem/1.5 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.contact-row dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
   overflow-wrap: anywhere;
 }
+.contact-row a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--grid);
+  text-underline-offset: 4px;
+}
+.contact-row a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+.contact-row a span {
+  color: var(--muted);
+}
 .contact-copy {
-  min-height: 28px;
-  padding: 2px 6px;
+  margin-left: 10px;
+  padding: 2px 4px;
   border: 0;
   background: none;
   color: var(--muted);
-  font: 400 0.75rem/1.5 var(--font-mono);
+  font: 400 0.6875rem/1.5 var(--font-mono);
   letter-spacing: 0.04em;
   cursor: pointer;
 }
@@ -1386,31 +1398,37 @@ dl.cv-list .cv-row {
 .contact-copy.is-done {
   color: var(--accent);
 }
-.contact-links {
-  display: flex;
-  justify-content: center;
-  gap: 8px 28px;
-  margin: 24px 0 0;
-  padding: 0;
-  list-style: none;
-  font: 400 0.875rem/1.5 var(--font-mono);
-}
-.contact-links a {
-  color: var(--ink);
-  text-decoration: none;
-}
-.contact-links a:hover {
-  color: var(--accent);
-}
-.contact-links a span {
-  color: var(--muted);
+@media (min-width: 900px) {
+  #contact {
+    justify-content: center;
+    min-height: 100vh;
+    padding-top: clamp(40px, 5cqw, 80px);
+  }
+  #contact .section-head,
+  #contact .contact-body {
+    width: min(1100px, 100%);
+    max-width: none;
+    margin-inline: auto;
+    text-align: left;
+  }
+  #contact .section-sub {
+    margin-left: 0;
+    text-wrap: pretty;
+  }
+  .contact-list {
+    margin: 0;
+  }
 }
 html.arrive-live .backdrop {
-  --bg-op: 0.75;
-  -webkit-mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.5) 30%, rgb(0 0 0 / 0.5) 70%, #000 96%);
-  mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.5) 30%, rgb(0 0 0 / 0.5) 70%, #000 96%);
+  --bg-op: 0.8;
 }
-@media (max-width: 719px) {
+@media (min-width: 900px) {
+  html.arrive-live .backdrop {
+    -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.15) 30%, #000 48%);
+    mask-image: linear-gradient(to right, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.15) 30%, #000 48%);
+  }
+}
+@media (max-width: 899px) {
   html.arrive-live .backdrop {
     --bg-op: 0.4;
     -webkit-mask-image: none;
