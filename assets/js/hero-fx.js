@@ -9,6 +9,10 @@
 //   draw+accent
 //   rise    the flat map lifts into 3D: every contour rises to its elevation while the
 //           view tilts; afterwards it follows the mouse a little and leans back on scroll
+//   intro   rises once on load, holds, and settles back to the flat map
+//   sun     the 3D terraces cast shadows from the real sun over Freiburg right now
+//   lens    flat map; the terrain around the pointer lifts like a 3D magnifier
+//   scroll-rise  the map rises as you scroll, then leans away into the flight
 // Reduced motion: no animation (the static hero stays as it is).
 (function () {
   var root = document.documentElement;
@@ -19,14 +23,14 @@
   var de = root.lang === "de";
   var h1 = hero.querySelector("h1");
   var mapEls = [hero.querySelector(".hero-map"), hero.querySelector(".hero-places")];
-  var MODES = ["rise", "none", "draw", "scan", "tilt", "light", "accent", "draw+accent"];
+  var MODES = ["intro", "tilt", "sun", "lens", "scroll-rise", "rise", "scan", "light", "none"];
   var LABEL = de
-    ? { title: "Startbereich (Vorschau)", rise: "aufsteigen", none: "ohne", draw: "zeichnen", scan: "scan", tilt: "kippen", light: "licht", accent: "akzent", "draw+accent": "zeichnen+akzent", replay: "wiederholen ↺" }
-    : { title: "Hero (preview)", rise: "rise", none: "none", draw: "draw", scan: "scan", tilt: "tilt", light: "light", accent: "accent", "draw+accent": "draw+accent", replay: "replay ↺" };
+    ? { title: "Startbereich (Vorschau)", intro: "intro", sun: "sonne", lens: "lupe", "scroll-rise": "scroll-3d", rise: "aufsteigen", none: "ohne", draw: "zeichnen", scan: "scan", tilt: "kippen", light: "licht", accent: "akzent", "draw+accent": "zeichnen+akzent", replay: "wiederholen ↺" }
+    : { title: "Hero (preview)", intro: "intro", sun: "sun", lens: "lens", "scroll-rise": "scroll-3d", rise: "rise", none: "none", draw: "draw", scan: "scan", tilt: "tilt", light: "light", accent: "accent", "draw+accent": "draw+accent", replay: "replay ↺" };
 
   var mode = new URLSearchParams(location.search).get("hero");
   if (MODES.indexOf(mode) < 0) { try { mode = localStorage.getItem("hero-preview"); } catch (e) {} }
-  if (MODES.indexOf(mode) < 0) mode = "rise";
+  if (MODES.indexOf(mode) < 0) mode = "intro";
   var smooth = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
 
   // -------------------------------------------------- words of the sentence --
@@ -185,7 +189,7 @@
     cv.className = "hfx-rise";
     cv.setAttribute("aria-hidden", "true");
     hm.appendChild(cv);
-    R3 = { canvas: cv, ctx: cv.getContext("2d"), levels: [], k: 0, mx: 0, my: 0, mxs: 0, mys: 0, t0: 0, running: false };
+    R3 = { canvas: cv, ctx: cv.getContext("2d"), levels: [], k: 0, mx: 0, my: 0, mxs: 0, mys: 0, t0: 0, running: false, lensA: 0 };
     return fetch(hero.dataset.topo + "hero-terraces.json").then(function (r) { return r.json(); }).then(function (d) {
       R3.levels = d.levels.map(function (l) { return { z: l.z - d.zmin, index: l.z % 50 === 0, rings: l.rings }; });
       var pl = hero.querySelector(".hero-place");
@@ -196,6 +200,16 @@
       return R3;
     });
   }
+  function inLevel(L, x, y) {                                 // even-odd test over all rings
+    var inside = false;
+    for (var r = 0; r < L.rings.length; r++) {
+      var g = L.rings[r];
+      for (var i = 0, j = g.length - 2; i < g.length; j = i, i += 2) {
+        if ((g[i + 1] > y) !== (g[j + 1] > y) && x < ((g[j] - g[i]) * (y - g[i + 1])) / (g[j + 1] - g[i + 1]) + g[i]) inside = !inside;
+      }
+    }
+    return inside;
+  }
   function drawRise(time) {
     var hm = hero.querySelector(".hero-map"), box = hero.querySelector(".map-box");
     var W = hm.clientWidth, H = hm.clientHeight, dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -205,7 +219,11 @@
     var s0 = bb.width / 10000, ox = bb.left - hb.left, oy = bb.top - hb.top;   // flat map: px = ox + x * s0
     var scrollP = Math.min(1, Math.max(0, window.scrollY / (hero.offsetHeight * 0.9)));
     var k = R3.k;
+    var lens = mode === "lens";
+    if (mode === "scroll-rise") scrollP = Math.max(0, (window.scrollY - hero.offsetHeight * 0.35) / (hero.offsetHeight * 0.6));
     R3.mxs += (R3.mx - R3.mxs) * 0.05; R3.mys += (R3.my - R3.mys) * 0.05;
+    R3.lensA += ((R3.inside ? 1 : 0) - R3.lensA) * 0.12;
+    var lx = (R3.px || 0) - (hb.left), ly = (R3.py || 0) - (hb.top), LR = Math.max(W, H) * 0.12;
     var sway = Math.sin(time / 4200);
     var tilt = (k * TILT + scrollP * 14 + R3.mys * 4 * k) * Math.PI / 180;   // 0 = straight down
     var yaw = (k * (YAW + sway * 2.5) + R3.mxs * 8 * k) * Math.PI / 180;
@@ -228,6 +246,32 @@
       o[0] = pcx + xr * f;
       o[1] = pcy + (yr * ct - Z * st) * f;
     };
+    if (lens) {
+      // 3D loupe: the terrain under the pointer, risen and tilted, inside a circle
+      var LS = s0 * 1.6, LT = 48 * Math.PI / 180, lct = Math.cos(LT), lst = Math.sin(LT);
+      var mX = (lx - ox) / s0, mY = (ly - oy) / s0, LD = LR * 6;
+      ex = EXAG * LS * 0.8;
+      var zc = 0;                                             // ground height under the pointer (nearest terrace)
+      for (var q = 0; q < R3.levels.length; q++) { if (R3.levels[q].z * ex > zc && inLevel(R3.levels[q], mX, mY)) zc = R3.levels[q].z * ex; }
+      proj = function (X, Y, Z, o) {
+        var x = (X - mX) * LS, y = (Y - mY) * LS;            // oblique parallel view: no distortion
+        o[0] = lx + x;
+        o[1] = ly + LR * 0.3 + y * lct - (Z - zc) * lst;
+      };
+      ctx.save();
+      ctx.beginPath(); ctx.arc(lx, ly, LR * R3.lensA, 0, Math.PI * 2); ctx.clip();
+      ctx.globalAlpha = 1; ctx.fillStyle = paper; ctx.fillRect(lx - LR, ly - LR, LR * 2, LR * 2);
+    }
+    // sun: shadow offset (screen px per 10 m terrace step), from the real sun position
+    var shadow = null;
+    if (mode === "sun" && R3.sun && R3.sun.alt > 1 && k > 0.01) {
+      var len = Math.min(320, (10 * EXAG) / Math.tan(R3.sun.alt * Math.PI / 180));   // map metres
+      var az = R3.sun.az * Math.PI / 180, ddx = -Math.sin(az) * len, ddy = Math.cos(az) * len;
+      var a0 = [0, 0], a1 = [0, 0];
+      proj(5000, 2500, 0, a0); proj(5000 + ddx, 2500 + ddy, 0, a1);
+      shadow = [(a1[0] - a0[0]) * k, (a1[1] - a0[1]) * k];
+    }
+    var isDark = css.getPropertyValue("--paper").trim().toLowerCase() === "#0e1215";
     var o = [0, 0];
     var lv = R3.levels;
     for (var n = 0; n < lv.length; n++) {
@@ -246,13 +290,45 @@
         }
         fillPath.closePath();
       }
-      if (k > 0.001) { ctx.globalAlpha = Math.min(1, k * 3); ctx.fill(fillPath, "evenodd"); }
+      if (shadow) {                                          // cast shadow onto the layer below
+        ctx.save();
+        ctx.translate(shadow[0], shadow[1]);
+        ctx.globalAlpha = isDark ? 0.55 : 0.09;
+        ctx.fillStyle = "#000";
+        ctx.fill(fillPath, "evenodd");
+        ctx.restore();
+        ctx.fillStyle = paper;
+      }
+      if (k > 0.001 || lens) { ctx.globalAlpha = lens ? 1 : Math.min(1, k * 3); ctx.fillStyle = paper; ctx.fill(fillPath, "evenodd"); }
       ctx.globalAlpha = L.index ? 0.85 : 0.45;
       ctx.lineWidth = L.index ? 1.2 : 0.6;
       ctx.stroke(linePath);
     }
+    if (lens) {
+      ctx.restore();
+      if (R3.lensA > 0.02) {                                  // the loupe's rim and a centre tick
+        ctx.globalAlpha = R3.lensA;
+        ctx.strokeStyle = css.getPropertyValue("--ink").trim();
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(lx, ly, LR * R3.lensA, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = css.getPropertyValue("--accent-mark").trim();
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(lx, ly, LR * R3.lensA + 4, -0.6, 0.6); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      return;
+    }
+    if (mode === "sun" && R3.sun && k > 0.5) {
+      ctx.globalAlpha = Math.min(1, (k - 0.5) * 2) * 0.85;
+      ctx.fillStyle = css.getPropertyValue("--muted").trim();
+      ctx.font = '400 11px "IBM Plex Mono", monospace';
+      if ("letterSpacing" in ctx) ctx.letterSpacing = "1px";
+      ctx.textAlign = "right";
+      ctx.fillText(R3.sun.label, W - 24, 28);
+      ctx.textAlign = "left";
+    }
     // Freiburg (Münster) as a map label on the terrain
-    if (R3.place) {
+    if (R3.place && !lens) {
       proj(R3.place[0], R3.place[1], R3.place[2] * ex, o);
       ctx.globalAlpha = 1;
       ctx.fillStyle = css.getPropertyValue("--ink").trim();
@@ -269,11 +345,47 @@
     var b = hero.getBoundingClientRect();
     R3.mx = ((e.clientX - b.left) / b.width - 0.5) * 2;
     R3.my = ((e.clientY - b.top) / b.height - 0.5) * 2;
+    R3.px = e.clientX; R3.py = e.clientY; R3.inside = true;
   });
+  hero.addEventListener("pointerleave", function () { if (R3) R3.inside = false; });
+
+  // Sun position over Freiburg now (NOAA simplified solar position).
+  function sunNow(at) {
+    var d = at || new Date(), lat = 47.995 * Math.PI / 180, lon = 7.85;
+    var jd = d.getTime() / 86400000 + 2440587.5, n = jd - 2451545.0;
+    var L = (280.46 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * Math.PI / 180;
+    var lam = (L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * Math.PI / 180, eps = (23.439 - 4e-7 * n) * Math.PI / 180;
+    var ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)), dec = Math.asin(Math.sin(eps) * Math.sin(lam));
+    var gmst = (18.697374558 + 24.06570982441908 * n) % 24, lst = (gmst * 15 + lon) * Math.PI / 180, ha = lst - ra;
+    var alt = Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(ha));
+    var az = Math.atan2(-Math.sin(ha), Math.tan(dec) * Math.cos(lat) - Math.sin(lat) * Math.cos(ha));
+    var azd = (az * 180 / Math.PI + 360) % 360, altd = alt * 180 / Math.PI;
+    var hh = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    if (altd < 5 && !at) {               // night or dusk: show this afternoon's sun instead, and say so
+      var day = new Date(d); day.setHours(16, 0, 0, 0);
+      var r = sunNow(day);
+      r.label = (de ? "SONNE ÜBER FREIBURG HEUTE 16:00" : "SUN OVER FREIBURG TODAY 16:00") + r.label.slice(r.label.indexOf(" · AZ"));
+      return r;
+    }
+    var label = (de ? "SONNE ÜBER FREIBURG " : "SUN OVER FREIBURG ") + hh + " · AZ " + Math.round(azd) + "° · " +
+      (de ? "HÖHE " : "ALT ") + Math.round(altd) + "°";
+    return { az: azd, alt: altd, label: label };
+  }
+  var CANVAS_MODES = { rise: 1, intro: 1, sun: 1, lens: 1, "scroll-rise": 1 };
   function riseLoop(now) {
-    if (!R3 || mode !== "rise") { if (R3) R3.running = false; return; }
+    if (!R3 || !CANVAS_MODES[mode]) { if (R3) R3.running = false; return; }
     var t = (now - R3.t0) / 1000;
-    R3.k = smooth((t - 0.7) / 2.6);
+    if (mode === "intro") {
+      R3.k = smooth((t - 0.5) / 2.3) * (1 - smooth((t - 4.6) / 1.9));
+      if (t > 6.6) { root.classList.remove("hfx-rising"); R3.canvas.getContext("2d").clearRect(0, 0, R3.canvas.width, R3.canvas.height); R3.running = false; return; }
+    } else if (mode === "lens") {
+      R3.k = 0;
+    } else if (mode === "scroll-rise") {
+      R3.k = smooth(window.scrollY / (hero.offsetHeight * 0.45));
+      root.classList.toggle("hfx-rising", R3.k > 0.005);
+    } else {
+      R3.k = smooth((t - 0.7) / 2.6);
+    }
     var b = hero.getBoundingClientRect();
     if (b.bottom > 0) drawRise(now);
     requestAnimationFrame(riseLoop);
@@ -288,7 +400,8 @@
   var timers = [];
   function reset() {
     timers.forEach(clearTimeout); timers = [];
-    root.classList.remove("hfx-drawing", "hfx-drawn", "hfx-scanning", "hfx-words", "hfx-words-in", "hfx-ul-on", "hfx-light-on", "hfx-rising");
+    root.classList.remove("hfx-drawing", "hfx-drawn", "hfx-scanning", "hfx-words", "hfx-words-in", "hfx-ul-on", "hfx-light-on", "hfx-rising", "hfx-lens");
+    if (R3) R3.ctx.clearRect(0, 0, R3.canvas.width, R3.canvas.height);
     if (overlay) overlay.remove(), (overlay = null);
     scanLine.style.left = "";
     hero.style.removeProperty("--scan");
@@ -326,13 +439,15 @@
       wordsIn(1.4);
     } else if (m === "accent") {
       timers.push(setTimeout(function () { root.classList.add("hfx-ul-on"); }, 400));
-    } else if (m === "rise") {
+    } else if (CANVAS_MODES[m]) {
       buildRise().then(function () {
-        root.classList.add("hfx-rising");
+        if (m === "sun") R3.sun = sunNow();
+        if (m !== "scroll-rise" && m !== "lens") root.classList.add("hfx-rising");
+        root.classList.toggle("hfx-lens", m === "lens");
         R3.t0 = performance.now();
         if (!R3.running) { R3.running = true; requestAnimationFrame(riseLoop); }
       });
-      wordsIn(2.4);
+      if (m === "rise" || m === "sun" || m === "intro") wordsIn(m === "intro" ? 1.6 : 2.4);
     } else if (m === "light") {
       buildLight(); paintLight();
       root.classList.add("hfx-light-on");

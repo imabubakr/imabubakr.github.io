@@ -2265,3 +2265,9 @@ html.hfx-rising .hero-places {
 html.hfx-rising .hero h1 {
   text-shadow: 0 0 6px var(--paper), 0 0 14px var(--paper), 0 0 22px var(--paper);
 }
+html.hfx-rising.hfx-lens .hero-places {
+  opacity: 1;
+}
+html.hfx-lens .hfx-rise {
+  opacity: 1;
+}

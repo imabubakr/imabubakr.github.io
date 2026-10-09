@@ -231,7 +231,11 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   `rise` (default in the preview; the owner wanted a "wow"): the flat map lifts into stacked paper terraces, one per
   10 m level (`assets/topo/hero-terraces.json`, 44 KB, from `tools/hero/build_terraces.py`), drawn on a canvas in
   perspective looking east into the Black Forest (TILT 66°, YAW −80°, heights ×3.6), sways slightly, follows the
-  pointer, leans further on scroll. Open issue: the map tools (hover coordinates, profile) still read the flat map. The draw effect animates a split
+  pointer, leans further on scroll. Open issue: the map tools (hover coordinates, profile) still read the flat map.
+  Further preview modes: `intro` (rises once, settles back flat), `sun` (terraces cast paper shadows from the real sun
+  over Freiburg now; at night it shows today's 16:00 sun and says so), `lens` (a round 3D loupe that follows the
+  pointer over the flat map; map tools stay usable), `scroll-rise` (rises with scroll, then leans away). The owner
+  likes `tilt` (CSS lean on scroll). The draw effect animates a split
   copy of the contour paths (overlay svg) and removes it afterwards, so the map tools are untouched.
 - Hero map tools (`assets/js/hero-map.js`, one engine for hero and fullscreen viewer): hovering shows lat/lon +
   elevation in the strip (replacing `EPSG:4326`); two clicks/taps draw an accent survey line and open the elevation
