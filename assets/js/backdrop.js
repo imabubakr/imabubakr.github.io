@@ -1,7 +1,8 @@
 // Page background: a low flight over the Black Forest. Ridge lines of the region
 // DEM, drawn in perspective on a fixed canvas behind the page. Scrolling flies the
-// route Freiburg -> Schauinsland -> Feldberg; the page bottom ends looking at the
-// Feldberg summit. The camera eases towards the scroll position (no jumps), near
+// straight line from Freiburg to the Feldberg; the page bottom ends looking at
+// the Feldberg summit. The heading never changes, so every ridge line is fixed
+// in the landscape and only comes closer (a turning camera made them morph). The camera eases towards the scroll position (no jumps), near
 // ridges are drawn stronger than far ones, and the flight steps back while
 // section [02] (its own descent) is on screen. Reduced motion: one still frame.
 // Summits ahead get map labels, and a small readout (desktop, bottom-left) says
@@ -15,9 +16,14 @@
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
   var orbit = document.getElementById("orbit");
 
-  // Route in region metres: west of Freiburg, Freiburg, Schauinsland, Feldberg.
-  var ROUTE = [[17500, 16800], [23143, 18541], [26450, 27850], [34350, 32250]];
-  var LOOK = 1500;          // heading = direction to the route point this far ahead (m)
+  // Route in region metres: a straight line through Freiburg to the Feldberg,
+  // starting 6 km before Freiburg.
+  var FREIBURG = [23143, 18541], FELDBERG = [34350, 32250];
+  var ROUTE = (function () {
+    var vx = FELDBERG[0] - FREIBURG[0], vy = FELDBERG[1] - FREIBURG[1], n = Math.hypot(vx, vy);
+    return [[FREIBURG[0] - (vx / n) * 6000, FREIBURG[1] - (vy / n) * 6000], FELDBERG];
+  })();
+  var LOOK = 1500;          // look-ahead for the heading and the camera height (m)
   var END_GAP = 5000;       // the flight stops this far before the last point
   var EX = 2.6, H0 = 170;   // vertical exaggeration, base level (m)
   var NEAR = 300, FAR = 14000, STEP = 150;
@@ -53,7 +59,8 @@
     return a + (b - a) * ty;
   }
 
-  // Catmull-Rom through ROUTE, sampled every ~50 m with distance along it.
+  // ROUTE sampled every ~50 m with distance along it (Catmull-Rom; with two
+  // points that is the straight line).
   function buildRoute() {
     var P = [ROUTE[0]].concat(ROUTE, [ROUTE[ROUTE.length - 1]]), out = [], s = 0;
     for (var i = 1; i < P.length - 2; i++) {
@@ -133,9 +140,12 @@
       var near = 1 - (d - NEAR) / (FAR - NEAR);          // 1 near ... 0 far
       // far away only every second line; the others fade in between 7 and 5 km
       var thin = k % 2 ? Math.min(1, Math.max(0, (7000 - d) / 2000)) : 1;
-      var alpha = (0.25 + 0.75 * Math.pow(near, 1.3)) * thin;
+      var cx = c[0] + ux * d, cy = c[1] + uy * d;
+      // beyond the DEM the edge values would repeat: fade those lines out
+      var g = meta.grid, inside = Math.min(cx, cy, g.cols * g.cell_m[0] - cx, g.rows * g.cell_m[1] - cy);
+      var alpha = (0.25 + 0.75 * Math.pow(near, 1.3)) * thin * Math.min(1, Math.max(0, inside / 1500));
       if (alpha < 0.03) continue;
-      var cx = c[0] + ux * d, cy = c[1] + uy * d, top = Infinity, ys = [];
+      var top = Infinity, ys = [];
       ctx.beginPath();
       for (var sx = -dx; sx <= w + dx; sx += dx) {
         var l = ((sx - w / 2) / f) * d;

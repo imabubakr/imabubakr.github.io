@@ -51,8 +51,10 @@ It writes the media to `assets/plates/` and the grids into both pages between `<
 
 A low flight over the Black Forest (owner's pick, 2026-10-09, from four candidates): `assets/js/backdrop.js` draws
 ridge lines of the region DEM (`assets/topo/region-contours.*`) in perspective on a fixed canvas behind everything
-below the hero, in `--contour`. Scrolling flies Freiburg → Schauinsland → Feldberg (Catmull-Rom route, `ROUTE`); the
-page bottom ends ~5 km before the Feldberg, looking at it. The camera eases towards the scroll position (no jumps),
+below the hero, in `--contour`. Scrolling flies a **straight line** from 6 km before Freiburg through Freiburg to the
+Feldberg (`ROUTE`); the page bottom ends ~5 km before the Feldberg, looking at it. Keep the heading constant: a
+curved route turned the camera, and the cross-section lines then swept through the terrain and morphed ("like a
+snake", owner). Lines whose centre lies beyond the DEM fade out. The camera eases towards the scroll position (no jumps),
 near ridges are thicker and stronger than far ones (aerial perspective), it fades out while section [02] is on
 screen, and reduced motion gets one still frame. The camera flies ~1300 m (exaggerated) above the highest ground
 ahead with a wide lens (f = 0.42 × the longer viewport side) so plenty of ridges are on screen (owner: too few
