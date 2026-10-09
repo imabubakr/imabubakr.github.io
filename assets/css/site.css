@@ -564,54 +564,6 @@ a:hover {
   text-wrap: balance;
 }
 
-/* Town label on the hero map at its true position (build_hero.py writes --fx/--fy). */
-.hero-places {
-  position: absolute;
-  inset: var(--strip-h) 0 0;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
-}
-.hero-place {
-  position: absolute;
-  left: calc(50cqw + (var(--fx) - 0.5) * var(--mw));
-  top: calc(var(--fy) * var(--mw) / var(--map-aspect));
-  width: 0;
-  height: 0;
-}
-.hero-place::before {
-  content: "";
-  position: absolute;
-  left: -4px;
-  top: -4px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ink);
-  box-shadow: 0 0 0 3px var(--paper);
-}
-.hero-place-name {
-  position: absolute;
-  left: 12px;
-  top: 0;
-  transform: translateY(-50%);
-  padding: 1px 5px;
-  background: var(--paper);
-  color: var(--ink);
-  font: 500 0.75rem/1.3 var(--font-sans);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-/* phones: the map is cropped, so the name sits left of the dot */
-@media (max-width: 599px) {
-  .hero-place-name {
-    right: 12px;
-    left: auto;
-  }
-}
-
-
 /* ------------------------------------------------------------- sections -- */
 .section {
   padding: clamp(40px, 5cqw, 80px) var(--pad);
@@ -2084,165 +2036,25 @@ html.arrive-live .backdrop {
   }
 }
 
-/* ------------------------------------------- hero effects (PREVIEW) -- */
-/* assets/js/hero-fx.js; the owner is trying them before choosing. */
-.hfx-picker {
-  position: fixed;
-  bottom: 12px;
-  left: 12px;
-  z-index: 30;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 4px;
-  max-width: calc(100vw - 24px);
-  padding: 4px 8px;
-  border: 1px solid var(--grid);
-  background: var(--paper);
-  font: 400 0.6875rem/1 var(--font-mono);
+/* ---------------------------------------------------- hero: rise in 3D -- */
+/* assets/js/hero-3d.js: the hero sticks under the nav inside a taller wrapper while
+   the scroll lifts the map into paper terraces (canvas), then blows them away like
+   sand into the flight background. Only with JS and without reduced motion. */
+.hero-pin {
+  height: calc(var(--hero-h) + 90vh);
 }
-.hfx-picker span {
-  margin-right: 4px;
-  color: var(--muted);
+.hero-pin .hero {
+  position: sticky;
+  top: var(--nav-h);
+  /* the hero's paper turns transparent at the handoff so the flight shows through */
+  background: color-mix(in srgb, var(--paper) calc(var(--hero-bg, 1) * 100%), transparent);
 }
-.hfx-picker button {
-  min-height: 28px;
-  padding: 0 6px;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font: inherit;
-  cursor: pointer;
-}
-.hfx-picker button:hover,
-.hfx-picker button[aria-pressed="true"] {
-  color: var(--ink);
-}
-.hfx-picker button[aria-pressed="true"] {
-  text-decoration: underline;
-  text-decoration-color: var(--accent-mark);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-}
-.hfx-w {
-  display: inline-block;
-}
-html.hfx-words .hfx-w {
-  opacity: 0;
-  transform: translateY(0.35em);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-html.hfx-words.hfx-words-in .hfx-w {
-  opacity: 1;
-  transform: none;
-}
-/* draw: the real contours hide while the split copy draws itself */
-html.hfx-drawing svg.topo:not(.hfx-draw) .topo-c,
-html.hfx-drawing svg.topo:not(.hfx-draw) .topo-i {
-  opacity: 0;
-}
-html.hfx-drawing svg.topo:not(.hfx-draw) .topo-l,
-html.hfx-drawing .hero-places,
-html.hfx-drawing .grat {
-  opacity: 0;
-  transition: opacity 0.8s ease 2.2s;
-}
-html.hfx-drawing.hfx-drawn svg.topo:not(.hfx-draw) .topo-l,
-html.hfx-drawing.hfx-drawn .hero-places,
-html.hfx-drawing.hfx-drawn .grat {
-  opacity: 1;
-}
-.hfx-draw path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-}
-html.hfx-drawn .hfx-draw path {
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1.6s cubic-bezier(0.45, 0, 0.2, 1) var(--delay);
-}
-/* scan: the map is revealed behind a moving line */
-html.hfx-scanning .hero-map,
-html.hfx-scanning .hero-places {
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--scan) - 4%), transparent var(--scan));
-  mask-image: linear-gradient(90deg, #000 calc(var(--scan) - 4%), transparent var(--scan));
-}
-.hfx-scan {
-  position: absolute;
-  top: var(--strip-h);
-  bottom: 0;
-  left: var(--scan, -10%);
-  z-index: 2;
-  width: 2px;
-  background: var(--accent-mark);
-  box-shadow: 0 0 18px 4px color-mix(in srgb, var(--accent-mark) 45%, transparent);
-  opacity: 0;
-  pointer-events: none;
-}
-html.hfx-scanning .hfx-scan {
-  opacity: 0.9;
-}
-/* tilt: the map leans back as the hero scrolls away */
-.hero-map,
-.hero-places {
-  transform-origin: 50% 100%;
-}
-/* light: relief shading under the contours */
-.hfx-light {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-html.hfx-light-on .hfx-light {
-  opacity: 1;
-}
-/* accent: a survey line under "all things spatial" */
-.hfx-hl {
-  position: relative;
-  white-space: nowrap;
-}
-/* the line draws from left to right, then the two end ticks appear (survey style) */
-.hfx-hl::after,
-.hfx-hl::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  pointer-events: none;
-}
-.hfx-hl::after {
-  bottom: -0.1em;
-  height: 2px;
-  background: var(--accent-mark);
-  transform: scaleX(0);
-  transform-origin: 0 50%;
-}
-.hfx-hl::before {
-  bottom: -0.2em;
-  height: 0.22em;
-  border-left: 2px solid var(--accent-mark);
-  border-right: 2px solid var(--accent-mark);
-  opacity: 0;
-}
-html.hfx-ul-on .hfx-hl::after {
-  transform: none;
-  transition: transform 0.9s cubic-bezier(0.45, 0, 0.2, 1);
-}
-html.hfx-ul-on .hfx-hl::before {
-  opacity: 1;
-  transition: opacity 0.3s ease 0.8s;
-}
-@media print {
-  .hfx-picker,
-  .hfx-scan {
-    display: none !important;
+@media (max-width: 719px) {
+  .hero-pin {
+    height: calc(var(--hero-h) + 60vh);
   }
 }
-/* rise: a canvas draws the contours in 3D; the flat SVG layers fade out under it */
-.hfx-rise {
+.hero-3d {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -2250,74 +2062,46 @@ html.hfx-ul-on .hfx-hl::before {
   pointer-events: none;
   opacity: 0;
 }
-html.hfx-rising .hfx-rise {
+html.hero-rising .hero-3d {
   opacity: 1;
 }
-html.hfx-rising svg.topo .topo-c,
-html.hfx-rising svg.topo .topo-i,
-html.hfx-rising svg.topo .topo-l,
-html.hfx-rising .grat,
-html.hfx-rising .hero-places {
+/* the flat SVG steps back while the canvas shows the risen map */
+html.hero-rising svg.topo .topo-c,
+html.hero-rising svg.topo .topo-i,
+html.hero-rising svg.topo .topo-l,
+html.hero-rising .grat,
+html.hero-rising .ridges {
   opacity: 0;
   transition: opacity 0.6s ease 0.7s;
 }
 /* keep the sentence readable over the risen terrain */
-html.hfx-rising .hero h1 {
+html.hero-rising .hero h1 {
   text-shadow: 0 0 6px var(--paper), 0 0 14px var(--paper), 0 0 22px var(--paper);
 }
-html.hfx-rising.hfx-lens .hero-places {
-  opacity: 1;
-}
-html.hfx-lens .hfx-rise {
-  opacity: 1;
-}
-/* scroll-rise: the hero sticks under the nav inside a taller wrapper */
-.hfx-pin {
-  height: calc(var(--hero-h) + 90vh);
-}
-.hfx-pin .hero {
-  position: sticky;
-  top: var(--nav-h);
-}
-@media (max-width: 719px) {
-  .hfx-pin {
-    height: calc(var(--hero-h) + 60vh);
-  }
-}
-/* while risen: no map tools, controls and hint step back */
-html.hfx-risen .hero-map {
-  pointer-events: none;
-}
-html.hfx-risen .map-controls,
-html.hfx-risen .map-hint,
-html.hfx-risen .strip-crs {
-  opacity: 0;
+/* while risen: map tools, controls, hint and strip ticks step back */
+html.hero-risen .hero-map {
   pointer-events: none;
 }
 .map-controls,
-.map-hint {
-  transition: opacity 0.4s ease;
-}
-html.hfx-rising .ridges {
-  opacity: 0;
-}
-html.hfx-risen .hero-strip .ticks {
-  opacity: 0;
-}
+.map-hint,
+.strip-crs,
 .hero-strip .ticks {
   transition: opacity 0.4s ease;
 }
-/* handoff: the hero's paper turns transparent so the flight shows through */
-html.hfx-pinned .hero {
-  background: color-mix(in srgb, var(--paper) calc(var(--hfx-bg, 1) * 100%), transparent);
+html.hero-risen .map-controls,
+html.hero-risen .map-hint,
+html.hero-risen .strip-crs,
+html.hero-risen .hero-strip .ticks {
+  opacity: 0;
+  pointer-events: none;
 }
-/* scroll cue (scroll-rise) */
-.hfx-cue {
+/* scroll cue: a mono "scroll" with a falling accent tick, gone once scrolling starts */
+.hero-cue {
   position: absolute;
   bottom: 18px;
   left: 50%;
   z-index: 2;
-  display: none;
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
@@ -2329,32 +2113,35 @@ html.hfx-pinned .hero {
   pointer-events: none;
   transition: opacity 0.4s ease;
 }
-html.hfx-cue-on .hfx-cue {
-  display: flex;
-}
-.hfx-cue.is-gone {
+.hero-cue.is-gone {
   opacity: 0;
 }
-.hfx-cue i {
+.hero-cue i {
   position: relative;
   width: 1px;
   height: 26px;
   overflow: hidden;
   background: var(--grid);
 }
-.hfx-cue i::after {
+.hero-cue i::after {
   content: "";
   position: absolute;
   left: 0;
   width: 1px;
   height: 10px;
   background: var(--accent-mark);
-  animation: hfx-cue 1.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+  animation: hero-cue 1.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
-@keyframes hfx-cue {
+@keyframes hero-cue {
   from { top: -10px; }
   to { top: 26px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .hfx-cue i::after { animation: none; top: 8px; }
+@media print {
+  .hero-pin {
+    height: auto;
+  }
+  .hero-3d,
+  .hero-cue {
+    display: none !important;
+  }
 }
