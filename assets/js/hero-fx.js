@@ -229,13 +229,14 @@
     var a = d[i] + (d[i + 1] - d[i]) * fc, b = d[i + 200] + (d[i + 201] - d[i + 200]) * fc;
     return a + (b - a) * fr;
   }
-  // Dissolve: the layer as fine points (like a LiDAR point cloud), slightly scattered,
-  // appearing as the lines fade and vanishing towards the end of the handoff.
+  // Dissolve: the layer as fine points (like a LiDAR point cloud), then blown away like
+  // sand: each point waits a little (the gust moves left to right), then drifts up and
+  // downwind with its own speed, shrinking and fading. dis = handoff progress 0..1.
   function drawPoints(L, Z, proj, dis, col) {
-    var ctx = R3.ctx, o = [0, 0], A = Math.min(1, dis * 4) * (1 - smooth((dis - 0.55) / 0.45));
-    if (A <= 0.01) return;
-    ctx.fillStyle = col; ctx.globalAlpha = A * (L.index ? 0.9 : 0.6);
-    var sz = L.index ? 2 : 1.6, spread = 18 * dis;
+    var ctx = R3.ctx, o = [0, 0], appear = Math.min(1, dis * 5);
+    if (appear <= 0.01) return;
+    var Wc = ctx.canvas.clientWidth || 1, base = L.index ? 0.9 : 0.6, sz0 = L.index ? 2 : 1.6;
+    ctx.fillStyle = col;
     for (var r = 0; r < L.rings.length; r++) {
       var g = L.rings[r];
       for (var i = 0; i < g.length - 2; i += 2) {
@@ -244,8 +245,16 @@
         for (var j = 0; j < n; j++) {
           var h = Math.sin((X0 * 12.9898 + Y0 * 78.233 + j * 37.7) * 0.01) * 43758.5453; h -= Math.floor(h);
           var h2 = Math.sin((X0 * 3.17 + Y0 * 9.31 + j * 11.1) * 0.01) * 24634.6345; h2 -= Math.floor(h2);
+          var h3 = Math.sin((X0 * 7.7 + Y0 * 1.3 + j * 5.3) * 0.01) * 15731.743; h3 -= Math.floor(h3);
           proj(X0 + (X1 - X0) * j / n, Y0 + (Y1 - Y0) * j / n, Z, o);
-          ctx.fillRect(o[0] + (h - 0.5) * spread, o[1] + (h2 - 0.3) * spread, sz, sz);
+          var lp = Math.min(1, Math.max(0, (dis - 0.22 - 0.3 * (o[0] / Wc) - 0.18 * h3) / 0.42));
+          if (lp >= 1) continue;
+          var e = lp * lp;                                    // accelerates like a gust
+          var x = o[0] + (h - 0.5) * 8 * appear + e * (90 + 220 * h);
+          var y = o[1] + (h2 - 0.4) * 8 * appear - e * (60 + 260 * h2) + Math.sin(lp * 6 + h * 6) * 6 * lp;
+          ctx.globalAlpha = base * appear * (1 - lp);
+          var sz = sz0 * (1 - 0.5 * lp);
+          ctx.fillRect(x, y, sz, sz);
         }
       }
     }
@@ -370,7 +379,7 @@
     var o = [0, 0];
     var lv = R3.levels;
     var SR = mode === "scroll-rise";
-    var labelA = SR ? smooth((k - 0.45) / 0.4) : 0, placed = [];
+    var labelA = SR ? smooth((k - 0.45) / 0.4) * (1 - Math.min(1, (R3.fade || 0) * 2.5)) : 0, placed = [];
     var accentMark = css.getPropertyValue("--accent-mark").trim();
     var labelCol = css.getPropertyValue(isDark ? "--muted" : "--contour").trim();
     // paper-model edge: each layer's card thickness (10 m) seen from the side, a touch darker
@@ -407,11 +416,12 @@
         ctx.fill(shadowPath, "evenodd");
         ctx.fillStyle = paper;
       }
-      if (SR && thick > 0.6 && n > 0) {                       // the card's edge, under the layer
-        ctx.save(); ctx.translate(0, thick); ctx.globalAlpha = Math.min(1, k * 1.5);
+      var solid = SR && OPTS.points ? 1 - Math.min(1, R3.fade * 3) : 1;   // the paper model gives way to the points
+      if (SR && thick > 0.6 && n > 0 && solid > 0.01) {        // the card's edge, under the layer
+        ctx.save(); ctx.translate(0, thick); ctx.globalAlpha = Math.min(1, k * 1.5) * solid;
         ctx.fillStyle = edgeCol; ctx.fill(fillPath, "evenodd"); ctx.restore();
       }
-      if (k > 0.001 || lens) { ctx.globalAlpha = 1; ctx.fillStyle = paper; ctx.fill(fillPath, "evenodd"); }
+      if ((k > 0.001 || lens) && solid > 0.01) { ctx.globalAlpha = solid; ctx.fillStyle = paper; ctx.fill(fillPath, "evenodd"); }
       var a = L.index ? 0.85 : 0.45;
       if (SR && k > 0.01) {                                   // atmospheric depth: far lines recede
         var cy0 = 0, cnt = 0;
@@ -457,7 +467,7 @@
       }
     }
     // survey control points (trig points) on the summits
-    if (SR && OPTS.trig && R3.dem && labelA > 0.01) drawTrig(proj, ex, labelA * (1 - R3.fade));
+    if (SR && OPTS.trig && R3.dem && labelA > 0.01) drawTrig(proj, ex, labelA);
     if (lens) {
       ctx.restore();
       if (R3.lensA > 0.02) {                                  // the loupe's rim and a centre tick
@@ -618,7 +628,7 @@
       var fadeT = Math.max(0.55 * smooth((pp - 0.72) / 0.28), smooth(release));
       R3.fade = (R3.fade || 0) + (fadeT - (R3.fade || 0)) * 0.18;
       hero.style.setProperty("--hfx-bg", (1 - R3.fade).toFixed(3));
-      R3.canvas.style.opacity = R3.k > 0.004 ? (1 - (OPTS.points ? 0.55 : 0.9) * R3.fade).toFixed(3) : "";   // hidden until it rises
+      R3.canvas.style.opacity = R3.k > 0.004 ? (1 - (OPTS.points ? 0.15 : 0.9) * R3.fade).toFixed(3) : "";   // hidden until it rises
     } else {
       R3.k = smooth((t - 0.7) / 2.6);
     }

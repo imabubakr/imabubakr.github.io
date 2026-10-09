@@ -252,8 +252,9 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   with their layer so higher layers cover them, no overlaps, not over the sentence. No drone (every drawn flight line looked
   odd over the paper model; the owner dropped it). Extras on trial, toggled in the picker (`OPTS`, `localStorage
   hero-fx-opts`): `sweep` (an accent band passes west→east across the model during pinned progress 0.4–0.8, clipped
-  per layer so it respects occlusion), `points` (at the handoff the contour lines give way to fine scattered points,
-  like a LiDAR cloud, before the flight takes over), `trig` (the three highest DEM summits ≥ 1.5 km apart as trig
+  per layer so it respects occlusion), `points` (at the handoff the paper model (fills, card edges, lines, labels) gives way
+  to fine points, like a LiDAR cloud, which then blow away like sand: a gust from left to right, each grain
+  accelerating up and downwind with its own speed, shrinking and fading; reverses on scrolling back up), `trig` (the three highest DEM summits ≥ 1.5 km apart as trig
   triangles with their height). The draw effect animates a split
   copy of the contour paths (overlay svg) and removes it afterwards, so the map tools are untouched.
 - Hero map tools (`assets/js/hero-map.js`, one engine for hero and fullscreen viewer): hovering shows lat/lon +
