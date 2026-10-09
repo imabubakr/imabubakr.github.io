@@ -33,27 +33,30 @@ PLATES = [
      ("Auroras over the North Pole", "Auroras over the North Pole, visualized in Python from NOAA data."),
      ("Polarlichter über dem Nordpol", "Polarlichter über dem Nordpol, in Python aus NOAA-Daten visualisiert.")),
     ("aral-sea", "aral.gif", True, 0.0,
-     ("Aral Sea time-lapse", "Aral Sea time-lapse, starting in 1985."),
-     ("Aralsee im Zeitraffer", "Zeitraffer des Aralsees ab 1985.")),
+     ("Aral Sea, 1985–2019", "The shrinking Aral Sea, time-lapse from 1985 to 2019."),
+     ("Aralsee, 1985–2019", "Der schrumpfende Aralsee im Zeitraffer, 1985 bis 2019.")),
+    ("glacier", "glacier8.png", False, 0,
+     ("Mýrdalsjökull, 1980 and 2018", "Mýrdalsjökull, Iceland: glacier outlines of 1980 and 2018 over an ArcticDEM hillshade."),
+     ("Mýrdalsjökull, 1980 und 2018", "Mýrdalsjökull, Island: Gletscherumrisse von 1980 und 2018 über einer ArcticDEM-Schummerung.")),
+    ("landslide-world", "80.jpg", False, 0,
+     ("Landslide susceptibility", "Global landslide susceptibility, from slight to severe."),
+     ("Rutschungsanfälligkeit", "Weltweite Anfälligkeit für Hangrutschungen, von gering bis hoch.")),
     ("lidar-dem", "lidar.gif", True, 0.6,
      ("From LiDAR to DSM and DEM", "From LiDAR to DSM and DEM: unveiling the hidden terrain."),
      ("Vom LiDAR zu DOM und DGM", "Vom LiDAR zu DOM und DGM: das verborgene Gelände sichtbar gemacht.")),
-    ("europe-ridges", "europe-ridge-lines.png", False, 0,
-     ("Ridge lines of Europe", "Ridge lines showing the topography of Europe."),
-     ("Ridgelines Europas", "Ridgeline-Darstellung der Topografie Europas.")),
-    ("air-temperature", "europe.png", False, 0,
-     ("Surface air temperature change", "Change in surface air temperature between 1980 and 2018."),
-     ("Änderung der Lufttemperatur", "Veränderung der bodennahen Lufttemperatur zwischen 1980 und 2018.")),
-    ("freiburg-lst", "temp2.png", False, 0,
-     ("Land surface temperature, Freiburg", "Average monthly land surface temperature in Freiburg, 2001–2023, analyzed in Google Earth Engine."),
-     ("Landoberflächen&shy;temperatur, Freiburg", "Mittlere monatliche Landoberflächentemperatur in Freiburg, 2001–2023, ausgewertet in Google Earth Engine.")),
-    ("landslide", "prog1.jpg", False, 0,
-     ("Landslide simulation", "Simulated path of a landslide over real-world topography."),
-     ("Erdrutsch-Simulation", "Simulierter Verlauf eines Erdrutschs über realer Topografie.")),
-    ("freiburg-streets", "osm8.png", False, 0,
-     ("Street network of Freiburg", "Street network of Freiburg im Breisgau."),
-     ("Straßennetz von Freiburg", "Straßennetz von Freiburg im Breisgau.")),
+    ("etna", "mount_etna.png", False, 0,
+     ("Mount Etna", "Mount Etna, Sicily, drawn as stacked contour layers."),
+     ("Ätna", "Der Ätna auf Sizilien als gestapelte Höhenschichten.")),
+    ("world-ridges", "ridge-lines (3).png", False, 0,
+     ("Ridge lines of the world", "Ridge lines showing the topography of the world."),
+     ("Ridgelines der Welt", "Ridgeline-Darstellung der Topografie der Welt.")),
 ]
+
+# Sharper stills for animated plates (thumbnail / preview), where a larger frame exists.
+STILLS = {"storm-emir": "0055.png"}
+# Animations with thin lines get a 2x upscale for the viewer; photographic ones
+# (satellite time-lapses) stay at native size, where upscaling only adds megabytes.
+UPSCALE = {"storm-emir"}
 
 # Certificates, newest first: id, source, (title, caption, date) in English and German.
 # Titles stay in English on both pages (official course names).
@@ -106,13 +109,19 @@ def build_media():
         if anim:
             n = getattr(im, "n_frames", 1)
             im.seek(min(int(frame * n), n - 1))
-            # The GIFs are dithered; a light denoise keeps the videos small.
-            vf = "hqdn3d=3:3:4:4,scale=trunc(iw/2)*2:trunc(ih/2)*2"
+            # The GIFs are small (600-1000 px) and dithered. A very light denoise,
+            # 2x Lanczos upscaling for line art (UPSCALE; the viewer shows ~1100 px)
+            # and moderate compression keep fine lines sharp; stronger settings
+            # (hqdn3d 3, CRF 40) made Storm Emir blotchy.
+            scale = "scale=iw*2:ih*2:flags=lanczos" if pid in UPSCALE else "scale=trunc(iw/2)*2:trunc(ih/2)*2"
+            vf = "hqdn3d=1.5:1.5:2:2," + scale
             ffmpeg("-i", str(ROOT / src), "-an", "-pix_fmt", "yuv420p", "-vf", vf,
-                   "-c:v", "libvpx-vp9", "-crf", "40", "-b:v", "0", "-row-mt", "1", str(OUT / f"{pid}.webm"))
+                   "-c:v", "libvpx-vp9", "-crf", "36", "-b:v", "0", "-row-mt", "1", str(OUT / f"{pid}.webm"))
             ffmpeg("-i", str(ROOT / src), "-an", "-pix_fmt", "yuv420p", "-vf", vf, "-movflags", "+faststart",
-                   "-c:v", "libx264", "-preset", "veryslow", "-crf", "28", str(OUT / f"{pid}.mp4"))
+                   "-c:v", "libx264", "-preset", "slow", "-crf", "27", str(OUT / f"{pid}.mp4"))
             full = im.size
+            if pid in STILLS:
+                im = Image.open(ROOT / STILLS[pid])
         else:
             full = save_webp(im, OUT / f"{pid}-1600.webp", 1600, 80)
         thumb = save_webp(im, OUT / f"{pid}-720.webp", 720, 72)

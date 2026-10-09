@@ -45,6 +45,12 @@ One page per language: English at `/` (`index.html`), German at `/de/` (`de/inde
 
 Edit the `PLATES` or `CERTS` list (source file, EN/DE short title and caption) in `tools/plates/build_plates.py`, then run
 `python3 tools/plates/build_plates.py` (needs Pillow and ffmpeg; `--skip-media` to only rewrite the markup).
+Selection (Claude's pick at the owner's request, 2026-10-10; 8 plates): Storm Emir, Auroras, Aral Sea 1985–2019,
+Mýrdalsjökull 1980/2018, global landslide susceptibility, LiDAR to DSM/DEM, Mount Etna, ridge lines of the world.
+Dropped from the page (source files stay in the repo root): air temperature change, Freiburg LST, landslide
+simulation, Freiburg street network, Europe ridge lines. Video settings: very light denoise, VP9 CRF 36 / x264 CRF 27;
+line-art animations in `UPSCALE` get 2x Lanczos (Storm Emir looked blotchy with the old hqdn3d 3 / CRF 40), and
+`STILLS` gives Storm Emir a sharper preview frame (0055.png).
 It writes the media to `assets/plates/` and the plate index / certificate grid into both pages between
 `<!-- build:plates -->` / `<!-- build:certs -->` markers. The viewer pages through one list at a time.
 
