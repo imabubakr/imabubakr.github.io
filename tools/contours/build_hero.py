@@ -7,7 +7,6 @@ and replaces the content between marker comments in each HTML file:
     <!-- build:hero-map -->     inline contour + graticule SVGs
     <!-- build:hero-strip -->   longitude ticks/labels for the top neatline strip
     <!-- build:hero-place -->   "Freiburg im Breisgau" map label at the Münster
-    <!-- build:collar -->       CRS and contour interval
     <!-- build:credit -->       DEM licence credit
 
 Each marker is closed by <!-- /build:name -->.
@@ -116,7 +115,6 @@ def main(html_files):
     place = (f'<span class="hero-place" style="--fx:{px / width:.4f};--fy:{py / height:.4f}">'
              f'<span class="hero-place-name">{PLACE[0]}</span></span>')
 
-    utm_label = meta["crs"].replace("zone ", "")  # "WGS 84 / UTM 32N"
 
     def blocks_for(lang):
         loc = LOCALES.get(lang, LOCALES["en"])
@@ -130,7 +128,6 @@ def main(html_files):
             "hero-map": hero_map,
             "hero-strip": strip,
             "hero-place": place,
-            "collar": f'{utm_label} · {loc["ci"]} {meta["contour_interval_m"]} m',
             "credit": f'{loc["dem"]}: <span lang="en">{statement}</span>' if lang != "en" else f"{loc['dem']}: {statement}",
         }
 

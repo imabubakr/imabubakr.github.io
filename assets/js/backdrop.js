@@ -24,6 +24,7 @@
   var base = hero ? hero.getAttribute("data-topo") : "assets/topo/";
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
   var orbit = document.getElementById("orbit");
+  var footer = document.querySelector(".collar");
   var chapters = orbit ? Array.prototype.slice.call(orbit.querySelectorAll(".ds-ch")) : [];
   var de = root.lang === "de";
 
@@ -394,7 +395,8 @@
     hud.children[1].textContent = T.route;
     hud.children[2].textContent = num(ll[1], 3) + "°N " + num(ll[0], 3) + "°" + T.E + " · " + T.alt + " " + fmtHeight(realAlt);
     var heroGone = !hero || hero.getBoundingClientRect().bottom < h * 0.5;
-    hud.classList.toggle("is-on", heroGone && share < 0.3);
+    var footerIn = footer && footer.getBoundingClientRect().top < h - 20;
+    hud.classList.toggle("is-on", heroGone && share < 0.3 && !footerIn);
   }
 
   function setLabelFont(spacing) {

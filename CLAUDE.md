@@ -34,7 +34,7 @@ One page per language: English at `/` (`index.html`), German at `/de/` (`de/inde
    WGS 84 / UTM 32N, smooths, runs `gdal_contour` (10 m, every 5th = index), simplifies with mapshaper, places
    uphill-facing labels, runs SVGO. See `--help` for options (`--dem` for a local DEM).
 3. `python3 tools/contours/build_hero.py index.html de/index.html` injects the map, graticule ticks, coordinates and
-   footer values between the `<!-- build:name -->` markers, formatted per `<html lang>`.
+   the DEM credit between the `<!-- build:name -->` markers, formatted per `<html lang>`.
    `make_contours.sh` also writes the 50 m elevation grid and the map→lat/lon formula used by `hero-map.js`.
    Region map for the fullscreen viewer (Kaiserstuhl to Feldberg, 40 x 36 km, CI 20 m, 100 m grid): run the
    region command from `make_contours.sh --help` (own `--work` folder!), then
@@ -119,7 +119,7 @@ a PO box does not). Never publish placeholder addresses.
 ## Design rules
 
 The look is "technical survey sheet", deliberately toned down: the cartographic character lives in the hero map,
-the mono labels and the scale bar. Everything else is quiet. The user prefers calm and centred over decorative.
+the mono labels and the flight background. Everything else is quiet. The user prefers calm and centred over decorative.
 
 ### Palette (CSS custom properties; never hard-code colours)
 
@@ -161,7 +161,7 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 - Mobile first; the content column is max 860 px. Every section opens the same way on the page's centre axis:
   `header.section-head` → `h2.section-title` + optional one-line `.section-sub`.
 - Order of the page: hero (who) → About (story + timeline) → From orbit to drone (career story) → CV (details) →
-  Visualizations (work samples) → Contact (action) → footer collar.
+  Visualizations (work samples) → Contact (action) → footer.
 - Nav: a modern bar in Plex Sans: name left, `About  Orbit  CV  Visuals  Contact` centred (DE: Über mich, Orbit,
   Lebenslauf, Grafiken, Kontakt), `EN DE | ☀ Light ☾ Dark` right (DE `Hell`/`Dunkel`; `.theme-switch`, two buttons; icons only on phones).
   Language and theme options are styled like the section links (same type, muted, active = ink + accent bar). Translucent paper with backdrop blur;
@@ -211,8 +211,9 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 - Print / PDF: a two-page A4 CV (print header with photo + full CV, always light). Check it after CV changes
   (two pages), then rebuild the PDFs.
 - 404: "Off the map." on Null Island (0.0000°N 0.0000°E).
-- Footer collar: scale bar (1 km at the hero map's on-screen scale), `WGS 84 / UTM 32N · CI 10 m`, legal lines,
-  DEM credit.
+- Footer: one calm centred block (owner, 2026-10-10: the old one was too busy; no scale bar, no CRS line): mono
+  "© 2026 Muhammad Abu Bakar · Freiburg im Breisgau", the privacy line, data credits in small type (the Copernicus
+  DEM statement is required by its licence), "Back to top ↑". The flight readout hides while the footer is on screen.
 - Motion: smooth scrolling (only without `prefers-reduced-motion`) and subtle hovers. Nothing else.
 
 ### Content and languages

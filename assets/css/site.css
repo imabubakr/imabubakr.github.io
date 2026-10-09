@@ -1253,82 +1253,43 @@ dl.cv-list .cv-row {
 }
 
 /* ---------------------------------------------------------- footer -- */
+/* One calm centred block: name and place, the privacy line, the data credits
+   (required by the DEM licence) in small type, and a way back to the top. */
 .collar {
   display: grid;
-  gap: 16px;
-  padding: 24px var(--pad) 28px;
+  justify-items: center;
+  gap: 6px;
+  padding: 40px var(--pad) 36px;
   border-top: 1px solid var(--grid);
   color: var(--muted);
   font-size: 0.8125rem;
   line-height: 1.5;
+  text-align: center;
 }
-
-.scalebar {
-  /* 1000 m at the hero map's on-screen scale. */
-  --len: calc(max(100cqw, var(--map-aspect) * (var(--hero-h) - var(--strip-h))) * 1000 / var(--map-width-m));
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 4px 20px;
+.collar-name {
   color: var(--ink);
-  font: 400 0.6875rem/1.5 var(--font-mono);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.06em;
 }
-.scalebar-graphic {
-  flex: none;
-  padding-right: 7ch; /* room for the "1000 m" label past the bar's end */
-}
-.scalebar-bar {
-  position: relative;
-  width: var(--len);
-  height: 5px;
-  border: 1px solid var(--ink);
-}
-.scalebar-bar::before {
-  content: "";
-  position: absolute;
-  inset: 0 50% 0 0;
-  background: var(--ink);
-}
-.scalebar-ticks {
-  position: relative;
-  width: var(--len);
-  height: 16px;
-}
-.scalebar-ticks span {
-  position: absolute;
-  top: 3px;
-  transform: translateX(-50%);
-  white-space: nowrap;
-}
-.scalebar-ticks span:last-child {
-  transform: none;
-}
-.scalebar-ticks span:last-child::after {
-  content: " m";
-}
-.scalebar-meta {
-  color: var(--muted);
-}
-
 .collar-credit {
+  max-width: 72ch;
+  margin-top: 6px;
   font-size: 0.6875rem;
+  text-wrap: balance;
 }
 .collar-credit a {
   color: inherit;
 }
-
-@media (min-width: 900px) {
-  .collar {
-    grid-template-columns: auto 1fr;
-    align-items: start;
-    column-gap: 48px;
-  }
-  .collar-legal {
-    text-align: right;
-  }
-  .collar-credit {
-    grid-column: 1 / -1;
-  }
+.collar-top {
+  margin-top: 14px;
+  padding: 4px 6px; /* touch target */
+  color: var(--muted);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+.collar-top:hover {
+  color: var(--ink);
 }
 
 /* ------------------------------------------------------- print / pdf cv -- */
