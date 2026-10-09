@@ -69,6 +69,16 @@ user found those looked broken.
 
 ## "From orbit to drone" (career story)
 
+**Preview in progress (2026-10-09):** the owner wants this section improved and is comparing three versions via a
+temporary picker bottom-right (`?orbit=map|descent|strip`, remembered in `localStorage.orbit-preview`, sets
+`html[data-orbit]`; code in `backdrop.js` + "Preview" block in site.css):
+`map` = the pinned map below (descent.js); `descent` = no map, the page-background camera climbs to orbit (Earth's
+limb + 1° graticule, Freiburg marked in accent) and descends through the chapters to ~1 km (top-down) and drone
+height (tilting to level flight), chapters on the left, readout says "From orbit to drone"; `strip` = three calm
+columns with small resolution icons (one house footprint rasterised at 30 m / 20 cm / sharp with a detection box;
+generated inline SVG). Once the owner picks, delete the picker and the unused versions (descent.js, descent.json and
+`tools/layers/build_descent.py` too if the map goes).
+
 Section [02] tells the owner's path: satellite data (from 2016) → aerial imagery (from 2021, MapTransfer) → drones
 (since 11/2025, Beagle Systems). Three chapters (`.ds-ch`, EN/DE text in the HTML) scroll past a pinned canvas
 (`assets/js/descent.js`) that descends over Ebringen: 705 km / 30 m pixels → 1 km / 20 cm → 100 m / ~2 cm

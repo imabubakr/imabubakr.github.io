@@ -945,6 +945,146 @@ a:hover {
   }
 }
 
+/* Preview (2026-10-09): two alternatives to the pinned map, switched by
+   html[data-orbit] (backdrop.js, temporary picker bottom-right).
+   descent: no map; the page background itself climbs to orbit and descends to
+            drone height while the chapters scroll past on the left.
+   strip:   a calm row of three steps with a small resolution icon each. */
+.ds-icon {
+  display: none;
+}
+html[data-orbit="descent"] #orbit .ds-figure,
+html[data-orbit="strip"] #orbit .ds-figure {
+  display: none !important;
+}
+html[data-orbit="descent"] #orbit .descent {
+  display: block;
+  max-width: 1100px;
+}
+html[data-orbit="descent"] #orbit .ds-chapters {
+  max-width: 400px;
+  margin: 0;
+}
+html[data-orbit="descent"] #orbit .ds-ch {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+}
+html[data-orbit="descent"] #orbit .ds-ch:first-child {
+  min-height: 80vh;
+}
+html[data-orbit="strip"] #orbit .descent {
+  display: block;
+  max-width: 1000px;
+}
+html[data-orbit="strip"] .ds-hint {
+  display: none;
+}
+html[data-orbit="strip"] #orbit .ds-chapters {
+  display: grid;
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+@media (min-width: 760px) {
+  html[data-orbit="strip"] #orbit .ds-chapters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 48px;
+  }
+}
+html[data-orbit="strip"] #orbit .ds-ch {
+  display: block;
+  min-height: 0;
+  margin: 0;
+  opacity: 1;
+}
+html[data-orbit="strip"] .ds-icon {
+  display: block;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  overflow: visible;
+}
+.ds-icon-px {
+  fill: var(--ink);
+}
+.ds-icon-grid path,
+.ds-icon-frame {
+  fill: none;
+  stroke: var(--grid);
+  stroke-width: 1;
+}
+.ds-icon-shape {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.ds-icon-box {
+  fill: none;
+  stroke: var(--accent-mark);
+  stroke-width: 1.25;
+  stroke-dasharray: 3 3;
+}
+/* descent: inside [02] the background is the picture, stronger on the right */
+html.orbit-live .backdrop {
+  --bg-op: 0.85;
+  -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 0.18) 0%, rgb(0 0 0 / 0.18) 34%, #000 52%);
+  mask-image: linear-gradient(to right, rgb(0 0 0 / 0.18) 0%, rgb(0 0 0 / 0.18) 34%, #000 52%);
+}
+@media (max-width: 719px) {
+  html.orbit-live .backdrop {
+    --bg-op: 0.4;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+.orbit-picker {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+  max-width: calc(100vw - 24px);
+  padding: 4px 8px;
+  border: 1px solid var(--grid);
+  background: var(--paper);
+  font: 400 0.6875rem/1 var(--font-mono);
+}
+.orbit-picker span {
+  margin-right: 4px;
+  color: var(--muted);
+}
+.orbit-picker button {
+  min-height: 28px;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+.orbit-picker button:hover,
+.orbit-picker button[aria-pressed="true"] {
+  color: var(--ink);
+}
+.orbit-picker button[aria-pressed="true"] {
+  text-decoration: underline;
+  text-decoration-color: var(--accent-mark);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+@media print {
+  .orbit-picker {
+    display: none !important;
+  }
+}
+
 /* ------------------------------------------------------------ timeline -- */
 /* A hairline runs down the centre. Phase labels (education / career) sit
    on the line like contour labels. Phones: entries stacked on the line.
