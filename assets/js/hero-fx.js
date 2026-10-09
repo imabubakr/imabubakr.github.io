@@ -7,6 +7,8 @@
 //   light   faint relief shading whose sun follows the mouse
 //   accent  "all things spatial" gets a thin survey line drawn under it
 //   draw+accent
+//   rise    the flat map lifts into 3D: every contour rises to its elevation while the
+//           view tilts; afterwards it follows the mouse a little and leans back on scroll
 // Reduced motion: no animation (the static hero stays as it is).
 (function () {
   var root = document.documentElement;
@@ -17,14 +19,14 @@
   var de = root.lang === "de";
   var h1 = hero.querySelector("h1");
   var mapEls = [hero.querySelector(".hero-map"), hero.querySelector(".hero-places")];
-  var MODES = ["none", "draw", "scan", "tilt", "light", "accent", "draw+accent"];
+  var MODES = ["rise", "none", "draw", "scan", "tilt", "light", "accent", "draw+accent"];
   var LABEL = de
-    ? { title: "Startbereich (Vorschau)", none: "ohne", draw: "zeichnen", scan: "scan", tilt: "kippen", light: "licht", accent: "akzent", "draw+accent": "zeichnen+akzent", replay: "wiederholen ↺" }
-    : { title: "Hero (preview)", none: "none", draw: "draw", scan: "scan", tilt: "tilt", light: "light", accent: "accent", "draw+accent": "draw+accent", replay: "replay ↺" };
+    ? { title: "Startbereich (Vorschau)", rise: "aufsteigen", none: "ohne", draw: "zeichnen", scan: "scan", tilt: "kippen", light: "licht", accent: "akzent", "draw+accent": "zeichnen+akzent", replay: "wiederholen ↺" }
+    : { title: "Hero (preview)", rise: "rise", none: "none", draw: "draw", scan: "scan", tilt: "tilt", light: "light", accent: "accent", "draw+accent": "draw+accent", replay: "replay ↺" };
 
   var mode = new URLSearchParams(location.search).get("hero");
   if (MODES.indexOf(mode) < 0) { try { mode = localStorage.getItem("hero-preview"); } catch (e) {} }
-  if (MODES.indexOf(mode) < 0) mode = "draw+accent";
+  if (MODES.indexOf(mode) < 0) mode = "rise";
   var smooth = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
 
   // -------------------------------------------------- words of the sentence --
@@ -169,11 +171,124 @@
   }
   window.addEventListener("scroll", onScroll, { passive: true });
 
+
+  // ------------------------------------------------------------------ rise --
+  // Stacked terraces: one paper layer per 10 m level (assets/topo/hero-terraces.json,
+  // tools/hero/build_terraces.py), drawn from low to high so higher layers cover
+  // lower ones, like a layered paper model. At k = 0 it matches the flat map; as
+  // k grows the layers lift to their heights and the view tilts.
+  var R3 = null;
+  function buildRise() {
+    if (R3) return Promise.resolve(R3);
+    var hm = hero.querySelector(".hero-map");
+    var cv = document.createElement("canvas");
+    cv.className = "hfx-rise";
+    cv.setAttribute("aria-hidden", "true");
+    hm.appendChild(cv);
+    R3 = { canvas: cv, ctx: cv.getContext("2d"), levels: [], k: 0, mx: 0, my: 0, mxs: 0, mys: 0, t0: 0, running: false };
+    return fetch(hero.dataset.topo + "hero-terraces.json").then(function (r) { return r.json(); }).then(function (d) {
+      R3.levels = d.levels.map(function (l) { return { z: l.z - d.zmin, index: l.z % 50 === 0, rings: l.rings }; });
+      var pl = hero.querySelector(".hero-place");
+      if (pl) {   // the town label's map position (build_hero.py) on the lowest terrace
+        var fx = parseFloat(pl.style.getPropertyValue("--fx")), fy = parseFloat(pl.style.getPropertyValue("--fy"));
+        R3.place = [fx * 10000, fy * 5000, 30];
+      }
+      return R3;
+    });
+  }
+  function drawRise(time) {
+    var hm = hero.querySelector(".hero-map"), box = hero.querySelector(".map-box");
+    var W = hm.clientWidth, H = hm.clientHeight, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var cv = R3.canvas, ctx = R3.ctx;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    var hb = hm.getBoundingClientRect(), bb = box.getBoundingClientRect();
+    var s0 = bb.width / 10000, ox = bb.left - hb.left, oy = bb.top - hb.top;   // flat map: px = ox + x * s0
+    var scrollP = Math.min(1, Math.max(0, window.scrollY / (hero.offsetHeight * 0.9)));
+    var k = R3.k;
+    R3.mxs += (R3.mx - R3.mxs) * 0.05; R3.mys += (R3.my - R3.mys) * 0.05;
+    var sway = Math.sin(time / 4200);
+    var tilt = (k * TILT + scrollP * 14 + R3.mys * 4 * k) * Math.PI / 180;   // 0 = straight down
+    var yaw = (k * (YAW + sway * 2.5) + R3.mxs * 8 * k) * Math.PI / 180;
+    var s = s0 * (1 + k * ZOOM);                       // zoom in a little as the view tilts
+    var ex = k * EXAG * s;                             // px per metre of height
+    var ct = Math.cos(tilt), st = Math.sin(tilt), cyw = Math.cos(yaw), syw = Math.sin(yaw);
+    var D = Math.max(W, H) * 1.6;                      // viewer distance (px)
+    var pcx = ox + 5000 * s0, pcy = oy + 2500 * s0 + k * H * LIFT;
+    var css = getComputedStyle(root);
+    var paper = css.getPropertyValue("--paper").trim(), line = css.getPropertyValue("--contour").trim();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = line;
+    ctx.fillStyle = paper;
+    var proj = function (X, Y, Z, o) {
+      var x = (X - 5000) * s, y = (Y - 2500) * s;
+      var xr = x * cyw - y * syw, yr = x * syw + y * cyw;      // yaw about the map centre
+      var f = D / (D - yr * st);                              // the far (north) side is smaller
+      o[0] = pcx + xr * f;
+      o[1] = pcy + (yr * ct - Z * st) * f;
+    };
+    var o = [0, 0];
+    var lv = R3.levels;
+    for (var n = 0; n < lv.length; n++) {
+      var L = lv[n], Z = L.z * ex;
+      // fill: the whole layer; stroke: only the contour, not the map border
+      var fillPath = new Path2D(), linePath = new Path2D();
+      for (var r = 0; r < L.rings.length; r++) {
+        var ring = L.rings[r], pen = false, prevEdge = false;
+        for (var i = 0; i < ring.length; i += 2) {
+          var X = ring[i], Y = ring[i + 1];
+          var edge = X <= 15 || X >= 9985 || Y <= 15 || Y >= 4985;
+          proj(X, Y, Z, o);
+          if (i) fillPath.lineTo(o[0], o[1]); else fillPath.moveTo(o[0], o[1]);
+          if (pen && !(edge && prevEdge)) linePath.lineTo(o[0], o[1]); else linePath.moveTo(o[0], o[1]);
+          pen = true; prevEdge = edge;
+        }
+        fillPath.closePath();
+      }
+      if (k > 0.001) { ctx.globalAlpha = Math.min(1, k * 3); ctx.fill(fillPath, "evenodd"); }
+      ctx.globalAlpha = L.index ? 0.85 : 0.45;
+      ctx.lineWidth = L.index ? 1.2 : 0.6;
+      ctx.stroke(linePath);
+    }
+    // Freiburg (Münster) as a map label on the terrain
+    if (R3.place) {
+      proj(R3.place[0], R3.place[1], R3.place[2] * ex, o);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = css.getPropertyValue("--ink").trim();
+      ctx.beginPath(); ctx.arc(o[0], o[1], 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.font = '500 12px "IBM Plex Mono", monospace';
+      if ("letterSpacing" in ctx) ctx.letterSpacing = "2.5px";
+      ctx.fillText(de ? "FREIBURG IM BREISGAU" : "FREIBURG IM BREISGAU", o[0] + 12, o[1] + 4);
+    }
+    ctx.globalAlpha = 1;
+  }
+  var TILT = 66, YAW = -80, ZOOM = 1.25, EXAG = 3.6, LIFT = 0.55;
+  hero.addEventListener("pointermove", function (e) {
+    if (!R3) return;
+    var b = hero.getBoundingClientRect();
+    R3.mx = ((e.clientX - b.left) / b.width - 0.5) * 2;
+    R3.my = ((e.clientY - b.top) / b.height - 0.5) * 2;
+  });
+  function riseLoop(now) {
+    if (!R3 || mode !== "rise") { if (R3) R3.running = false; return; }
+    var t = (now - R3.t0) / 1000;
+    R3.k = smooth((t - 0.7) / 2.6);
+    var b = hero.getBoundingClientRect();
+    if (b.bottom > 0) drawRise(now);
+    requestAnimationFrame(riseLoop);
+  }
+  hero.addEventListener("pointermove", function (e) {
+    if (!R3) return;
+    var b = hero.getBoundingClientRect();
+    R3.mx = ((e.clientX - b.left) / b.width - 0.5) * 2;
+    R3.my = ((e.clientY - b.top) / b.height - 0.5) * 2;
+  });
   // ------------------------------------------------------------------ play --
   var timers = [];
   function reset() {
     timers.forEach(clearTimeout); timers = [];
-    root.classList.remove("hfx-drawing", "hfx-drawn", "hfx-scanning", "hfx-words", "hfx-words-in", "hfx-ul-on", "hfx-light-on");
+    root.classList.remove("hfx-drawing", "hfx-drawn", "hfx-scanning", "hfx-words", "hfx-words-in", "hfx-ul-on", "hfx-light-on", "hfx-rising");
     if (overlay) overlay.remove(), (overlay = null);
     scanLine.style.left = "";
     hero.style.removeProperty("--scan");
@@ -211,6 +326,13 @@
       wordsIn(1.4);
     } else if (m === "accent") {
       timers.push(setTimeout(function () { root.classList.add("hfx-ul-on"); }, 400));
+    } else if (m === "rise") {
+      buildRise().then(function () {
+        root.classList.add("hfx-rising");
+        R3.t0 = performance.now();
+        if (!R3.running) { R3.running = true; requestAnimationFrame(riseLoop); }
+      });
+      wordsIn(2.4);
     } else if (m === "light") {
       buildLight(); paintLight();
       root.classList.add("hfx-light-on");
