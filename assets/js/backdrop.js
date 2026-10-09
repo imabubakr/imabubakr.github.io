@@ -40,6 +40,7 @@
   var ROUTE_BRG = (Math.atan2(UX, -UY) * 180) / Math.PI; // route bearing from north (x east, y south)
   var END_GAP = 5000;        // the flight stops this far before the Feldberg
   var EX = 2.6, H0 = 170;    // vertical exaggeration, base level (m)
+  var ex = EX;               // exaggeration in use: EX x the descent's boost (set per frame)
   var STEP = 150, FAR = 14000;
   var CRUISE = 1300;         // height above the highest ground ahead (scene m)
   var R_EARTH = 6371000;
@@ -95,12 +96,12 @@
     var b = dem[i + g.cols] + (dem[i + g.cols + 1] - dem[i + g.cols]) * tx;
     return a + (b - a) * ty;
   }
-  function sceneZ(x, y) { return (elev(x, y) - H0) * EX; }
+  function sceneZ(x, y) { return (elev(x, y) - H0) * ex; }
   // reference ground: the highest point in the next 6 km (scene units)
   function ground(s) {
     var hi = 0;
     for (var d = 0; d <= 6000; d += 250) hi = Math.max(hi, elev(OX + UX * (s + d), OY + UY * (s + d)));
-    return (hi - H0) * EX;
+    return (hi - H0) * ex;
   }
   function loadEarth() {
     if (earthLoading) return;
@@ -136,7 +137,8 @@
   }
 
   // Keyframes of the descent, placed on the chapters: [t, height, pitch°, screen x, screen y,
-  // heading°]. The camera holds each platform's height while its chapter is centred; in orbit
+  // heading°, relief boost]. The zoom into Freiburg is tilted (~60°) with extra relief so the
+  // joy plot shows the mountains; the boost eases back to 1 by drone height. The camera holds each platform's height while its chapter is centred; in orbit
   // it faces north (so Europe reads the right way up) and turns back to the route on the way down.
   function layoutKeys() {
     if (!orbit || chapters.length < 3 || reduce.matches) return;
@@ -147,15 +149,16 @@
     });
     var g1 = c[1] - c[0], g2 = c[2] - c[1], g3 = 1 - c[2];
     var k = [
-      [0, CRUISE, 0, 0.5, 0.26, ROUTE_BRG],
-      [Math.max(0.04, c[0] - 0.35 * g1), ORBIT_H, -58, 0.66, 0.62, 0],
-      [c[0] + 0.15 * g1, ORBIT_H, -62, 0.66, 0.62, 0],
-      [c[0] + 0.55 * g1, 30000, -86, 0.66, 0.5, ROUTE_BRG],
-      [c[1] - 0.15 * g1, AERIAL_H, -89, 0.66, 0.5, ROUTE_BRG],
-      [c[1] + 0.2 * g2, AERIAL_H, -89, 0.66, 0.5, ROUTE_BRG],
-      [c[2] - 0.1 * g2, DRONE_H, -28, 0.66, 0.42, ROUTE_BRG],
-      [c[2] + 0.3 * g3, DRONE_H, -24, 0.66, 0.42, ROUTE_BRG],
-      [1, CRUISE, 0, 0.5, 0.26, ROUTE_BRG],
+      [0, CRUISE, 0, 0.5, 0.26, ROUTE_BRG, 1],
+      [Math.max(0.04, c[0] - 0.35 * g1), ORBIT_H, -58, 0.66, 0.62, 0, 1],
+      [c[0] + 0.15 * g1, ORBIT_H, -62, 0.66, 0.62, 0, 1.5],
+      [c[0] + 0.55 * g1, 30000, -60, 0.66, 0.58, ROUTE_BRG, 4],
+      [c[1] - 0.35 * g1, 6000, -62, 0.66, 0.56, ROUTE_BRG, 3.5],
+      [c[1] - 0.12 * g1, AERIAL_H, -89, 0.66, 0.5, ROUTE_BRG, 2.5],
+      [c[1] + 0.2 * g2, AERIAL_H, -89, 0.66, 0.5, ROUTE_BRG, 2.5],
+      [c[2] - 0.1 * g2, DRONE_H, -28, 0.66, 0.42, ROUTE_BRG, 1],
+      [c[2] + 0.3 * g3, DRONE_H, -24, 0.66, 0.42, ROUTE_BRG, 1],
+      [1, CRUISE, 0, 0.5, 0.26, ROUTE_BRG, 1],
     ];
     for (var i = 1; i < k.length; i++) k[i][0] = Math.max(k[i][0], k[i - 1][0] + 0.005);
     keys = k;
@@ -167,7 +170,7 @@
   function target() {
     var max = document.documentElement.scrollHeight - window.innerHeight;
     var p = reduce.matches ? 0.35 : clamp(window.scrollY / (max || 1), 0, 1);
-    var cam = { s: p * (ROUTE_LEN - END_GAP), la: Math.log(CRUISE), pitch: 0, cx: 0.5, cy: 0.26, yaw: ROUTE_BRG };
+    var cam = { s: p * (ROUTE_LEN - END_GAP), la: Math.log(CRUISE), pitch: 0, cx: 0.5, cy: 0.26, yaw: ROUTE_BRG, boost: 1 };
     var t = orbitT();
     if (keys && !reduce.matches && t > 0 && t < 1) {
       var i = 1;
@@ -180,6 +183,7 @@
       var cyA = w < 720 && a[2] ? 0.76 : a[4], cyB = w < 720 && b[2] ? 0.76 : b[4];
       cam.cy = cyA + (cyB - cyA) * k;
       cam.yaw = a[5] + (b[5] - a[5]) * k;
+      cam.boost = a[6] + (b[6] - a[6]) * k;
     }
     return cam;
   }
@@ -188,6 +192,7 @@
   function draw(cam) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
+    ex = EX * cam.boost;
     var alt = Math.exp(cam.la), pitchDeg = (-cam.pitch * 180) / Math.PI;
     var G = ground(cam.s);
     var CX = OX + UX * cam.s, CY = OY + UY * cam.s, CZ = G + alt;
@@ -211,9 +216,9 @@
     var inOrbit = !!keys && t > 0 && t < 1;
     var live = inOrbit && cam.pitch < -0.02;
 
-    // --- the Earth from orbit (above ~25 km), outlines down to ~8 km
+    // --- the Earth from orbit (above ~25 km), country outlines down to ~60 km
     var orbA = clamp((alt - 25000) / 75000, 0, 1);
-    var mapA = clamp((alt - 8000) / 12000, 0, 1);
+    var mapA = clamp((alt - 60000) / 80000, 0, 1); // outlines are not draped: gone before the terrain rises
     if (orbA > 0) drawGlobe(orbA, view, line);
     if (mapA > 0 && earth) drawEarth(mapA, view, ink);
     if (alt > 60000) drawSwath(clamp((alt - 60000) / 140000, 0, 1), view, ink, line);
@@ -238,7 +243,7 @@
       var aMax = aTop <= 0.02 ? FAR : Math.min(Math.max(FAR, alt * 3), H / Math.tan(aTop));
       aMin = cam.s + aMin - 2 * step;
       aMax = cam.s + aMax + 2 * step;
-      while ((aMax - aMin) / step > (down ? 420 : 160)) { step *= 2; n0++; frac = 0; }
+      while ((aMax - aMin) / step > (down ? 640 : 160)) { step *= 2; n0++; frac = 0; }
       var g = meta.grid, W = g.cols * g.cell_m[0], Hm = g.rows * g.cell_m[1];
       var fogFar = Math.max(FAR, alt * 4);
       ctx.lineJoin = "round";
@@ -278,7 +283,7 @@
           var sx = out[0], sy = out[1];
           pts.push(sx, sy);
           if (fill) {
-            if (proj(X, Y, -H0 * EX)) basePts.push(out[0], Math.max(out[1], sy));
+            if (proj(X, Y, -H0 * ex)) basePts.push(out[0], Math.max(out[1], sy));
             else basePts.push(sx, h + 4);
           }
           if (sy < top) top = sy;
@@ -323,7 +328,7 @@
       (meta.places || []).forEach(function (pl) {
         if (pl.kind !== "summit") return;
         var d = (pl.x - CX) * UX + (pl.y - CY) * UY;
-        if (d < 1500 || d > 9000 || !proj(pl.x, pl.y, (pl.elev - H0) * EX)) return;
+        if (d < 1500 || d > 9000 || !proj(pl.x, pl.y, (pl.elev - H0) * ex)) return;
         var sx = out[0], sy = out[1];
         if (sx < 40 || sx > w - 40 || sy < 20 || sy > h) return;
         if (hiddenBehind(drawn, d, sx, sy)) return;
@@ -368,7 +373,7 @@
     var share = orbitShare();
     canvas.style.setProperty("--fade", String(keys ? 1 : 1 - 0.85 * share));
     if (share > 0 && !earth) loadEarth();
-    var ll = lonLat(CX, CY), realAlt = alt + G / EX + H0;
+    var ll = lonLat(CX, CY), realAlt = alt + G / ex + H0;
     hud.children[0].textContent = T.title;
     hud.children[1].textContent = T.route;
     hud.children[2].textContent = num(ll[1], 3) + "°N " + num(ll[0], 3) + "°" + T.E + " · " + T.alt + " " + fmtHeight(realAlt);
@@ -639,7 +644,7 @@
     var goal = target();
     var k = reduce.matches ? 1 : 1 - Math.exp(-dt / 0.35);
     var moving = false;
-    ["s", "la", "pitch", "cx", "cy", "yaw"].forEach(function (key) {
+    ["s", "la", "pitch", "cx", "cy", "yaw", "boost"].forEach(function (key) {
       cur[key] += (goal[key] - cur[key]) * k;
       var eps = key === "s" ? 1 : 1e-3;
       if (Math.abs(goal[key] - cur[key]) > eps) moving = true;
