@@ -117,7 +117,7 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 - Order of the page: hero (who) → About (story + timeline) → From orbit to drone (career story) → CV (details) →
   Visualizations (work samples) → Contact (action) → footer collar.
 - Nav: a modern bar in Plex Sans: name left, `About  Orbit  CV  Visuals  Contact` centred (DE: Über mich, Orbit,
-  Lebenslauf, Grafiken, Kontakt), `EN DE` + a visible theme toggle (moon icon + "dark"/"dunkel"; moon filled when on) right. Translucent paper with backdrop blur;
+  Lebenslauf, Grafiken, Kontakt), `EN DE` + a `light dark` switch (DE `hell dunkel`; `.theme-switch`, two buttons, the active one underlined) right. Translucent paper with backdrop blur;
   links muted, the current one ink with a 2px `--accent-mark` bar on the nav's bottom edge. Phones: two rows (name +
   tools, then the links). `--nav-h` is 84px on phones, 57px from 900px. The hero strip says `SHEET 01 / 05`
   (`BLATT` in German). Update it if sections are added.

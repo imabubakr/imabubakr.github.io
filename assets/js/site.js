@@ -2,29 +2,32 @@
 // nav section highlight, and keeping the language switch on the current section.
 (function () {
   var root = document.documentElement;
-  var toggle = document.querySelector(".theme-toggle");
+  var themeButtons = document.querySelectorAll("[data-set-theme]");
   var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
 
-  function current() {
+  function currentTheme() {
     return root.dataset.theme || (systemDark.matches ? "dark" : "light");
   }
 
   function sync() {
-    if (toggle) toggle.setAttribute("aria-pressed", String(current() === "dark"));
+    var theme = currentTheme();
+    themeButtons.forEach(function (btn) {
+      btn.setAttribute("aria-pressed", String(btn.dataset.setTheme === theme));
+    });
   }
 
-  if (toggle) {
-    toggle.addEventListener("click", function () {
-      var next = current() === "dark" ? "light" : "dark";
+  themeButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var next = btn.dataset.setTheme;
       root.dataset.theme = next;
       try {
         localStorage.setItem("theme", next);
       } catch (e) {}
       sync();
     });
-    systemDark.addEventListener("change", sync);
-    sync();
-  }
+  });
+  systemDark.addEventListener("change", sync);
+  sync();
 
   // Plates viewer: clicking a plate opens it large in a <dialog> (animations play
   // there unless reduced motion is on); arrow keys step through, Esc closes.

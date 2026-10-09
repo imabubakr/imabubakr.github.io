@@ -349,12 +349,15 @@ a:hover {
   text-underline-offset: 5px;
 }
 
-.theme-toggle {
+/* Theme: two options side by side, like the language switch. */
+.theme-switch {
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  margin-left: 8px;
+}
+.theme-switch button {
+  min-width: 30px;
   min-height: 32px;
-  padding: 0 2px 0 6px;
+  padding: 0 4px;
   border: 0;
   background: none;
   color: var(--muted);
@@ -362,24 +365,15 @@ a:hover {
   letter-spacing: 0.04em;
   cursor: pointer;
 }
-.theme-toggle:hover {
+.theme-switch button:hover,
+.theme-switch button[aria-pressed="true"] {
   color: var(--ink);
 }
-.theme-toggle svg {
-  width: 15px;
-  height: 15px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-/* "dark" is on (aria-pressed) when the moon is filled. */
-.theme-toggle[aria-pressed="true"] {
-  color: var(--ink);
-}
-.theme-toggle[aria-pressed="true"] svg {
-  fill: currentColor;
+.theme-switch button[aria-pressed="true"] {
+  text-decoration: underline;
+  text-decoration-color: var(--accent-mark);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
 }
 
 @media (min-width: 900px) {
