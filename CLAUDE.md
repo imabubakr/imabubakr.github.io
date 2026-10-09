@@ -45,12 +45,10 @@ One page per language: English at `/` (`index.html`), German at `/de/` (`de/inde
 
 Edit the `PLATES` or `CERTS` list (source file, EN/DE short title and caption) in `tools/plates/build_plates.py`, then run
 `python3 tools/plates/build_plates.py` (needs Pillow and ffmpeg; `--skip-media` to only rewrite the markup).
-**Review in progress (2026-10-10):** at the owner's request ALL plots from the repo root are listed (86 plates;
-plates 1–13 are Claude's earlier pick, 14–86 the rest, titled from what is visible: no invented facts). The owner
-will say which to remove. Left out on purpose: certificates (CV), me.jpg/me.jfif, do.jpg (chat screenshot with third
-parties' names/emails), trans.png (signature), web.jpg (code screenshot), databases.jpg (logos), 0055.png (Storm
-Emir still), prog4.gif/sen1.gif (byte-identical to home1.gif), aral.gif and glacier8.png (removed by the owner).
-The preview is sticky so it stays beside a long list. Video settings: very light denoise, VP9 CRF 36 / x264 CRF 27;
+**Selection (2026-10-10):** all plots were listed, then the owner removed 42; 44 plates remain (6 of them
+animations), titled from what is visible (no invented facts; proper captions still to do). Never on the page:
+certificates (CV), me.jpg/me.jfif, do.jpg (chat screenshot with third parties' names/emails), trans.png (signature),
+web.jpg, databases.jpg, prog4.gif/sen1.gif (copies of home1.gif). The preview is sticky beside the list. Video settings: very light denoise, VP9 CRF 36 / x264 CRF 27;
 line-art animations in `UPSCALE` get 2x Lanczos (Storm Emir looked blotchy with the old hqdn3d 3 / CRF 40), and
 `STILLS` gives Storm Emir a sharper preview frame (0055.png).
 It writes the media to `assets/plates/` and the plate index / certificate grid into both pages between
