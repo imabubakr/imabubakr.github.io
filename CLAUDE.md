@@ -53,6 +53,10 @@ footprints drawing in. Data: Geobasis NRW, dl-de/zero-2-0 (credited in the capti
 houses, loose outlines; official footprints in white) and its caption says so. Captions must stay truthful: the building footprints are official ALKIS data, not model output (the owner
 asked; a false claim would be detectable and risky in applications). They are listed in `PLATES`
 with `src=None` (pre-rendered, skipped by `build_media`).
+Added 2026-10-10 from the owner's Downloads: vehicle detection video (pre-rendered, `src=None`; source stays in
+~/Downloads, not in the repo), tree crowns (`tree-crowns.png`), population density Europe (`population-europe.png`,
+cropped from a geemap screenshot to remove the UI; basemap credit in the caption). Captions neutral until the owner
+confirms sources/methods.
 **Selection (2026-10-10):** all plots were listed, then the owner removed 50 in three rounds; 36 plates remain (6 of them
 animations), titled from what is visible (no invented facts; proper captions still to do). Never on the page:
 certificates (CV), me.jpg/me.jfif, do.jpg (chat screenshot with third parties' names/emails), trans.png (signature),
