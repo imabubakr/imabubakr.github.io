@@ -892,6 +892,36 @@ a:hover {
 .intro-text p + p {
   margin-top: 0.8em;
 }
+/* What I work with: neutral key-value rows (like a map legend), no ratings. */
+.about-facts {
+  max-width: 62ch;
+  margin: 28px auto 0;
+  text-align: left;
+}
+.about-fact {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 2px 16px;
+  padding: 3px 0;
+}
+.about-fact dt {
+  color: var(--muted);
+  font: 400 0.6875rem/1.6 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.about-fact dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+@media (max-width: 479px) {
+  .about-fact {
+    grid-template-columns: 1fr;
+    padding: 5px 0;
+  }
+}
 /* ------------------------------------------------- from orbit to drone -- */
 /* Career story: three chapters scroll past on the left while the page
    background (assets/js/backdrop.js) climbs to orbit and descends to drone

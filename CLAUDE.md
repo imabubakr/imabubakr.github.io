@@ -179,10 +179,12 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   one-line description under the job taken from their site. Keep it factual.
 - Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
   "View certificates" link or the `#certificates` hash; hidden in print.
-- About: a **short** introduction in two paragraphs (owner's wish, 2026-10-09): background + earlier work
-  (satellite data, MapTransfer, Karuna), then what the current Beagle job involves. No job pitch (the owner is not
-  job-hunting). Text → timeline. **No photo on the page** (owner, 2026-10-09: it does not go with the site); the
-  photo stays only in the PDF/print CV header.
+- About (owner-approved wording, 2026-10-10): two short paragraphs (who/what: Earth observation data from orbit
+  to drone height; where three fields meet: remote sensing, data engineering incl. pipelines and WebGIS backends,
+  machine learning incl. fine-tuned foundation models and open-source LLMs/VLMs; since 11/2025 at Beagle Systems),
+  then a quiet "What I work with" key-value block (`.about-facts`: Data / Analysis / Engineering / Models; facts only,
+  no ratings, no software lists: those stay in the CV), then the timeline. No photo on the page. The owner does not
+  want to sound like a "loud mouth": no adjectives like expert/passionate, no self-ratings.
 - Portrait (PDF/print header only): the **uncropped** square selfie `me.jpg` → `assets/img/portrait-{320,640}.webp`
   (owner disliked a cropped version).
 - CV on the page is **short** (owner's friend's advice, 2026-10-09): professional experience with 3–4 bullets per
@@ -236,9 +238,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   compounds badly); use `&shy;` in long headings.
 - US English spelling on the English page (matches the original CV).
 - Professional register: **no contractions** on either page ("I am", "do not", never "I'm", "you'd").
-- About text positions the owner as working at the intersection of Earth observation, data engineering (pipelines)
-  and AI (fine-tuning detection models, open-source large models and VLMs, edge deployment), with the geology /
-  satellite background after that. Keep it factual: only things stated in the CV or by the owner.
+- About text positions the owner at the intersection of remote sensing, data engineering and machine learning. Keep
+  it factual: only things stated in the CV or by the owner.
 
 ### Accessibility and performance
 
