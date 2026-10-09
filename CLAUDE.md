@@ -247,7 +247,11 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   (`--hfx-bg`), so the background flight (also looking east) takes over; while risen the map tools,
   controls, hint and strip ticks step back. Polish (2026-10-12): each layer has a fine card edge (≤ 1.8 px, paper mixed with
   --contour), far lines fade (atmospheric depth), no sway while scrolling, softer easing (0.1), a mono "scroll" cue
-  with a falling accent tick at the bottom (hidden once scrolling starts), canvas hidden until the rise begins. The draw effect animates a split
+  with a falling accent tick at the bottom (hidden once scrolling starts), canvas hidden until the rise begins.
+  Height labels ("450 m") on the 50 m terraces, anchored at each level's westernmost vertex (facing the camera), drawn
+  with their layer so higher layers cover them, no overlaps, not over the sentence. A drone mission (`ROUTE` in
+  hero-fx.js, map metres) draws itself over the model from pinned progress 0.62: dashed plan, solid flown part,
+  drone ring + cross at the head with a drop line, 80 m above the smoothed ground of the hero DEM. The draw effect animates a split
   copy of the contour paths (overlay svg) and removes it afterwards, so the map tools are untouched.
 - Hero map tools (`assets/js/hero-map.js`, one engine for hero and fullscreen viewer): hovering shows lat/lon +
   elevation in the strip (replacing `EPSG:4326`); two clicks/taps draw an accent survey line and open the elevation

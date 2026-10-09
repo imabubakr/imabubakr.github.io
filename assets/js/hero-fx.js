@@ -196,7 +196,22 @@
     fetch(hero.dataset.topo + "hero-contours-dem.bin").then(function (r) { return r.arrayBuffer(); })
       .then(function (buf) { R3.dem = new Int16Array(buf); });    // 200 x 100 cells of 50 m, for the glass spots
     return fetch(hero.dataset.topo + "hero-terraces.json").then(function (r) { return r.json(); }).then(function (d) {
-      R3.levels = d.levels.map(function (l) { return { z: l.z - d.zmin, index: l.z % 50 === 0, rings: l.rings }; });
+      R3.zmin = d.zmin;
+      R3.levels = d.levels.map(function (l) { return { z: l.z - d.zmin, elev: l.z, index: l.z % 50 === 0, rings: l.rings }; });
+      // label anchor per 50 m level: the westernmost contour vertex (the side facing the
+      // camera, which looks east), away from the map border
+      R3.levels.forEach(function (L) {
+        if (!L.index) return;
+        var best = null;
+        L.rings.forEach(function (g) {
+          for (var i = 0; i < g.length; i += 2) {
+            var X = g[i], Y = g[i + 1];
+            if (X < 400 || X > 9600 || Y < 400 || Y > 4600) continue;
+            if (!best || X < best[0]) best = [X, Y];
+          }
+        });
+        L.anchor = best;
+      });
       var pl = hero.querySelector(".hero-place");
       if (pl) {   // the town label's map position (build_hero.py) on the lowest terrace
         var fx = parseFloat(pl.style.getPropertyValue("--fx")), fy = parseFloat(pl.style.getPropertyValue("--fy"));
@@ -204,6 +219,57 @@
       }
       return R3;
     });
+  }
+  // Drone mission over the model: a route from the plain into the hills, 80 m above the
+  // ground (hero DEM, 50 m cells); planned part dashed, flown part solid, drone at the head.
+  var ROUTE = [[4300, 3900], [5600, 3300], [6700, 2950], [7600, 2350], [8500, 1850], [9400, 1300]];
+  var routePts = null;
+  function demAt(X, Y) {
+    var c = Math.min(198.999, Math.max(0, X / 50 - 0.5)), r = Math.min(98.999, Math.max(0, Y / 50 - 0.5));
+    var c0 = Math.floor(c), r0 = Math.floor(r), fc = c - c0, fr = r - r0, d = R3.dem, i = r0 * 200 + c0;
+    var a = d[i] + (d[i + 1] - d[i]) * fc, b = d[i + 200] + (d[i + 201] - d[i + 200]) * fc;
+    return a + (b - a) * fr;
+  }
+  function drawFlightPath(proj, ex, k) {
+    var ctx = R3.ctx, css = getComputedStyle(root), o = [0, 0];
+    if (!routePts) {
+      routePts = [];
+      for (var w = 1; w < ROUTE.length; w++) {
+        var a = ROUTE[w - 1], b = ROUTE[w], n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 40);
+        for (var j = 0; j < n; j++) routePts.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]);
+      }
+      routePts.push(ROUTE[ROUTE.length - 1]);
+      // fly 80 m above the highest ground nearby, smoothed so the line glides
+      var hs = routePts.map(function (p) { return demAt(p[0], p[1]); }), sm = hs.slice();
+      for (var q = 0; q < hs.length; q++) { var m = -1e9; for (var e = Math.max(0, q - 6); e <= Math.min(hs.length - 1, q + 6); e++) m = Math.max(m, hs[e]); sm[q] = m + 80; }
+      routePts.forEach(function (p, q) { p[2] = sm[q]; });
+    }
+    var P = routePts.map(function (p) { proj(p[0], p[1], (p[2] - R3.zmin) * ex, o); return [o[0], o[1]]; });
+    var head = R3.pathP * (P.length - 1), hi = Math.floor(head), f = head - hi;
+    var accent = css.getPropertyValue("--accent-mark").trim();
+    ctx.save();
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.strokeStyle = accent;
+    ctx.globalAlpha = 0.45 * Math.min(1, R3.pathP * 4);       // the plan
+    ctx.setLineDash([3, 6]); ctx.lineWidth = 1.2;
+    ctx.beginPath(); P.forEach(function (p, i) { if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); }); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha = 0.95; ctx.lineWidth = 1.8;   // the flown part
+    ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]);
+    for (var i = 1; i <= hi; i++) ctx.lineTo(P[i][0], P[i][1]);
+    var hx = P[hi][0], hy = P[hi][1];
+    if (hi < P.length - 1) { hx += (P[hi + 1][0] - hx) * f; hy += (P[hi + 1][1] - hy) * f; }
+    ctx.lineTo(hx, hy); ctx.stroke();
+    // drone: ring with a cross, and a faint drop line to the ground
+    var g = routePts[Math.min(hi, routePts.length - 1)];
+    proj(g[0], g[1], (demAt(g[0], g[1]) - R3.zmin) * ex, o);
+    ctx.globalAlpha = 0.5; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+    ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(o[0], o[1]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.globalAlpha = 1; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(hx, hy, 6, 0, Math.PI * 2);
+    ctx.moveTo(hx - 11, hy); ctx.lineTo(hx - 3, hy); ctx.moveTo(hx + 3, hy); ctx.lineTo(hx + 11, hy);
+    ctx.moveTo(hx, hy - 11); ctx.lineTo(hx, hy - 3); ctx.moveTo(hx, hy + 3); ctx.lineTo(hx, hy + 11);
+    ctx.stroke();
+    ctx.restore();
   }
   function mixColor(a, b, t) {                               // two #rrggbb colours
     var pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16), o = [];
@@ -288,6 +354,8 @@
     var o = [0, 0];
     var lv = R3.levels;
     var SR = mode === "scroll-rise";
+    var labelA = SR ? smooth((k - 0.45) / 0.4) : 0, placed = [];
+    var labelCol = css.getPropertyValue(isDark ? "--muted" : "--contour").trim();
     // paper-model edge: each layer's card thickness (10 m) seen from the side, a touch darker
     var edgeCol = SR ? mixColor(paper, line, isDark ? 0.3 : 0.22) : null;
     var tmp = [0, 0], tmp2 = [0, 0];
@@ -338,7 +406,27 @@
       ctx.globalAlpha = a;
       ctx.lineWidth = L.index ? 1.2 : 0.6;
       ctx.stroke(linePath);
+      if (SR && L.index && L.anchor && labelA > 0.01) {      // height label on the 50 m contours
+        proj(L.anchor[0], L.anchor[1], Z, tmp);
+        var lxp = tmp[0], lyp = tmp[1], clear = lxp > 30 && lxp < W - 60 && lyp > 24 && lyp < H - 24 &&
+          !(lxp < W * 0.42 && lyp > H * 0.6);                   // not over the sentence
+        for (var u = 0; u < placed.length && clear; u++) if (Math.abs(placed[u][0] - lxp) < 64 && Math.abs(placed[u][1] - lyp) < 18) clear = false;
+        if (clear) {
+          placed.push([lxp, lyp]);
+          ctx.globalAlpha = labelA;
+          ctx.font = '500 10px "IBM Plex Mono", monospace';
+          if ("letterSpacing" in ctx) ctx.letterSpacing = "1px";
+          ctx.textAlign = "right";
+          ctx.lineWidth = 3; ctx.strokeStyle = paper; ctx.lineJoin = "round";
+          ctx.strokeText(L.elev + " m", lxp - 6, lyp + 3.5);
+          ctx.fillStyle = labelCol; ctx.fillText(L.elev + " m", lxp - 6, lyp + 3.5);
+          ctx.fillRect(lxp - 3, lyp - 0.5, 3, 1);
+          ctx.strokeStyle = line; ctx.textAlign = "left";
+        }
+      }
     }
+    // drone flight path over the model during the push-in (scroll-rise)
+    if (SR && R3.dem && R3.pathP > 0.01) drawFlightPath(proj, ex, k);
     if (lens) {
       ctx.restore();
       if (R3.lensA > 0.02) {                                  // the loupe's rim and a centre tick
@@ -484,6 +572,7 @@
       var pp = pinProgress();
       R3.kT = smooth(pp / 0.7);
       R3.pushT = smooth((pp - 0.7) / 0.3);
+      R3.pathP = (R3.pathP || 0) + (smooth((pp - 0.62) / 0.36) - (R3.pathP || 0)) * 0.1;
       R3.k += (R3.kT - R3.k) * 0.1;                       // eased, never jumps with the wheel
       R3.push = (R3.push || 0) + (R3.pushT - (R3.push || 0)) * 0.1;
       cue.classList.toggle("is-gone", pp > 0.015);
