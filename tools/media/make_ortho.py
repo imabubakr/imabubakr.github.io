@@ -6,6 +6,12 @@ the page, in both languages).
     ~/miniforge3/envs/geoai/bin/python tools/media/make_ortho.py
 
 Writes assets/plates/ortho-buildings.{webm,mp4} and -720.webp (poster/thumbnail).
+
+    --errors   a labelled SIMULATION of typical building-segmentation errors, made
+               from the official footprints (not model output): attached houses
+               merged, loose rounded outlines on complex buildings; the official
+               footprints stay as thin white reference lines.
+               -> assets/plates/ortho-errors.*
 """
 import glob
 import math
@@ -20,6 +26,8 @@ import numpy as np
 import rasterio
 from rasterio.merge import merge
 from PIL import Image, ImageDraw
+from shapely.geometry import Polygon
+from shapely.ops import unary_union
 
 HERE = Path(__file__).resolve().parent
 WORK = HERE / "work"
@@ -71,14 +79,41 @@ def load_buildings(bounds):
     return list(gdf.geometry)
 
 
+def simulate_errors(polys):
+    """Simulated model output (see module doc): merge attached houses, loosen complex shapes."""
+    # attached or less than ~1.2 m apart: grow, union, shrink back (models bridge narrow gaps)
+    merged = unary_union([p.buffer(0.6, join_style=2) for p in polys]).buffer(-0.6, join_style=2)
+    parts = list(merged.geoms) if hasattr(merged, "geoms") else [merged]
+    out = []
+    for p in parts:
+        if p.is_empty or p.geom_type != "Polygon":
+            continue
+        rect = p.minimum_rotated_rectangle
+        complex_shape = len(p.exterior.coords) > 14 or p.area / max(rect.area, 1) < 0.78
+        if complex_shape:
+            # blobby, generalised outline: rounded, slightly too large, corners lost
+            q = p.buffer(2.2, join_style=1).buffer(-1.0, join_style=1).simplify(1.2)
+        else:
+            q = p.buffer(0.7, join_style=1).simplify(0.5)
+        if q.geom_type == "Polygon":
+            out.append(q)
+    return out
+
+
 def main():
+    errors = "--errors" in sys.argv
+    name = "ortho-errors" if errors else "ortho-buildings"
     ortho, (x0, y0, x1, y1) = load_ortho()
     polys = load_buildings((x0, y0, x1, y1))
+    official = polys
+    if errors:
+        polys = simulate_errors(polys)
+        print(len(official), "official footprints ->", len(polys), "simulated predictions")
     # reveal order: by distance of the centroid from the centre
     cx, cy = CENTER
     order = sorted(polys, key=lambda p: math.hypot(p.centroid.x - cx, p.centroid.y - cy))
     rmax = math.hypot(*HALF)
-    frames = WORK / "ortho_frames"
+    frames = WORK / f"{name}_frames"
     shutil.rmtree(frames, ignore_errors=True)
     frames.mkdir(parents=True)
     n = FPS * SECONDS
@@ -108,6 +143,10 @@ def main():
             pts = [((x - (cx - vw / 2)) * scale, ((cy + vh / 2) - y) * scale) for x, y in p.exterior.coords]
             d.polygon(pts, fill=ACCENT + (int(46 * k),))
             d.line(pts + [pts[0]], fill=ACCENT + (int(235 * k),), width=max(3, round(1.8 * SS)), joint="curve")
+        if errors:  # official footprints on top as thin white reference lines
+            for p in official:
+                pts = [((x - (cx - vw / 2)) * scale, ((cy + vh / 2) - y) * scale) for x, y in p.exterior.coords]
+                d.line(pts + [pts[0]], fill=(255, 255, 255, 215), width=max(2, SS), joint="curve")
         frame = Image.alpha_composite(frame.convert("RGBA"), over).convert("RGB")
         frame = frame.resize((W, H), Image.LANCZOS)
         frame.save(frames / f"{i:04d}.png")
@@ -119,11 +158,11 @@ def main():
     pat = str(frames / "%04d.png")
     run = lambda *a: subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *a], check=True)
     run("-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-c:v", "libvpx-vp9", "-crf", "34", "-b:v", "0",
-        "-row-mt", "1", str(OUT / "ortho-buildings.webm"))
+        "-row-mt", "1", str(OUT / f"{name}.webm"))
     run("-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-c:v", "libx264",
-        "-preset", "slow", "-crf", "24", str(OUT / "ortho-buildings.mp4"))
+        "-preset", "slow", "-crf", "24", str(OUT / f"{name}.mp4"))
     poster = Image.open(frames / f"{n - 1:04d}.png").convert("RGB")
-    poster.resize((720, round(720 * H / W)), Image.LANCZOS).save(OUT / "ortho-buildings-720.webp", quality=80, method=6)
+    poster.resize((720, round(720 * H / W)), Image.LANCZOS).save(OUT / f"{name}-720.webp", quality=80, method=6)
     print("done")
 
 

@@ -49,7 +49,8 @@ Edit the `PLATES` or `CERTS` list (source file, EN/DE short title and caption) i
 a classified LiDAR fly-around (NRW point clouds only separate ground/non-ground, so buildings = inside ALKIS
 footprints and > 1.5 m above ground, vegetation = other non-ground > 0.5 m; three.js in headless Chromium,
 1280 px, fixed bitrate: point clouds are ~90 MB at CRF settings) and a DOP10 orthophoto with the ALKIS building
-footprints drawing in. Data: Geobasis NRW, dl-de/zero-2-0 (credited in the captions). Captions must stay truthful: the building footprints are official ALKIS data, not model output (the owner
+footprints drawing in. Data: Geobasis NRW, dl-de/zero-2-0 (credited in the captions). Plate 03 (`make_ortho.py --errors`) is a SIMULATION of typical segmentation errors made from ALKIS (merged attached
+houses, loose outlines; official footprints in white) and its caption says so. Captions must stay truthful: the building footprints are official ALKIS data, not model output (the owner
 asked; a false claim would be detectable and risky in applications). They are listed in `PLATES`
 with `src=None` (pre-rendered, skipped by `build_media`).
 **Selection (2026-10-10):** all plots were listed, then the owner removed 50 in three rounds; 36 plates remain (6 of them

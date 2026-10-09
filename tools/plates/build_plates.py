@@ -45,6 +45,15 @@ PLATES = [
      ("Orthofoto und Gebäudeumrisse, Freudenberg",
       "Die Altstadt von Freudenberg (Siegerland) im 10-cm-Orthofoto (DOP10, 2025) mit den amtlichen "
       "ALKIS-Gebäudegrundrissen. Daten: Geobasis NRW (dl-de/zero-2-0).")),
+    ("ortho-errors", None, True, 0,
+     ("Typical segmentation errors (simulated)",
+      "Typical errors of building-segmentation models, simulated from the official footprints (white): attached "
+      "houses merged into one polygon and loose outlines on complex roofs (orange). An illustration, not model "
+      "output. Freudenberg, DOP10 2025. Data: Geobasis NRW (dl-de/zero-2-0)."),
+     ("Typische Segmentierungsfehler (simuliert)",
+      "Typische Fehler von Modellen zur Gebäudesegmentierung, simuliert aus den amtlichen Grundrissen (weiß): "
+      "aneinandergebaute Häuser zu einem Polygon verschmolzen und ungenaue Umrisse bei komplexen Dächern (orange). "
+      "Eine Illustration, keine Modellausgabe. Freudenberg, DOP10 2025. Daten: Geobasis NRW (dl-de/zero-2-0).")),
     ("storm-emir", "storm.gif", True, 0.5,
      ("Storm Emir", f"Storm Emir, November 2023: wind field over Europe. Data: ERA5; {C3S}."),
      ("Sturm Emir", f'Sturm Emir, November 2023: Windfeld über Europa. Daten: ERA5; <span lang="en">{C3S}</span>.')),
