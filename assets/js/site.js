@@ -133,11 +133,6 @@
     openCerts();
   }
 
-  // Page background (village outlines) loads after the page, never competing with it.
-  var showBackground = function () { root.classList.add("bg-on"); };
-  if (document.readyState === "complete") showBackground();
-  else window.addEventListener("load", showBackground);
-
   var langLink = document.querySelector(".lang a[hreflang]");
   var langBase = langLink ? langLink.getAttribute("href").split("#")[0] : "";
 

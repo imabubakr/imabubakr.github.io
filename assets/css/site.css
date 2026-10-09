@@ -1656,43 +1656,11 @@ dl.cv-list .cv-row {
 }
 
 /* ----------------------------------------------------- page background -- */
-/* Building outlines of a village (Ebringen, OSM; tools/layers/build_layers.py),
-   fixed behind everything below the hero like a map under tracing paper. A mask
-   painted in --contour, so it follows the theme; site.js adds .bg-on after load. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-html.bg-on body::before {
-  background-color: var(--contour);
-  opacity: 0.3;
-  /* outlines x a horizontal fade: full in the margins, faint behind the text column */
-  -webkit-mask:
-    url("../layers/village.svg") center / cover no-repeat,
-    linear-gradient(to right, #000, rgb(0 0 0 / 0.3) 32%, rgb(0 0 0 / 0.3) 68%, #000);
-  -webkit-mask-composite: source-in;
-  mask:
-    url("../layers/village.svg") center / cover no-repeat,
-    linear-gradient(to right, #000, rgb(0 0 0 / 0.3) 32%, rgb(0 0 0 / 0.3) 68%, #000);
-  mask-composite: intersect;
-}
-@media (prefers-color-scheme: dark) {
-  html.bg-on:not([data-theme="light"]) body::before {
-    opacity: 0.42;
-  }
-}
-html.bg-on[data-theme="dark"] body::before {
-  opacity: 0.42;
-}
-.hero {
-  background: var(--paper); /* the hero has its own map */
-}
-/* Background preview (assets/js/backdrop.js): flight / parallax / path drawn on a
-   fixed canvas with the same side-heavy fade as the village. Temporary switcher
-   bottom-left while the owner compares them. */
+/* A low flight over the Black Forest (assets/js/backdrop.js): ridge lines on a
+   fixed canvas behind everything below the hero, in --contour. A horizontal mask
+   keeps them in the margins and very faint behind the text column; on phones,
+   where text fills the width, they are faint everywhere. backdrop.js sets
+   --fade while section [02] (its own descent) is on screen. */
 .backdrop {
   --bg-op: 0.45;
   position: fixed;
@@ -1702,8 +1670,15 @@ html.bg-on[data-theme="dark"] body::before {
   height: 100%;
   pointer-events: none;
   opacity: calc(var(--bg-op) * var(--fade, 1));
-  -webkit-mask-image: linear-gradient(to right, #000, rgb(0 0 0 / 0.3) 32%, rgb(0 0 0 / 0.3) 68%, #000);
-  mask-image: linear-gradient(to right, #000, rgb(0 0 0 / 0.3) 32%, rgb(0 0 0 / 0.3) 68%, #000);
+  -webkit-mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.14) 30%, rgb(0 0 0 / 0.14) 70%, #000 96%);
+  mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.14) 30%, rgb(0 0 0 / 0.14) 70%, #000 96%);
+}
+@media (max-width: 719px) {
+  .backdrop {
+    -webkit-mask-image: none;
+    mask-image: none;
+    --bg-op: 0.16;
+  }
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .backdrop {
@@ -1713,59 +1688,21 @@ html.bg-on[data-theme="dark"] body::before {
 :root[data-theme="dark"] .backdrop {
   --bg-op: 0.6;
 }
-html[data-bg="path"] .backdrop {
-  --bg-op: 0.75;
-  -webkit-mask-image: linear-gradient(to right, #000 8%, rgb(0 0 0 / 0.12) 30%, rgb(0 0 0 / 0.12) 70%, #000 92%);
-  mask-image: linear-gradient(to right, #000 8%, rgb(0 0 0 / 0.12) 30%, rgb(0 0 0 / 0.12) 70%, #000 92%);
+@media (max-width: 719px) {
+  :root[data-theme="dark"] .backdrop {
+    --bg-op: 0.24;
+  }
 }
-html[data-bg="flight"] body::before,
-html[data-bg="parallax"] body::before {
-  content: none;
+@media (max-width: 719px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .backdrop {
+    --bg-op: 0.24;
+  }
 }
-.bg-picker {
-  position: fixed;
-  bottom: 12px;
-  left: 12px;
-  z-index: 30;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 4px;
-  max-width: calc(100vw - 24px);
-  padding: 4px 8px;
-  border: 1px solid var(--grid);
-  background: var(--paper);
-  font: 400 0.6875rem/1 var(--font-mono);
-}
-.bg-picker span {
-  margin-right: 4px;
-  color: var(--muted);
-}
-.bg-picker button {
-  min-height: 28px;
-  padding: 0 6px;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font: inherit;
-  cursor: pointer;
-}
-.bg-picker button:hover,
-.bg-picker button[aria-pressed="true"] {
-  color: var(--ink);
-}
-.bg-picker button[aria-pressed="true"] {
-  text-decoration: underline;
-  text-decoration-color: var(--accent-mark);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
+.hero {
+  background: var(--paper); /* the hero has its own map */
 }
 @media print {
-  body::before {
-    content: none;
-  }
-  .backdrop,
-  .bg-picker {
+  .backdrop {
     display: none !important;
   }
 }
