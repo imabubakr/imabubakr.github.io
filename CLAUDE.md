@@ -179,8 +179,9 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   one-line description under the job taken from their site. Keep it factual.
 - Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
   "View certificates" link or the `#certificates` hash; hidden in print.
-- About (owner-approved wording, 2026-10-10): two short paragraphs (who/what: Earth observation data from orbit
-  to drone height; where three fields meet: remote sensing, data engineering incl. pipelines and WebGIS backends,
+- About (owner-approved wording, 2026-10-10): two short paragraphs (who/what: most of the career with EO data from
+  satellites and aircraft, today mainly drone sensors (RGB, LiDAR); where three fields meet: remote sensing, data
+  engineering incl. pipelines, WebGIS backends and big geodata in Google Earth Engine,
   machine learning incl. fine-tuned foundation models and open-source LLMs/VLMs; since 11/2025 at Beagle Systems),
   then a quiet "What I work with" key-value block (`.about-facts`: Data / Analysis / Engineering / Models; facts only,
   no ratings, no software lists: those stay in the CV), then the timeline. No photo on the page. The owner does not
