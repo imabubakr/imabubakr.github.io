@@ -220,9 +220,10 @@
       return R3;
     });
   }
-  // Drone mission over the model: a route from the plain into the hills, 80 m above the
-  // ground (hero DEM, 50 m cells); planned part dashed, flown part solid, drone at the head.
-  var ROUTE = [[4300, 3900], [5600, 3300], [6700, 2950], [7600, 2350], [8500, 1850], [9400, 1300]];
+  // Drone mapping mission over the model: a lawnmower survey of a block on the west-facing
+  // slope in front of the camera (map metres), flown 40 m above the ground (hero DEM).
+  // Planned lanes faint, flown lanes solid, the drone a small dot with a soft ring.
+  var SURVEY = { x0: 6000, x1: 6750, y0: 2300, y1: 2850, lanes: 6, agl: 40 };
   var routePts = null;
   function demAt(X, Y) {
     var c = Math.min(198.999, Math.max(0, X / 50 - 0.5)), r = Math.min(98.999, Math.max(0, Y / 50 - 0.5));
@@ -230,45 +231,47 @@
     var a = d[i] + (d[i + 1] - d[i]) * fc, b = d[i + 200] + (d[i + 201] - d[i + 200]) * fc;
     return a + (b - a) * fr;
   }
+  function buildSurvey() {
+    var S = SURVEY, way = [], dy = (S.y1 - S.y0) / (S.lanes - 1);
+    for (var l = 0; l < S.lanes; l++) {                      // lanes up and down the slope (west-east),
+      var Y = S.y0 + l * dy, up = l % 2 === 0;               // along the camera's line of sight
+      way.push([up ? S.x0 : S.x1, Y], [up ? S.x1 : S.x0, Y]);
+    }
+    var pts = [];
+    for (var w = 1; w < way.length; w++) {
+      var a = way[w - 1], b = way[w], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 25));
+      for (var j = 0; j < n; j++) pts.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]);
+    }
+    pts.push(way[way.length - 1]);
+    var g = pts.map(function (p) { return demAt(p[0], p[1]); });
+    pts.forEach(function (p, q) {                            // terrain following, lightly smoothed
+      var sum = 0, n = 0;
+      for (var e = Math.max(0, q - 2); e <= Math.min(g.length - 1, q + 2); e++) { sum += g[e]; n++; }
+      p[2] = sum / n + S.agl;
+    });
+    return pts;
+  }
   function drawFlightPath(proj, ex, k) {
     var ctx = R3.ctx, css = getComputedStyle(root), o = [0, 0];
-    if (!routePts) {
-      routePts = [];
-      for (var w = 1; w < ROUTE.length; w++) {
-        var a = ROUTE[w - 1], b = ROUTE[w], n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 40);
-        for (var j = 0; j < n; j++) routePts.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]);
-      }
-      routePts.push(ROUTE[ROUTE.length - 1]);
-      // fly 80 m above the highest ground nearby, smoothed so the line glides
-      var hs = routePts.map(function (p) { return demAt(p[0], p[1]); }), sm = hs.slice();
-      for (var q = 0; q < hs.length; q++) { var m = -1e9; for (var e = Math.max(0, q - 6); e <= Math.min(hs.length - 1, q + 6); e++) m = Math.max(m, hs[e]); sm[q] = m + 80; }
-      routePts.forEach(function (p, q) { p[2] = sm[q]; });
-    }
+    if (!routePts) routePts = buildSurvey();
     var P = routePts.map(function (p) { proj(p[0], p[1], (p[2] - R3.zmin) * ex, o); return [o[0], o[1]]; });
     var head = R3.pathP * (P.length - 1), hi = Math.floor(head), f = head - hi;
-    var accent = css.getPropertyValue("--accent-mark").trim();
+    var accent = css.getPropertyValue("--accent-mark").trim(), appear = Math.min(1, R3.pathP * 5);
     ctx.save();
-    ctx.lineCap = "round"; ctx.lineJoin = "round";
-    ctx.strokeStyle = accent;
-    ctx.globalAlpha = 0.45 * Math.min(1, R3.pathP * 4);       // the plan
-    ctx.setLineDash([3, 6]); ctx.lineWidth = 1.2;
+    ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = accent;
+    ctx.globalAlpha = 0.35 * appear; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);      // the plan
     ctx.beginPath(); P.forEach(function (p, i) { if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); }); ctx.stroke();
-    ctx.setLineDash([]); ctx.globalAlpha = 0.95; ctx.lineWidth = 1.8;   // the flown part
+    ctx.setLineDash([]); ctx.globalAlpha = 0.9 * appear; ctx.lineWidth = 1.5;          // flown lanes
     ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]);
     for (var i = 1; i <= hi; i++) ctx.lineTo(P[i][0], P[i][1]);
     var hx = P[hi][0], hy = P[hi][1];
     if (hi < P.length - 1) { hx += (P[hi + 1][0] - hx) * f; hy += (P[hi + 1][1] - hy) * f; }
     ctx.lineTo(hx, hy); ctx.stroke();
-    // drone: ring with a cross, and a faint drop line to the ground
-    var g = routePts[Math.min(hi, routePts.length - 1)];
-    proj(g[0], g[1], (demAt(g[0], g[1]) - R3.zmin) * ex, o);
-    ctx.globalAlpha = 0.5; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
-    ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(o[0], o[1]); ctx.stroke(); ctx.setLineDash([]);
-    ctx.globalAlpha = 1; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.arc(hx, hy, 6, 0, Math.PI * 2);
-    ctx.moveTo(hx - 11, hy); ctx.lineTo(hx - 3, hy); ctx.moveTo(hx + 3, hy); ctx.lineTo(hx + 11, hy);
-    ctx.moveTo(hx, hy - 11); ctx.lineTo(hx, hy - 3); ctx.moveTo(hx, hy + 3); ctx.lineTo(hx, hy + 11);
-    ctx.stroke();
+    // the drone: a small dot with a soft ring
+    ctx.globalAlpha = appear * (R3.pathP < 0.999 ? 1 : 0.6); ctx.fillStyle = accent;
+    ctx.beginPath(); ctx.arc(hx, hy, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 0.45 * appear; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(hx, hy, 7, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
   }
   function mixColor(a, b, t) {                               // two #rrggbb colours
@@ -572,7 +575,7 @@
       var pp = pinProgress();
       R3.kT = smooth(pp / 0.7);
       R3.pushT = smooth((pp - 0.7) / 0.3);
-      R3.pathP = (R3.pathP || 0) + (smooth((pp - 0.62) / 0.36) - (R3.pathP || 0)) * 0.1;
+      R3.pathP = (R3.pathP || 0) + (Math.min(1, Math.max(0, (pp - 0.5) / 0.38)) - (R3.pathP || 0)) * 0.1;
       R3.k += (R3.kT - R3.k) * 0.1;                       // eased, never jumps with the wheel
       R3.push = (R3.push || 0) + (R3.pushT - (R3.push || 0)) * 0.1;
       cue.classList.toggle("is-gone", pp > 0.015);
