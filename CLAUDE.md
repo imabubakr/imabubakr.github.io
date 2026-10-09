@@ -45,6 +45,12 @@ One page per language: English at `/` (`index.html`), German at `/de/` (`de/inde
 
 Edit the `PLATES` or `CERTS` list (source file, EN/DE short title and caption) in `tools/plates/build_plates.py`, then run
 `python3 tools/plates/build_plates.py` (needs Pillow and ffmpeg; `--skip-media` to only rewrite the markup).
+**Plates 01–02 are rendered videos of Freudenberg (Siegerland, NRW), made with `tools/media/` (see its README):**
+a classified LiDAR fly-around (NRW point clouds only separate ground/non-ground, so buildings = inside ALKIS
+footprints and > 1.5 m above ground, vegetation = other non-ground > 0.5 m; three.js in headless Chromium,
+1280 px, fixed bitrate: point clouds are ~90 MB at CRF settings) and a DOP10 orthophoto with the ALKIS building
+footprints drawing in. Data: Geobasis NRW, dl-de/zero-2-0 (credited in the captions). They are listed in `PLATES`
+with `src=None` (pre-rendered, skipped by `build_media`).
 **Selection (2026-10-10):** all plots were listed, then the owner removed 50 in three rounds; 36 plates remain (6 of them
 animations), titled from what is visible (no invented facts; proper captions still to do). Never on the page:
 certificates (CV), me.jpg/me.jfif, do.jpg (chat screenshot with third parties' names/emails), trans.png (signature),
