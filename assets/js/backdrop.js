@@ -45,8 +45,8 @@
   var ex = EX;               // exaggeration in use: EX x the descent's boost (set per frame)
   var STEP = 150, FAR = 14000;
   var CRUISE = 1300;         // height above the highest ground ahead (scene m)
-  var ARRIVE_PITCH = 30, ARRIVE_CLIMB = 1500; // contact: look down onto the Feldberg
-  var ARRIVE_ZOOM = 0.7;     // contact: wider lens (focal length x 0.7)
+  var ARRIVE_PITCH = 55, ARRIVE_CLIMB = 3500; // contact: look down onto the Feldberg
+  var ARRIVE_ZOOM = 0.5;     // contact: wider lens (focal length x 0.5)
   var R_EARTH = 6371000;
   var CENTER_LL = [48.0, 7.81], CENTER_XY = [20000, 18000]; // region centre
   var ORBIT_H = 705000, AERIAL_H = 1000, DRONE_H = 100;     // as in the chapters' spec lines
@@ -351,8 +351,8 @@
       if (droneA > 0.02) drawViewfinder(droneA, PX, PY, ink);
     }
 
-    // --- summits ahead (level flight only): a tick and the name, like a map label
-    if (cam.pitch > -0.6 && alt < 5000) {
+    // --- summits ahead (flight and the arrival view): a tick and the name, like a map label
+    if (cam.pitch > -1.0 && alt < 5000) { // incl. the 55° view onto the Feldberg
       setLabelFont(1.5);
       ctx.textAlign = "center";
       ctx.fillStyle = ink;
