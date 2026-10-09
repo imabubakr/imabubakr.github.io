@@ -181,8 +181,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   "View certificates" link or the `#certificates` hash; hidden in print.
 - About: two paragraphs only, in the owner's own wording (2026-10-10): "I am a geospatial professional." → most of
   the career with EO data from satellites and aircraft, today mainly drone sensors (RGB, LiDAR) → work at the
-  intersection of remote sensing, data engineering and machine learning (Google Earth Engine for large datasets, and
-  separately data pipelines + backends: different kinds of work; no "elevation data", the owner rarely uses it) → Beagle Systems since 11/2025. Then the timeline. No facts block, no
+  intersection of remote sensing, data engineering and machine learning (large datasets, and separately data pipelines
+  + backends: different kinds of work; Google Earth Engine not named, owner's wish; no "elevation data", the owner rarely uses it) → Beagle Systems since 11/2025. Then the timeline. No facts block, no
   photo. The owner does not want to sound like a "loud mouth": no adjectives like expert/passionate, no self-ratings.
 - Portrait (PDF/print header only): the **uncropped** square selfie `me.jpg` → `assets/img/portrait-{320,640}.webp`
   (owner disliked a cropped version).
