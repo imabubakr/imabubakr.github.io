@@ -4,6 +4,8 @@
 // Feldberg summit. The camera eases towards the scroll position (no jumps), near
 // ridges are drawn stronger than far ones, and the flight steps back while
 // section [02] (its own descent) is on screen. Reduced motion: one still frame.
+// Summits ahead get map labels, and a small readout (desktop, bottom-left) says
+// what it is: route, position and altitude.
 // Data: assets/topo/region-contours.{json,dem.bin} (400 x 360 cells of 100 m,
 // x east, y south, row 0 = north).
 (function () {
@@ -18,7 +20,11 @@
   var LOOK = 1500;          // heading = direction to the route point this far ahead (m)
   var END_GAP = 5000;       // the flight stops this far before the last point
   var EX = 2.6, H0 = 170;   // vertical exaggeration, base level (m)
-  var NEAR = 300, FAR = 12000, STEP = 200;
+  var NEAR = 300, FAR = 14000, STEP = 150;
+  var de = root.lang === "de";
+  var T = de
+    ? { title: "Flug über den Schwarzwald · Freiburg → Feldberg", alt: "Höhe", E: "O", dec: "," }
+    : { title: "Flight over the Black Forest · Freiburg → Feldberg", alt: "alt", E: "E", dec: "." };
 
   var canvas = document.createElement("canvas");
   canvas.className = "backdrop";
@@ -29,6 +35,11 @@
   var route = null;                // sampled route: [{x, y, s}]
   var cur = null, curZ = null;     // eased distance along the route and camera height
   var last = 0, running = false;
+  var hud = document.createElement("p");
+  hud.className = "flight-hud";
+  hud.setAttribute("aria-hidden", "true");
+  hud.innerHTML = '<span class="fh-title"></span><span class="fh-pos"></span>';
+  hud.firstChild.textContent = T.title;
 
   // ------------------------------------------------------------- data --
   function elev(x, y) {
@@ -81,12 +92,12 @@
     var p = reduce.matches ? 0.35 : Math.min(Math.max(window.scrollY / (max || 1), 0), 1);
     return p * (route[route.length - 1].s - END_GAP);
   }
-  // camera height: ~450 m (exaggerated) above the highest ground in the next 6 km
+  // camera height: ~900 m (exaggerated) above the highest ground in the next 6 km
   function targetZ(s) {
     var c = at(s), a = at(s + LOOK), len = Math.hypot(a[0] - c[0], a[1] - c[1]) || 1;
     var ux = (a[0] - c[0]) / len, uy = (a[1] - c[1]) / len, hi = 0;
     for (var d = 0; d <= 6000; d += 250) hi = Math.max(hi, elev(c[0] + ux * d, c[1] + uy * d));
-    return (hi - H0) * EX + 450;
+    return (hi - H0) * EX + 900;
   }
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -108,30 +119,33 @@
     var c = at(s), a = at(s + LOOK), len = Math.hypot(a[0] - c[0], a[1] - c[1]) || 1;
     var ux = (a[0] - c[0]) / len, uy = (a[1] - c[1]) / len; // heading
     var rx = -uy, ry = ux;                                  // to the right on screen
-    var f = Math.max(w, h) * 0.55, horizon = h * 0.34;
+    var f = Math.max(w, h) * 0.55, horizon = h * 0.3;
     var paper = color("--paper"), line = color("--contour");
     var dx = w < 600 ? 6 : 4;
     ctx.lineJoin = "round";
     ctx.strokeStyle = line;
     ctx.fillStyle = paper;
+    var drawn = [];                                         // [distance, screen y per sample] for the summit check
     // lines sit at fixed distances along the way, so they glide towards the viewer
     for (var k = Math.floor((s + FAR) / STEP); k * STEP > s + NEAR; k--) {
       var d = k * STEP - s;
       var near = 1 - (d - NEAR) / (FAR - NEAR);          // 1 near ... 0 far
       // far away only every second line; the others fade in between 7 and 5 km
       var thin = k % 2 ? Math.min(1, Math.max(0, (7000 - d) / 2000)) : 1;
-      var alpha = Math.pow(near, 1.6) * thin;
+      var alpha = (0.25 + 0.75 * Math.pow(near, 1.3)) * thin;
       if (alpha < 0.03) continue;
-      var cx = c[0] + ux * d, cy = c[1] + uy * d, top = Infinity;
+      var cx = c[0] + ux * d, cy = c[1] + uy * d, top = Infinity, ys = [];
       ctx.beginPath();
       for (var sx = -dx; sx <= w + dx; sx += dx) {
         var l = ((sx - w / 2) / f) * d;
         var z = (elev(cx + rx * l, cy + ry * l) - H0) * EX;
         var sy = horizon + (f * (camZ - z)) / d;
         if (sy < top) top = sy;
+        ys.push(sy);
         if (sx < 0) ctx.moveTo(sx, sy);
         else ctx.lineTo(sx, sy);
       }
+      drawn.push([d, ys]);
       if (top > h + 2) continue;
       ctx.lineTo(w + dx, h + 4);
       ctx.lineTo(-dx, h + 4);
@@ -142,9 +156,45 @@
       ctx.lineWidth = 0.6 + 1.1 * near * near;
       ctx.stroke();
     }
+    // summits ahead: a tick above the peak and its name, like a map label
+    ctx.font = '500 10px "IBM Plex Mono", monospace';
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "1.5px";
+    ctx.textAlign = "center";
+    ctx.fillStyle = color("--ink");
+    (meta.places || []).forEach(function (pl) {
+      if (pl.kind !== "summit") return;
+      var px = pl.x - c[0], py = pl.y - c[1];
+      var d = px * ux + py * uy, l = px * rx + py * ry;
+      if (d < 1500 || d > 9000) return;
+      var sx = w / 2 + (f * l) / d;
+      var sy = horizon + (f * (camZ - (pl.elev - H0) * EX)) / d;
+      if (sx < 40 || sx > w - 40 || sy < 20 || sy > h) return;
+      // only label a summit you can see: no nearer ridge may rise above it
+      var i = Math.round((sx + dx) / dx);
+      for (var j = 0; j < drawn.length; j++) {
+        if (drawn[j][0] < d - 400 && drawn[j][1][i] < sy - 2) return;
+      }
+      ctx.globalAlpha = Math.min(1, (9000 - d) / 2500) * 0.9;
+      ctx.fillRect(sx - 0.5, sy - 14, 1, 9);
+      var name = de ? pl.de : pl.en;
+      ctx.fillText(name.toUpperCase() + "  " + pl.elev + " m", sx, sy - 20);
+    });
     ctx.globalAlpha = 1;
-    canvas.style.setProperty("--fade", String(1 - 0.85 * orbitShare()));
+    var share = orbitShare();
+    canvas.style.setProperty("--fade", String(1 - 0.85 * share));
+    // readout: position below the camera and its real altitude
+    var ll = lonLat(c[0], c[1]), alt = Math.round(camZ / EX + H0);
+    hud.lastChild.textContent =
+      num(ll[1], 4) + "°N " + num(ll[0], 4) + "°" + T.E + " · " + T.alt + " " + alt.toLocaleString(root.lang) + " m";
+    var heroGone = !hero || hero.getBoundingClientRect().bottom < h * 0.5;
+    hud.classList.toggle("is-on", heroGone && share < 0.3);
   }
+  function lonLat(x, y) {
+    var t = [1, x, y, x * x, x * y, y * y];
+    var poly = function (k) { return k.reduce(function (sum, v, i) { return sum + v * t[i]; }, 0); };
+    return [poly(meta.lonlat.lon), poly(meta.lonlat.lat)];
+  }
+  function num(v, digits) { return Math.abs(v).toFixed(digits).replace(".", T.dec); }
 
   // Ease towards the scroll position (time constant ~0.35 s), then stop the loop.
   function frame(now) {
@@ -178,6 +228,7 @@
         cur = target();
         curZ = targetZ(cur);
         document.body.insertBefore(canvas, document.body.firstChild);
+        document.body.appendChild(hud);
         resize();
         draw(cur, curZ);
         window.addEventListener("resize", function () { resize(); draw(cur, curZ); });
