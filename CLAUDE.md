@@ -175,7 +175,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   line that starts at the first phase label (not at the photo); `EDUCATION`/`CAREER` labels sit on the line;
   entries alternate sides (`.tl-l`/`.tl-r`) with diamond markers and short connectors; the current job is
   `.tl-now` (accent). On phones entries stack on the centre line.
-- Beagle Systems (current employer, Hamburg) is linked to https://beaglesystems.com/ in About and the CV, with a
+- Beagle Systems (current employer, Hamburg) is plain text in About (owner disliked the red underlined link there)
+  and linked to https://beaglesystems.com/ in the CV, with a
   one-line description under the job taken from their site. Keep it factual.
 - Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
   "View certificates" link or the `#certificates` hash; hidden in print.
