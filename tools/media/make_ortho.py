@@ -7,10 +7,11 @@ the page, in both languages).
 
 Writes assets/plates/ortho-buildings.{webm,mp4} and -720.webp (poster/thumbnail).
 
+    --pred F   draw a model's predicted building polygons (GeoJSON/GPKG, any CRS) in cyan
+               -> assets/plates/ortho-model.*
     --errors   a labelled SIMULATION of typical building-segmentation errors, made
                from the official footprints (not model output): attached houses
-               merged, loose rounded outlines on complex buildings; drawn as white
-               outlines only.
+               merged, slightly loose outlines on complex buildings; drawn in cyan.
                -> assets/plates/ortho-errors.*
 """
 import glob
@@ -40,6 +41,7 @@ W, H, FPS, SECONDS = 1600, 900, 30, 12
 SS = 2                           # supersampling for smooth outlines
 ZOOM = (0.34, 0.16)              # metres per output pixel at start and end
 ACCENT = (210, 65, 15)           # --accent-mark (light theme), the site's survey orange
+CYAN = (0, 230, 255)             # model predictions: reads well on roofs, trees and streets
 
 
 def ease(t):
@@ -82,7 +84,7 @@ def load_buildings(bounds):
 def simulate_errors(polys):
     """Simulated model output (see module doc): merge attached houses, loosen complex shapes."""
     # attached or less than ~1.2 m apart: grow, union, shrink back (models bridge narrow gaps)
-    merged = unary_union([p.buffer(0.6, join_style=2) for p in polys]).buffer(-0.6, join_style=2)
+    merged = unary_union([p.buffer(0.25, join_style=2) for p in polys]).buffer(-0.25, join_style=2)
     parts = list(merged.geoms) if hasattr(merged, "geoms") else [merged]
     out = []
     for p in parts:
@@ -92,9 +94,9 @@ def simulate_errors(polys):
         complex_shape = len(p.exterior.coords) > 14 or p.area / max(rect.area, 1) < 0.78
         if complex_shape:
             # blobby, generalised outline: rounded, slightly too large, corners lost
-            q = p.buffer(2.2, join_style=1).buffer(-1.0, join_style=1).simplify(1.2)
+            q = p.buffer(0.9, join_style=1).buffer(-0.7, join_style=1).simplify(0.6)
         else:
-            q = p.buffer(0.7, join_style=1).simplify(0.5)
+            q = p.buffer(0.2, join_style=1).simplify(0.25)
         if q.geom_type == "Polygon":
             out.append(q)
     return out
@@ -102,11 +104,18 @@ def simulate_errors(polys):
 
 def main():
     errors = "--errors" in sys.argv
-    name = "ortho-errors" if errors else "ortho-buildings"
+    pred = sys.argv[sys.argv.index("--pred") + 1] if "--pred" in sys.argv else None
+    name = "ortho-model" if pred else "ortho-errors" if errors else "ortho-buildings"
     ortho, (x0, y0, x1, y1) = load_ortho()
     polys = load_buildings((x0, y0, x1, y1))
     official = polys
-    if errors:
+    if pred:
+        g = gpd.read_file(pred)
+        g = g.to_crs(25832) if g.crs and g.crs.to_epsg() != 25832 else g
+        g = g[g.geometry.notna()].explode(index_parts=False)
+        polys = [p for p in g.geometry if p.geom_type == "Polygon"]
+        print(len(polys), "predicted polygons")
+    elif errors:
         polys = simulate_errors(polys)
         print(len(official), "official footprints ->", len(polys), "simulated predictions")
     # reveal order: by distance of the centroid from the centre
@@ -141,8 +150,8 @@ def main():
                 break
             k = min(1, (radius - dist) / 25)                  # each outline fades in over 25 m
             pts = [((x - (cx - vw / 2)) * scale, ((cy + vh / 2) - y) * scale) for x, y in p.exterior.coords]
-            col = (255, 255, 255) if errors else ACCENT       # errors mode: white outlines only
-            d.polygon(pts, fill=col + (int((30 if errors else 46) * k),))
+            col = CYAN if (pred or errors) else ACCENT
+            d.polygon(pts, fill=col + (int((24 if (errors or pred) else 46) * k),))
             d.line(pts + [pts[0]], fill=col + (int(235 * k),), width=max(3, round(1.8 * SS)), joint="curve")
         frame = Image.alpha_composite(frame.convert("RGBA"), over).convert("RGB")
         frame = frame.resize((W, H), Image.LANCZOS)
