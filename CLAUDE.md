@@ -45,7 +45,7 @@ One page per language: English at `/` (`index.html`), German at `/de/` (`de/inde
 
 Edit the `PLATES` or `CERTS` list (source file, EN/DE short title and caption) in `tools/plates/build_plates.py`, then run
 `python3 tools/plates/build_plates.py` (needs Pillow and ffmpeg; `--skip-media` to only rewrite the markup).
-**Selection (2026-10-10):** all plots were listed, then the owner removed 49 in two rounds; 37 plates remain (6 of them
+**Selection (2026-10-10):** all plots were listed, then the owner removed 50 in three rounds; 36 plates remain (6 of them
 animations), titled from what is visible (no invented facts; proper captions still to do). Never on the page:
 certificates (CV), me.jpg/me.jfif, do.jpg (chat screenshot with third parties' names/emails), trans.png (signature),
 web.jpg, databases.jpg, prog4.gif/sen1.gif (copies of home1.gif). The preview is sticky beside the list. Video settings: very light denoise, VP9 CRF 36 / x264 CRF 27;
