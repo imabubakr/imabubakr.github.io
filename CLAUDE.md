@@ -95,14 +95,15 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 
 ### Typography
 
-- IBM Plex Sans (text, headings) and IBM Plex Mono (nav, numbers, dates, coordinates, labels, metadata).
+- IBM Plex Sans (text, headings) and IBM Plex Mono (numbers, dates, coordinates, labels, metadata).
   Self-hosted latin-subset woff2 in `assets/fonts/`. **Only weights 400 and 500.** No other fonts.
 - Hero `h1`: the owner's sentence "Hello, I'm Bakar, a geospatial data professional with a passion for all things
   spatial." (DE: "Hallo, ich bin Bakar, …"), 500, moderate size (max 2.5rem), bottom-left. No big title, no red
   coordinates line (owner's wish).
 - Running text is 15px (0.9375rem) everywhere, one size per text block (no bigger "lead" paragraphs); the owner
   found the earlier scale too big.
-- Section titles: Plex Sans 500, `clamp(1.625rem, …, 2.375rem)`, `letter-spacing: -0.035em`, with a small mono `[0n]` above.
+- Section titles: Plex Sans 500, `clamp(1.625rem, …, 2.375rem)`, `letter-spacing: -0.035em`. No `[0n]` numbers above
+  them or in the nav (owner removed them, 2026-10-09).
 - Mono is for metadata only: never for running text.
 - Centre only short text (headings, one-liners, at most about 3 lines; use `text-wrap: balance`). Longer text is
   left-aligned, even inside centred columns.
@@ -112,16 +113,18 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
 - No page frame, no boxes, no cards, no rounded corners, no shadows, no gradients. The only lines are `--grid`
   hairlines (under the nav, under the hero strip, above the footer) and the timeline line. Don't add more.
 - Mobile first; the content column is max 860 px. Every section opens the same way on the page's centre axis:
-  `header.section-head` → mono `.section-no` + `h2.section-title` + optional one-line `.section-sub`.
+  `header.section-head` → `h2.section-title` + optional one-line `.section-sub`.
 - Order of the page: hero (who) → About (story + timeline) → From orbit to drone (career story) → CV (details) →
   Visualizations (work samples) → Contact (action) → footer collar.
-- Nav: mono, `[01] about  [02] orbit  [03] cv  [04] visuals  [05] contact` (DE: über mich, orbit, lebenslauf,
-  grafiken, kontakt); the current section gets an underline and an accent number; on phones the numbers are hidden
-  so all five fit. The hero strip says `SHEET 01 / 05` (`BLATT` in German). Update both if sections are added.
+- Nav: a modern bar in Plex Sans: name left, `About  Orbit  CV  Visuals  Contact` centred (DE: Über mich, Orbit,
+  Lebenslauf, Grafiken, Kontakt), `EN DE` + a moon/sun icon toggle right. Translucent paper with backdrop blur;
+  links muted, the current one ink with a 2px `--accent-mark` bar on the nav's bottom edge. Phones: two rows (name +
+  tools, then the links). `--nav-h` is 84px on phones, 57px from 900px. The hero strip says `SHEET 01 / 05`
+  (`BLATT` in German). Update it if sections are added.
 - Hero: real contours (hero only, faint), graticule meridians, top strip with sheet number, longitude ticks and
   `EPSG:4326`. "FREIBURG IM BREISGAU" as a map label (ink dot + spaced caps) at the Münster's true position
   (`build:hero-place`, written by build_hero.py); on phones the name sits left of the dot.
-- About: short centred lead + one supporting sentence, portrait, then a vertical timeline. Timeline: a centre
+- About timeline: a centre
   line that starts at the first phase label (not at the photo); `EDUCATION`/`CAREER` labels sit on the line;
   entries alternate sides (`.tl-l`/`.tl-r`) with diamond markers and short connectors; the current job is
   `.tl-now` (accent). On phones entries stack on the centre line.
@@ -129,9 +132,12 @@ the mono labels and the scale bar. Everything else is quiet. The user prefers ca
   one-line description under the job taken from their site. Keep it factual.
 - Certificates: a `<details>` (`#certificates`) at the end of the CV, closed by default ("show all 6"), opened by the
   "View certificates" link or the `#certificates` hash; hidden in print.
-- About: a professional four-paragraph profile (no job pitch: the owner is not job-hunting) left-aligned in a centred 62ch
-  column → timeline (compact) → portrait below it as a duotone in map colours (`.duotone`, `--photo-shadow` /
-  `--photo-light` per theme).
+- About: a **short** introduction in two paragraphs (owner's wish, 2026-10-09): background + earlier work
+  (satellite data, MapTransfer, Karuna), then what the current Beagle job involves. No job pitch (the owner is not
+  job-hunting). Portrait beside the text (above it on phones), then the timeline.
+- Portrait: the **uncropped** square selfie `me.jpg` → `assets/img/portrait-{320,640}.webp` (owner disliked the
+  crop). Shown as a duotone in map colours (`.duotone`, `--photo-shadow` / `--photo-light` per theme) with soft
+  edges faded into the paper by a CSS mask (`.portrait`), so it has no frame. The print header uses it too.
 - CV: German Lebenslauf layout, kept **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.

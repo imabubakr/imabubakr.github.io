@@ -39,18 +39,20 @@
         <a class="brand" href="#top">Muhammad Abu Bakar</a>
         <nav aria-label="Abschnitte">
           <ul class="nav-list">
-            <li><a href="#about"><span>[01]</span> über mich</a></li>
-            <li><a href="#orbit"><span>[02]</span> orbit</a></li>
-            <li><a href="#cv"><span>[03]</span> lebenslauf</a></li>
-            <li><a href="#plates"><span>[04]</span> grafiken</a></li>
-            <li><a href="#contact"><span>[05]</span> kontakt</a></li>
+            <li><a href="#about">Über mich</a></li>
+            <li><a href="#orbit">Orbit</a></li>
+            <li><a href="#cv">Lebenslauf</a></li>
+            <li><a href="#plates">Grafiken</a></li>
+            <li><a href="#contact">Kontakt</a></li>
           </ul>
         </nav>
-        <div class="lang" role="group" aria-label="Sprache">
-          <a href="../" hreflang="en" lang="en"><span aria-hidden="true">EN</span><span class="visually-hidden">English</span></a>
-          <a href="./" aria-current="page"><span aria-hidden="true">DE</span><span class="visually-hidden">Deutsch</span></a>
+        <div class="nav-tools">
+          <div class="lang" role="group" aria-label="Sprache">
+            <a href="../" hreflang="en" lang="en"><span aria-hidden="true">EN</span><span class="visually-hidden">English</span></a>
+            <a href="./" aria-current="page"><span aria-hidden="true">DE</span><span class="visually-hidden">Deutsch</span></a>
+          </div>
+          <button class="theme-toggle" type="button" aria-pressed="false"><svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><span class="visually-hidden">Dunkler Modus</span></button>
         </div>
-        <button class="theme-toggle" type="button" aria-pressed="false"><span class="box" aria-hidden="true"></span><span class="toggle-label">dunkel</span></button>
       </header>
 
       <main id="main">
@@ -71,14 +73,15 @@
 
         <section class="section" id="about" aria-labelledby="about-title">
           <header class="section-head">
-            <h2 class="section-title" id="about-title"><span class="section-no">[01]</span>Über mich</h2>
+            <h2 class="section-title" id="about-title">Über mich</h2>
           </header>
           <div class="section-body about-body">
-            <div class="intro-text">
-              <p>Ich bin Geodatenexperte an der Schnittstelle von Erdbeobachtung, Data Engineering und künstlicher Intelligenz. Bei <a href="https://beaglesystems.com/">Beagle Systems</a> entwickle ich Datenpipelines, die Bild- und LiDAR-Daten von Langstreckendrohnen in verlässliche, analysefertige Daten überführen, von der automatischen Georeferenzierung und Punktwolkenklassifikation bis zur Bereitstellung großer GeoTIFFs mit PostGIS und TiTiler.</p>
-              <p>Ein wachsender Teil meiner Arbeit ist angewandte KI: Ich trainiere Foundation Models für die Objekterkennung nach (Fine-Tuning), setze große Open-Source-Modelle und Vision-Language-Modelle (VLMs) zur Prüfung der Erkennungsergebnisse ein und bringe Modelle für Live-Analysen auf Edge-Hardware wie den NVIDIA Jetson.</p>
-              <p>Mein Hintergrund liegt in Geologie und Fernerkundung. Ich habe einen M.Sc. in <span lang="en">Remote Sensing &amp; GIS</span> und einen M.Sc. in Geologie und habe meine Laufbahn mit Satellitendaten begonnen, von der Gletschermassenbilanz mit Landsat und Sentinel-2 bis zu InSAR-Zeitreihen mit Sentinel-1. Vor Beagle Systems war ich als <span lang="en">GIS &amp; RS Specialist</span> bei MapTransfer und als <span lang="en">Geospatial (EO) Data Scientist</span> bei Karuna Technology tätig.</p>
-              <p>Ich arbeite vor allem mit Python und SQL, PostGIS, GDAL und Google Earth Engine und lege Wert auf reproduzierbare Workflows, offene Daten und klare Visualisierung. Über einen Austausch zu Erdbeobachtung, Drohnendaten und Geo-KI freue ich mich jederzeit.</p>
+            <div class="intro">
+              <span class="duotone portrait"><img class="about-photo" src="../assets/img/portrait-320.webp" srcset="../assets/img/portrait-320.webp 320w, ../assets/img/portrait-640.webp 640w" sizes="(min-width: 720px) 248px, 208px" width="320" height="320" loading="lazy" decoding="async" alt="Muhammad Abu Bakar"></span>
+              <div class="intro-text">
+                <p>Ich bin Geodatenexperte in Freiburg mit Hintergrund in Geologie und Fernerkundung. Angefangen habe ich mit Satellitendaten, von der Gletschermassenbilanz bis zu InSAR-Zeitreihen. Bei MapTransfer habe ich danach Workflows für Luftbilder, Orthofotos und Geodatenbanken aufgebaut, bei Karuna Technology Pipelines für Sentinel-1- und InSAR-Daten.</p>
+                <p>Seit November 2025 arbeite ich bei <a href="https://beaglesystems.com/">Beagle Systems</a>, deren Langstreckendrohnen Pipelines, Versorgungsnetze und andere Infrastruktur überwachen. Aus den Bild- und LiDAR-Daten dieser Flüge mache ich analysefertige Daten: automatische Georeferenzierung, Punktwolkenklassifikation und Objekterkennung mit nachtrainierten Modellen, teils live auf einem NVIDIA Jetson.</p>
+              </div>
             </div>
             <figure class="timeline" aria-label="Ausbildung und Berufsweg, 2012 bis heute">
               <ol class="tl-items">
@@ -92,15 +95,12 @@
                 <li class="tl-item tl-work tl-now tl-r"><span class="tl-date">seit 11/2025</span><span class="tl-body"><span class="tl-what"><span lang="en">Geospatial Data Specialist</span></span><span class="tl-where">Beagle Systems</span></span></li>
               </ol>
             </figure>
-            <div class="about-visual">
-              <span class="duotone"><img class="about-photo" src="../assets/img/portrait-200.webp" srcset="../assets/img/portrait-200.webp 200w, ../assets/img/portrait-400.webp 400w" sizes="140px" width="200" height="250" loading="lazy" decoding="async" alt="Muhammad Abu Bakar"></span>
-            </div>
           </div>
         </section>
 
         <section class="section" id="orbit" aria-labelledby="orbit-title" data-descent="../assets/layers/descent.json">
           <header class="section-head">
-            <h2 class="section-title" id="orbit-title"><span class="section-no">[02]</span>Vom Orbit zur Drohne</h2>
+            <h2 class="section-title" id="orbit-title">Vom Orbit zur Drohne</h2>
             <p class="section-sub">Mein Weg in der Fernerkundung, vom Satelliten bis zur Drohne. Scrollen Sie nach unten.</p>
           </header>
           <div class="section-body descent">
@@ -136,7 +136,7 @@
 
         <section class="section" id="cv" aria-labelledby="cv-title">
           <header class="section-head">
-            <h2 class="section-title" id="cv-title"><span class="section-no">[03]</span>Lebenslauf</h2>
+            <h2 class="section-title" id="cv-title">Lebenslauf</h2>
             <p class="section-sub">Beruf, Ausbildung und Kenntnisse auf einen Blick.</p>
             <button class="print-cv" type="button" data-pdf-title="Muhammad Abu Bakar – Lebenslauf" hidden>lebenslauf als pdf</button>
           </header>
@@ -148,7 +148,7 @@
                 <p class="print-title" lang="en">Geospatial Data Specialist</p>
                 <p class="print-contact">Freiburg im Breisgau · imabubakar@outlook.com<br>linkedin.com/in/imabubakr · github.com/imabubakr · imabubakr.github.io</p>
               </div>
-              <img src="../assets/img/portrait-400.webp" width="200" height="250" alt="">
+              <img src="../assets/img/portrait-320.webp" width="320" height="320" alt="">
             </div>
             <div class="cv-group cv-personal-group">
               <h3>Persönliche Daten</h3>
@@ -330,7 +330,7 @@
         </section>
         <section class="section" id="plates" aria-labelledby="plates-title">
           <header class="section-head">
-            <h2 class="section-title" id="plates-title"><span class="section-no">[04]</span>Visualisierungen</h2>
+            <h2 class="section-title" id="plates-title">Visualisierungen</h2>
             <p class="section-sub">Karten und Datengrafiken aus privaten und Studienprojekten.</p>
           </header>
           <div class="section-body plates-body"><!-- build:plates -->
@@ -404,7 +404,7 @@
 
         <section class="section" id="contact" aria-labelledby="contact-title">
           <header class="section-head">
-            <h2 class="section-title" id="contact-title"><span class="section-no">[05]</span>Kontakt</h2>
+            <h2 class="section-title" id="contact-title">Kontakt</h2>
             <p class="section-sub">Am schnellsten erreichen Sie mich per E-Mail.</p>
           </header>
           <div class="section-body contact-body">
