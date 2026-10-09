@@ -116,6 +116,10 @@ aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors. Three chapt
 - Looking down (pitch > 45°) the ridge-line spacing follows the screen (a line every ~6.5 px, power-of-2 steps
   of 150 m so lines stay fixed; thinner strokes when dense): the joy plot stays dense from 30 km down to 1 km
   (owner's wish). Level flight keeps the height-based spacing.
+- Smoothness (owner felt jerkiness, 2026-10-11): frame rates were fine; the jerk was the camera height jumping up to
+  7 m whenever a new hilltop entered the 6 km look-ahead window. The ground profile along the route is now
+  precomputed (20 m steps, 50 m look-ahead sampling) and smoothed over ~1 km (`buildGround`), so the camera glides.
+  Adaptive quality only coarsens sample spacing, never the number of ridge lines (lines popped in and out).
 - Performance (owner noticed lag, 2026-10-10): static sphere geometry (graticule, outlines, swath) is converted to
   scene points once (`toScene`), theme colours are cached (`readColors` on theme change), style writes only on change,
   camera easing 0.2 s, and adaptive quality while moving (`q` 1–2.5 scales sample spacing and line density when a

@@ -101,11 +101,31 @@
     return a + (b - a) * ty;
   }
   function sceneZ(x, y) { return (elev(x, y) - H0) * ex; }
-  // reference ground: the highest point in the next 6 km (scene units)
+  // Reference ground for the camera height: the highest point in the next 6 km,
+  // precomputed along the route and smoothed (~1 km), so a hilltop entering the
+  // look-ahead window lifts the camera gently instead of making it jump.
+  var GS_STEP = 20, GS0 = -1000, groundProfile = null;
+  function buildGround() {
+    var n = Math.ceil((ROUTE_LEN + 8000 - GS0) / GS_STEP), raw = new Float32Array(n);
+    for (var i = 0; i < n; i++) {
+      var s = GS0 + i * GS_STEP, hi = 0;
+      for (var d = 0; d <= 6000; d += 50) hi = Math.max(hi, elev(OX + UX * (s + d), OY + UY * (s + d)));
+      raw[i] = hi;
+    }
+    var out = new Float32Array(n), R = 25;            // +-500 m box filter, twice (~ Gaussian)
+    for (var pass = 0, src = raw; pass < 2; pass++, src = out.slice()) {
+      for (var j = 0; j < n; j++) {
+        var sum = 0, cnt = 0;
+        for (var k = Math.max(0, j - R); k <= Math.min(n - 1, j + R); k++) { sum += src[k]; cnt++; }
+        out[j] = sum / cnt;
+      }
+    }
+    groundProfile = out;
+  }
   function ground(s) {
-    var hi = 0;
-    for (var d = 0; d <= 6000; d += 250) hi = Math.max(hi, elev(OX + UX * (s + d), OY + UY * (s + d)));
-    return (hi - H0) * ex;
+    var f = Math.min(Math.max((s - GS0) / GS_STEP, 0), groundProfile.length - 1.001), i = Math.floor(f);
+    var h = groundProfile[i] + (groundProfile[i + 1] - groundProfile[i]) * (f - i);
+    return (h - H0) * ex;
   }
   function loadEarth() {
     if (earthLoading) return;
@@ -263,7 +283,7 @@
       // stays dense at any height. Steps halve/double, so lines stay put.
       var down = pitchDeg > 45;
       var Hg = Math.max(CZ - sceneZ(CX, CY), 50);
-      var lvl = down ? clamp(Math.log2((6.5 * Math.sqrt(q) * Hg) / F / STEP), -2, 6) : clamp(Math.log2(alt / CRUISE), -2, 6);
+      var lvl = down ? clamp(Math.log2((6.5 * Hg) / F / STEP), -2, 6) : clamp(Math.log2(alt / CRUISE), -2, 6);
       var n0 = Math.floor(lvl), frac = lvl - n0;
       var step = STEP * Math.pow(2, n0);
       var gapPx = (step * F) / Hg;
@@ -745,6 +765,7 @@
       })
       .then(function (buf) {
         dem = new Int16Array(buf);
+        buildGround();
         document.body.insertBefore(canvas, document.body.firstChild);
         document.body.appendChild(hud);
         if (orbit) document.body.appendChild(alti);
