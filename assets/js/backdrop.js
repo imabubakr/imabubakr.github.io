@@ -25,6 +25,7 @@
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
   var orbit = document.getElementById("orbit");
   var footer = document.querySelector(".collar");
+  var contact = document.getElementById("contact");
   var chapters = orbit ? Array.prototype.slice.call(orbit.querySelectorAll(".ds-ch")) : [];
   var de = root.lang === "de";
 
@@ -50,11 +51,11 @@
   var S2_TRACK = 13, S2_HALF = 145000; // Sentinel-2: ground track ~13° east of north here, 290 km swath
 
   var T = de
-    ? { title: "Flug über den Schwarzwald", route: "Freiburg → Feldberg", 
+    ? { title: "Flug über den Schwarzwald", arrived: "Am Feldberg angekommen", route: "Freiburg → Feldberg", 
         alt: "Höhe", E: "O", dec: ",",
         swath: "SENTINEL-2 · AUFNAHMEBREITE 290 KM", frames: "LUFTBILD · 20 CM",
         corridor: "DROHNENKAMERA · ~2 CM", platforms: ["Satellit", "Flugzeug", "Drohne"] }
-    : { title: "Flight over the Black Forest", route: "Freiburg → Feldberg", 
+    : { title: "Flight over the Black Forest", arrived: "Arrived at the Feldberg", route: "Freiburg → Feldberg", 
         alt: "alt", E: "E", dec: ".",
         swath: "SENTINEL-2 · 290 KM SWATH", frames: "AERIAL PHOTO · 20 CM",
         corridor: "DRONE CAMERA · ~2 CM", platforms: ["satellite", "aircraft", "drone"] };
@@ -391,11 +392,14 @@
     if (fade !== lastFade) { canvas.style.setProperty("--fade", fade); lastFade = fade; }
     if (share > 0 && !earth) loadEarth();
     var ll = lonLat(CX, CY), realAlt = alt + G / ex + H0;
-    hud.children[0].textContent = T.title;
+    var cr = contact && contact.getBoundingClientRect();
+    var arrived = !!cr && cr.top < h * 0.6 && cr.bottom > h * 0.3;
+    root.classList.toggle("arrive-live", arrived && !reduce.matches);
+    hud.children[0].textContent = arrived ? T.arrived : T.title;
     hud.children[1].textContent = T.route;
     hud.children[2].textContent = num(ll[1], 3) + "°N " + num(ll[0], 3) + "°" + T.E + " · " + T.alt + " " + fmtHeight(realAlt);
     var heroGone = !hero || hero.getBoundingClientRect().bottom < h * 0.5;
-    var footerIn = footer && footer.getBoundingClientRect().top < h - 20;
+    var footerIn = footer && footer.getBoundingClientRect().top < h - 90;
     hud.classList.toggle("is-on", heroGone && share < 0.3 && !footerIn);
   }
 

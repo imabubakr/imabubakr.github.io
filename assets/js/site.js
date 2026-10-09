@@ -59,7 +59,7 @@
         media.playsInline = true;
         media.controls = true;
         media.autoplay = !reduceMotion.matches;
-        media.poster = a.querySelector("img").src;
+        media.poster = a.dataset.thumb || a.querySelector("img").src;
         [["webm", "video/webm"], ["mp4", "video/mp4"]].forEach(function (f) {
           var src = document.createElement("source");
           src.src = a.dataset[f[0]];
@@ -75,7 +75,7 @@
       }
       media.className = "lb-media";
       stage.replaceChildren(media);
-      box.querySelector(".lb-no").textContent = a.querySelector(".plate-no").textContent;
+      box.querySelector(".lb-no").textContent = a.dataset.no || a.querySelector(".plate-no").textContent;
       box.querySelector(".lb-caption").innerHTML = a.dataset.caption;
     };
 
@@ -88,6 +88,32 @@
         box.showModal();
       });
     });
+    // Plate index: hovering or focusing a title shows it in the large preview;
+    // clicking the preview opens that plate. Stills only, nothing moves.
+    var pidx = document.querySelector(".pidx");
+    if (pidx) {
+      var previewImg = pidx.querySelector(".pidx-open img");
+      var previewCap = pidx.querySelector(".pidx-cap");
+      var pidxLinks = Array.prototype.slice.call(pidx.querySelectorAll(".plate-link"));
+      var currentPlate = pidxLinks[0];
+      var select = function (a) {
+        if (a === currentPlate && a.classList.contains("is-current")) return;
+        pidxLinks.forEach(function (l) { l.classList.toggle("is-current", l === a); });
+        currentPlate = a;
+        previewImg.src = a.dataset.thumb;
+        previewCap.innerHTML = a.dataset.caption;
+      };
+      pidxLinks.forEach(function (a) {
+        a.addEventListener("mouseenter", function () { select(a); });
+        a.addEventListener("focus", function () { select(a); });
+      });
+      pidx.querySelector(".pidx-open").addEventListener("click", function () { currentPlate.click(); });
+      select(pidxLinks[0]);
+      // warm the cache so the preview swaps instantly
+      var warm = function () { pidxLinks.forEach(function (a) { new Image().src = a.dataset.thumb; }); };
+      pidx.addEventListener("mouseenter", warm, { once: true });
+    }
+
     box.querySelectorAll("[data-step]").forEach(function (b) {
       b.addEventListener("click", function () { show(current + Number(b.dataset.step)); });
     });
@@ -102,6 +128,25 @@
     box.addEventListener("close", function () {
       stage.replaceChildren();
       group[current].focus();
+    });
+  }
+
+  // Contact: copy the email address (shown only where the clipboard API exists).
+  var copyBtn = document.querySelector(".contact-copy");
+  if (copyBtn && navigator.clipboard && window.isSecureContext) {
+    var copyLabel = copyBtn.textContent;
+    var copied = document.documentElement.lang === "de" ? "kopiert" : "copied";
+    copyBtn.hidden = false;
+    copyBtn.setAttribute("aria-live", "polite");
+    copyBtn.addEventListener("click", function () {
+      navigator.clipboard.writeText(copyBtn.dataset.copy).then(function () {
+        copyBtn.textContent = copied + " ✓";
+        copyBtn.classList.add("is-done");
+        setTimeout(function () {
+          copyBtn.textContent = copyLabel;
+          copyBtn.classList.remove("is-done");
+        }, 2000);
+      });
     });
   }
 

@@ -652,9 +652,120 @@ a:hover {
 }
 
 /* -------------------------------------------------------------- plates -- */
-/* Visualizations: a calm grid of still thumbnails; clicking opens the viewer
-   (dialog.lightbox, built by site.js), where animations play. */
-.plates {
+/* Visualizations: a plate index, like the sheet index of a map series. A
+   numbered list of titles beside one large still preview (site.js swaps it on
+   hover/focus); clicking opens the viewer (dialog.lightbox), where animations
+   play. Phones: each row carries a small thumbnail, no preview. */
+.pidx-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pidx-list .plate-link {
+  display: grid;
+  grid-template-columns: 64px 2.2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 12px;
+  padding: 8px 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+.pidx-list img {
+  display: block;
+  width: 64px;
+  height: 48px;
+  object-fit: cover;
+  background: var(--grid);
+}
+.pidx-list .plate-no {
+  color: var(--muted);
+  font: 400 0.75rem/1 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.pidx-list .plate-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.pidx-list .plate-tag {
+  color: var(--muted);
+  font: 400 0.6875rem/1 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.pidx-list .plate-link:hover .plate-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pidx-preview {
+  display: none;
+  margin: 0;
+}
+@media (min-width: 900px) {
+  .pidx {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: 48px;
+    align-items: center;
+  }
+  .pidx-list img {
+    display: none;
+  }
+  .pidx-list .plate-link {
+    grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+    padding: 7px 0;
+    color: var(--muted);
+  }
+  .pidx-list .plate-link:hover .plate-title {
+    text-decoration: none;
+  }
+  .pidx-list .plate-link:hover,
+  .pidx-list .plate-link.is-current {
+    color: var(--ink);
+  }
+  .pidx-list .plate-link.is-current .plate-no {
+    color: var(--accent);
+  }
+  .pidx-preview {
+    display: block;
+  }
+  .pidx-open {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+  .pidx-open img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--grid);
+  }
+  .pidx-preview figcaption {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+  .pidx-hint {
+    color: var(--ink);
+    font: 400 0.6875rem/1.5 var(--font-mono);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .pidx-list .plate-link {
+    transition: color 0.15s ease;
+  }
+}
+
+/* Certificates (CV): a small grid of still thumbnails, same viewer. */
+.certs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 28px 16px;
@@ -662,12 +773,12 @@ a:hover {
   padding: 0;
   list-style: none;
 }
-.plate-link {
+.certs .plate-link {
   display: block;
   color: var(--ink);
   text-decoration: none;
 }
-.plate-link img {
+.certs .plate-link img {
   display: block;
   width: 100%;
   height: auto;
@@ -675,7 +786,7 @@ a:hover {
   object-fit: cover;
   background: var(--grid);
 }
-.plate-meta {
+.certs .plate-meta {
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -685,19 +796,19 @@ a:hover {
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.plate-title {
+.certs .plate-title {
   display: block;
   margin-top: 2px;
   font-size: 0.9375rem;
   font-weight: 500;
   line-height: 1.35;
 }
-.plate-link:hover .plate-title {
+.certs .plate-link:hover .plate-title {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 @media (min-width: 900px) {
-  .plates {
+  .certs {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 40px 24px;
   }
@@ -1216,16 +1327,64 @@ dl.cv-list .cv-row {
 }
 
 /* ------------------------------------------------------------- contact -- */
+/* The end of the flight: the background arrives at the Feldberg (backdrop.js
+   adds html.arrive-live, which lets the landscape show more strongly here).
+   One invitation line, the email with a copy button, two profile links. */
+#contact {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 92vh;
+  padding-top: 48vh; /* the summit stands in the space above the text */
+  padding-bottom: clamp(64px, 8cqw, 120px);
+}
 .contact-body {
   text-align: center;
 }
+.contact-mailrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+@media (min-width: 720px) {
+  /* the address stays centred, the copy button sits beside it */
+  .contact-mailrow {
+    position: relative;
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+  }
+  .contact-copy {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 12px);
+    transform: translateY(-40%);
+    white-space: nowrap;
+  }
+}
 .contact-mail {
-  display: inline-block;
   font-size: clamp(1.25rem, 1rem + 1cqw, 1.75rem);
   font-weight: 500;
   letter-spacing: -0.02em;
   text-underline-offset: 6px;
   overflow-wrap: anywhere;
+}
+.contact-copy {
+  min-height: 28px;
+  padding: 2px 6px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.contact-copy:hover {
+  color: var(--ink);
+}
+.contact-copy.is-done {
+  color: var(--accent);
 }
 .contact-links {
   display: flex;
@@ -1238,12 +1397,25 @@ dl.cv-list .cv-row {
 }
 .contact-links a {
   color: var(--ink);
+  text-decoration: none;
 }
 .contact-links a:hover {
   color: var(--accent);
 }
-#contact {
-  padding-bottom: clamp(64px, 8cqw, 120px);
+.contact-links a span {
+  color: var(--muted);
+}
+html.arrive-live .backdrop {
+  --bg-op: 0.75;
+  -webkit-mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.5) 30%, rgb(0 0 0 / 0.5) 70%, #000 96%);
+  mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.5) 30%, rgb(0 0 0 / 0.5) 70%, #000 96%);
+}
+@media (max-width: 719px) {
+  html.arrive-live .backdrop {
+    --bg-op: 0.4;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
 /* ----------------------------------------------------------------- 404 -- */
@@ -1589,6 +1761,7 @@ dl.cv-list .cv-row {
   height: 100%;
   pointer-events: none;
   opacity: calc(var(--bg-op) * var(--fade, 1));
+  transition: opacity 0.5s ease;
   -webkit-mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.2) 30%, rgb(0 0 0 / 0.2) 70%, #000 96%);
   mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.2) 30%, rgb(0 0 0 / 0.2) 70%, #000 96%);
 }

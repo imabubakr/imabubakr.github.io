@@ -1,4 +1,4 @@
-"""Build the image grids: "Visualizations" plates and the CV's certificates.
+"""Build the "Visualizations" plate index and the CV's certificate grid.
 
 For each item in PLATES and CERTS (source files are images in the repo root):
   stills      -> assets/plates/<id>-720.webp (grid) and <id>-1600.webp (viewer)
@@ -80,8 +80,8 @@ CERTS = [
 ]
 
 LABELS = {
-    "en": {"plate": "Plate", "anim": "animation", "open": "Open"},
-    "de": {"plate": "Tafel", "anim": "Animation", "open": "Öffnen"},
+    "en": {"plate": "Plate", "anim": "animation", "open": "Open", "view": "open large", "list": "Plates"},
+    "de": {"plate": "Tafel", "anim": "Animation", "open": "Öffnen", "view": "groß öffnen", "list": "Tafeln"},
 }
 
 
@@ -142,25 +142,44 @@ def cert_markup(lang, prefix):
 
 
 def markup(lang, prefix):
+    """Plate index: a numbered list of titles beside one large preview. site.js
+    swaps the preview on hover/focus; a click opens the viewer. Phones show a
+    small thumbnail in each row instead of the preview."""
     L = LABELS[lang]
     items = []
+    first = None
     for i, (pid, src, anim, frame, en, de) in enumerate(PLATES, 1):
         short, caption = en if lang == "en" else de
         base = f"{prefix}assets/plates/{pid}"
         full = f"{base}.mp4" if anim else f"{base}-1600.webp"
-        thumb = Image.open(OUT / f"{pid}-720.webp").size
+        w, h = Image.open(OUT / f"{pid}-720.webp").size
         data = f' data-webm="{base}.webm" data-mp4="{base}.mp4"' if anim else f' data-full="{base}-1600.webp"'
         tag = f'<span class="plate-tag">{L["anim"]}</span>' if anim else ""
+        no = f'{L["plate"]} {i:02d}'
+        if first is None:
+            first = (base, w, h, short, caption, anim)
         items.append(
             f'              <li class="plate">\n'
-            f'                <a href="{full}" class="plate-link"{data} data-caption="{html.escape(caption, quote=True)}">\n'
-            f'                  <img src="{base}-720.webp" width="{thumb[0]}" height="{thumb[1]}" loading="lazy" decoding="async" alt="">\n'
-            f'                  <span class="plate-meta"><span class="plate-no">{L["plate"]} {i:02d}</span>{tag}</span>\n'
-            f'                  <span class="plate-title">{short}</span>\n'
+            f'                <a href="{full}" class="plate-link"{data} data-no="{no}" data-thumb="{base}-720.webp" data-caption="{html.escape(caption, quote=True)}">\n'
+            f'                  <img src="{base}-720.webp" width="{w}" height="{h}" loading="lazy" decoding="async" alt="">\n'
+            f'                  <span class="plate-no" aria-hidden="true">{i:02d}</span>\n'
+            f'                  <span class="plate-title"><span class="visually-hidden">{no}: </span>{short}</span>\n'
+            f"                  {tag}\n"
             f"                </a>\n"
             f"              </li>"
         )
-    return '\n            <ol class="plates">\n' + "\n".join(items) + "\n            </ol>\n            "
+    base, w, h, short, caption, anim = first
+    tag = f'<span class="plate-tag">{L["anim"]}</span>' if anim else ""
+    preview = (
+        f'            <figure class="pidx-preview" aria-hidden="true">\n'
+        f'              <button class="pidx-open" type="button" tabindex="-1">'
+        f'<img src="{base}-720.webp" width="{w}" height="{h}" loading="lazy" decoding="async" alt=""></button>\n'
+        f'              <figcaption><span class="pidx-cap">{caption}</span> <span class="pidx-hint">{L["view"]} ↗</span></figcaption>\n'
+        f"            </figure>\n"
+    )
+    return ('\n          <div class="pidx">\n'
+            f'            <ol class="plates pidx-list" aria-label="{L["list"]}">\n' + "\n".join(items) + "\n            </ol>\n"
+            + preview + "          </div>\n          ")
 
 
 def main():
