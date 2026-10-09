@@ -2307,3 +2307,7 @@ html.hfx-risen .hero-strip .ticks {
 .hero-strip .ticks {
   transition: opacity 0.4s ease;
 }
+/* handoff: the hero's paper turns transparent so the flight shows through */
+html.hfx-pinned .hero {
+  background: color-mix(in srgb, var(--paper) calc(var(--hfx-bg, 1) * 100%), transparent);
+}

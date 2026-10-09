@@ -266,7 +266,7 @@
     }
     // sun: shadow offset (screen px per 10 m terrace step), from the real sun position
     var shadow = null;
-    var sunUse = mode === "sun" ? R3.sun : mode === "scroll-rise" ? { az: 225, alt: 30 } : null;
+    var sunUse = mode === "sun" ? R3.sun : null;
     if (sunUse && sunUse.alt > 1 && k > 0.01) {
       var len = Math.min(320, (10 * EXAG) / Math.tan(sunUse.alt * Math.PI / 180));   // map metres
       var az = sunUse.az * Math.PI / 180, ddx = -Math.sin(az) * len, ddy = Math.cos(az) * len;
@@ -396,6 +396,15 @@
       if (R3.k < 1e-3 && R3.kT === 0) R3.k = 0;
       root.classList.toggle("hfx-rising", R3.k > 0.004);
       root.classList.toggle("hfx-risen", R3.k > 0.04);
+      // handoff to the background flight: near the end of the pin and while the hero
+      // scrolls away, the terraces dissolve and the hero turns transparent, so the
+      // flight's ridge lines (fixed behind the page, also looking east) take over
+      var hr = hero.getBoundingClientRect(), navH = parseFloat(getComputedStyle(root).getPropertyValue("--nav-h")) || 57;
+      var release = Math.min(1, Math.max(0, (navH - hr.top) / (hr.height * 0.55)));
+      var fadeT = Math.max(0.55 * smooth((pp - 0.72) / 0.28), smooth(release));
+      R3.fade = (R3.fade || 0) + (fadeT - (R3.fade || 0)) * 0.18;
+      hero.style.setProperty("--hfx-bg", (1 - R3.fade).toFixed(3));
+      R3.canvas.style.opacity = (1 - 0.9 * R3.fade).toFixed(3);
     } else {
       R3.k = smooth((t - 0.7) / 2.6);
     }
@@ -440,7 +449,7 @@
     timers.forEach(clearTimeout); timers = [];
     root.classList.remove("hfx-drawing", "hfx-drawn", "hfx-scanning", "hfx-words", "hfx-words-in", "hfx-ul-on", "hfx-light-on", "hfx-rising", "hfx-lens");
     if (R3) R3.ctx.clearRect(0, 0, R3.canvas.width, R3.canvas.height);
-    if (mode !== "scroll-rise") pinOff();
+    if (mode !== "scroll-rise") { pinOff(); hero.style.removeProperty("--hfx-bg"); if (R3) R3.canvas.style.opacity = ""; }
     if (overlay) overlay.remove(), (overlay = null);
     scanLine.style.left = "";
     hero.style.removeProperty("--scan");
