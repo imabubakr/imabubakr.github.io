@@ -31,13 +31,19 @@ PLATES = [
     # Pre-rendered videos (tools/media, src None): media already in assets/plates.
     ("lidar-flyaround", None, True, 0,
      ("LiDAR point cloud, Freudenberg",
-      "Freudenberg (Siegerland) from airborne laser scanning: about 2.4 million points with an automated "
-      "classification into ground, vegetation and buildings (height above ground and cadastral building "
-      "footprints). Data: Geobasis NRW (dl-de/zero-2-0)."),
+      "Freudenberg (Siegerland) from airborne laser scanning, about 2.4 million points. The open data only "
+      "separates ground from non-ground, so I classified it in three automated steps: (1) a 1 m terrain model "
+      "from the ground points, with gaps under buildings filled; (2) height above ground for every point; "
+      "(3) points more than 1.5 m above ground inside an official building footprint are buildings, all other "
+      "points more than 0.5 m above ground are vegetation, the rest is ground. Noise points were removed. "
+      "Data: Geobasis NRW (dl-de/zero-2-0)."),
      ("LiDAR-Punktwolke, Freudenberg",
-      "Freudenberg (Siegerland) aus flugzeuggestütztem Laserscanning: rund 2,4 Millionen Punkte mit automatisierter "
-      "Klassifikation in Boden, Vegetation und Gebäude (Höhe über Grund und amtliche Gebäudegrundrisse). "
-      "Daten: Geobasis NRW (dl-de/zero-2-0).")),
+      "Freudenberg (Siegerland) aus flugzeuggestütztem Laserscanning, rund 2,4 Millionen Punkte. Die offenen Daten "
+      "unterscheiden nur Boden und Nicht-Boden, daher habe ich sie in drei automatisierten Schritten klassifiziert: "
+      "(1) ein Geländemodell mit 1 m Auflösung aus den Bodenpunkten, Lücken unter Gebäuden gefüllt; (2) die Höhe "
+      "über Grund für jeden Punkt; (3) Punkte mehr als 1,5 m über Grund innerhalb eines amtlichen Gebäudegrundrisses "
+      "sind Gebäude, alle übrigen Punkte mehr als 0,5 m über Grund Vegetation, der Rest Boden. Rauschpunkte wurden "
+      "entfernt. Daten: Geobasis NRW (dl-de/zero-2-0).")),
     ("ortho-buildings", None, True, 0,
      ("Orthophoto and building outlines, Freudenberg",
       "The old town of Freudenberg (Siegerland) in a 10 cm orthophoto (DOP10, 2025) with the official ALKIS "
