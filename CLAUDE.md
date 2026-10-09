@@ -54,6 +54,12 @@ place). It's one continuous background fixed behind everything below the hero (`
 `--contour` through a mask, faded towards the centre so text sits on calm paper, loaded after page load. No bands or
 per-section layers: the user found those looked broken. Credit "© OpenStreetMap contributors" stays in the footer.
 
+**Preview in progress (2026-10-09):** `assets/js/backdrop.js` adds three candidate backgrounds next to the village,
+switchable via a temporary picker bottom-left (or `?bg=village|flight|parallax|path`, remembered in
+`localStorage.bg-preview`): `flight` (perspective ridge lines of the region DEM, scrolling flies east into the Black
+Forest, fades out over section [02]), `parallax` (top-down ridges moving at 0.25× scroll), `path` (village + a drone
+survey route that draws itself with scroll). Once the owner picks one, remove the picker and the unused modes.
+
 ## "From orbit to drone" (career story)
 
 Section [02] tells the owner's path: satellite data (from 2016) → aerial imagery (from 2021, MapTransfer) → drones
