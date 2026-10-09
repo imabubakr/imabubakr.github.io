@@ -1,27 +1,29 @@
 """Shallow-landslide scenario on real terrain (Freudenberg, NRW LiDAR), rendered
-as a short video. A MODEL SCENARIO, not a recorded event.
+in 3D. A MODEL SCENARIO with assumed soil and rain values, not a recorded event.
 
 Model
-  terrain   2 m DTM from the LiDAR ground points (classes 2, 26), gaps filled
-  stability infinite-slope model (Skempton & DeLory 1957):
-              FS = [c' + (gamma - m*gamma_w) * z * cos^2(beta) * tan(phi')]
-                   / [gamma * z * sin(beta) * cos(beta)]
-            with soil depth z, slope beta and relative wetness m (0 dry ... 1 saturated)
-  rain      m rises from 0 to 1 (a prolonged-rainfall scenario); cells with FS < 1 fail
-  mass      volume = failed area * z, mass = volume * gamma / g
-  runout    debris spreads downslope by multiple-flow-direction routing (Holmgren, x = 4)
-            and stops where the travel angle from the top of the source drops below the
-            empirical reach angle for its volume (Corominas 1996, all landslides):
-              tan(alpha) = 0.97 * V^-0.105
+  terrain    2 m DTM from the LiDAR ground points (classes 2, 26), gaps filled
+  hydrology  steady-state shallow subsurface flow (Montgomery & Dietrich 1994;
+             as in SHALSTAB / SINMAP):  m = min(1, q * a / (T * sin(beta)))
+             q rainfall rate, a upslope area per unit contour width (MFD flow
+             accumulation, Freeman p = 1.1), T soil transmissivity
+  stability  infinite-slope model (Skempton & DeLory 1957):
+             FS = [c' + (gamma - m*gamma_w) z cos^2(beta) tan(phi')] / [gamma z sin(beta) cos(beta)]
+  failure    where FS < 1 at the peak rain; the scenario's slide is the compact
+             cluster nearest SRC_HINT (thin road/building cuts removed by an opening)
+  mass       V = A * z, M = V * gamma / g
+  runout     Voellmy mass point along multiple-flow-direction paths (Holmgren x = 4):
+             v2^2 = v1^2 + 2g (dz - mu * ds) - 2g ds v1^2 / xi ; stops where v = 0.
+             Arrival time t += ds / v_mean. Cross-check: Corominas (1996)
+             tan(alpha) = 0.97 V^-0.105.
+  deposit    the volume is spread over the runout cells, more where the flow is slow
+             (mass conserved); scar and deposit are drawn x VIS in 3D for visibility
 
-    ~/miniforge3/envs/geoai/bin/python tools/media/landslide.py [--scan] [--preview]
-      --scan     print FS statistics and candidate slopes, write work/ls_scan.png
-      --preview  render a few frames only
-  3D version (terrain mesh with the map draped on it):
-    python landslide.py --3d                      textures, panel layers, ls_dem.bin
-    node tools/media/render_landslide3d.mjs       3D frames (three.js, headless Chromium)
-    python landslide.py --compose3d               panel over the frames, encode
-Writes assets/plates/landslide-sim.{webm,mp4}, -720.webp and work/landslide.json (results).
+    python landslide.py --scan                      FS statistics, work/ls_scan.png
+    python landslide.py                              results, textures, panel layers, ls_*.bin
+    node tools/media/render_landslide3d.mjs          3D frames (three.js, headless Chromium)
+    python landslide.py --compose3d                  panel over the frames, encode
+(python = ~/miniforge3/envs/geoai/bin/python)
 """
 import glob
 import json
@@ -44,13 +46,21 @@ CELL = 2.0
 X0, Y1 = 420000.0, 5640000.0      # NW corner of the 2 x 2 km LiDAR block
 N = 1000                          # 2000 m / 2 m
 
-# soil and water (a typical weathered-slate colluvium of the Siegerland; scenario values)
+# soil, water, rain (a weathered-slate colluvium of the Siegerland; scenario values)
 C_EFF = 4.0e3        # effective cohesion c' incl. roots (Pa)
 PHI = math.radians(33.0)
 GAMMA = 19.0e3       # soil unit weight (N/m3)
-GAMMA_W = 9.81e3     # water
+GAMMA_W = 9.81e3
 Z_SOIL = 1.5         # soil depth (m)
+T_SOIL = 30.0        # transmissivity (m2/day)
+Q_MAX = 0.150        # peak rainfall rate (m/day) = 150 mm/d: an extreme event (cf. July 2021)
+MU, XI = 0.30, 300.0 # Voellmy friction and turbulence (m/s2)
 G = 9.81
+VIS = 3.0            # scar drawn this many times deeper in 3D
+VIS_DEP = 1.5        # deposit drawn this many times thicker
+
+OFFS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+STEP = [CELL * (1.4142 if dr and dc else 1.0) for dr, dc in OFFS]
 
 
 # ------------------------------------------------------------------ terrain --
@@ -76,19 +86,50 @@ def dtm():
     return d
 
 
-def slope_aspect(d):
-    gy, gx = np.gradient(d, CELL)            # gy: d/drow (south), gx: d/dcol (east)
-    beta = np.arctan(np.hypot(gx, gy))
-    return beta, gx, gy
+def slope(d):
+    gy, gx = np.gradient(d, CELL)
+    return np.arctan(np.hypot(gx, gy))
 
 
 def hillshade(d, az=315, alt=40):
     gy, gx = np.gradient(d, CELL)
-    slope = np.arctan(np.hypot(gx, gy))
+    s = np.arctan(np.hypot(gx, gy))
     aspect = np.arctan2(-gx, gy)
     a, al = math.radians(az), math.radians(alt)
-    hs = np.sin(al) * np.cos(slope) + np.cos(al) * np.sin(slope) * np.cos(a - aspect)
-    return np.clip(hs, 0, 1)
+    return np.clip(np.sin(al) * np.cos(s) + np.cos(al) * np.sin(s) * np.cos(a - aspect), 0, 1)
+
+
+def catchment(d):
+    """Specific catchment area a (m): MFD flow accumulation (Freeman p = 1.1) / contour width."""
+    cache = WORK / "ls_sca.npy"
+    if cache.exists():
+        return np.load(cache)
+    acc = np.full(d.shape, CELL * CELL)
+    nr, nc = d.shape
+    for k in np.argsort(-d, axis=None):
+        r, c = divmod(int(k), nc)
+        if r == 0 or c == 0 or r == nr - 1 or c == nc - 1:
+            continue
+        z = d[r, c]
+        w = []
+        for (dr, dc), st in zip(OFFS, STEP):
+            dz = z - d[r + dr, c + dc]
+            w.append((dz / st) ** 1.1 if dz > 0 else 0.0)
+        s = sum(w)
+        if s <= 0:
+            continue
+        a = acc[r, c]
+        for (dr, dc), wi in zip(OFFS, w):
+            if wi:
+                acc[r + dr, c + dc] += a * wi / s
+    sca = acc / CELL
+    np.save(cache, sca)
+    print("catchment done")
+    return sca
+
+
+def wetness(beta, sca, q):
+    return np.minimum(1.0, q * sca / (T_SOIL * np.maximum(np.sin(beta), 0.02)))
 
 
 def factor_of_safety(beta, m):
@@ -99,88 +140,68 @@ def factor_of_safety(beta, m):
 
 
 # ------------------------------------------------------------------- runout --
-OFFS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-
-
 def runout(d, source):
-    """Multiple-flow-direction spreading from the source cells, limited by the
-    Corominas reach angle. Returns (reach mask, path distance per cell, alpha, V)."""
-    V = source.sum() * CELL * CELL * Z_SOIL
-    tan_a = 0.97 * V ** -0.105
-    ztop = d[source].max()
+    """Voellmy mass point on MFD paths: weight (spreading share), velocity and
+    arrival time per cell. Cells are visited from high to low, so every cell has
+    received all its inflow before it passes it on."""
     rs, cs = np.nonzero(source)
-    # visit cells in order of decreasing elevation (a flow only moves downhill)
-    dist = np.full(d.shape, np.inf)
-    dist[source] = 0.0
-    weight = np.zeros(d.shape)
-    weight[source] = 1.0
-    r0, r1 = max(rs.min() - 400, 1), min(rs.max() + 400, d.shape[0] - 2)
-    c0, c1 = max(cs.min() - 400, 1), min(cs.max() + 400, d.shape[1] - 2)
+    r0, r1 = max(rs.min() - 300, 1), min(rs.max() + 300, d.shape[0] - 2)
+    c0, c1 = max(cs.min() - 300, 1), min(cs.max() + 300, d.shape[1] - 2)
+    weight = np.zeros(d.shape); v2 = np.full(d.shape, -1.0); tarr = np.full(d.shape, np.inf)
+    weight[source] = 1.0; v2[source] = 0.0; tarr[source] = 0.0
     sub = d[r0:r1, c0:c1]
-    order = np.argsort(-sub, axis=None)
-    for k in order:
-        r, c = divmod(int(k), sub.shape[1])
-        r += r0; c += c0
+    for k in np.argsort(-sub, axis=None):
+        r, c = divmod(int(k), sub.shape[1]); r += r0; c += c0
         w = weight[r, c]
-        if w <= 1e-4:
+        if w <= 1e-4 or v2[r, c] < 0:
             continue
-        drops, tgt = [], []
-        for dr, dc in OFFS:
+        z, va = d[r, c], v2[r, c]
+        tgt = []
+        for (dr, dc), st in zip(OFFS, STEP):
             rr, cc = r + dr, c + dc
-            step = CELL * (1.4142 if dr and dc else 1.0)
-            dz = d[r, c] - d[rr, cc]
-            if dz > 0:
-                drops.append((dz / step) ** 4)       # Holmgren exponent x = 4
-                tgt.append((rr, cc, step))
-        if not drops:
-            continue
-        s = sum(drops)
-        for p, (rr, cc, step) in zip(drops, tgt):
-            nd = dist[r, c] + step
-            # energy line: stop where the drop from the top over the path is flatter than alpha
-            if (ztop - d[rr, cc]) / max(nd, 1e-6) < tan_a:
+            dz = z - d[rr, cc]
+            if dz <= 0:
                 continue
+            nv = va + 2 * G * (dz - MU * st) - 2 * G * st * va / XI
+            if nv <= 0 and not source[rr, cc]:
+                continue                         # the mass stops before this cell
+            tgt.append((rr, cc, (dz / st) ** 4, max(nv, 0.0), st))
+        s = sum(t[2] for t in tgt)
+        for rr, cc, p, nv, st in tgt:
             weight[rr, cc] += w * p / s
-            if nd < dist[rr, cc]:
-                dist[rr, cc] = nd
-    reach = np.isfinite(dist) & (weight > 0.002)
-    return reach, np.where(reach, dist, np.nan), math.degrees(math.atan(tan_a)), V, weight
+            if nv > v2[rr, cc]:
+                v2[rr, cc] = nv
+            vm = 0.5 * (math.sqrt(va) + math.sqrt(nv))
+            t = tarr[r, c] + st / max(vm, 0.3)
+            if t < tarr[rr, cc]:
+                tarr[rr, cc] = t
+    reach = (weight > 0.002) & np.isfinite(tarr)
+    return reach, weight, np.sqrt(np.maximum(v2, 0)), tarr
 
 
 # -------------------------------------------------------------------- scan ---
 def scan():
-    d = dtm()
-    beta, _, _ = slope_aspect(d)
-    print("relief", float(np.nanmin(d)), float(np.nanmax(d)), "slope p50/p95/p99 deg",
-          [round(float(np.degrees(np.percentile(beta, q))), 1) for q in (50, 95, 99)])
-    for m in (0.0, 0.5, 1.0):
-        fs = factor_of_safety(beta, m)
-        print(f"m={m}: FS<1 on {100 * (fs < 1).mean():.2f} % of cells")
-    fs = factor_of_safety(beta, 1.0)
-    lab, n = ndimage.label(fs < 1)
-    sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
-    top = np.argsort(-sizes)[:8]
-    for i in top:
-        rr, cc = np.nonzero(lab == i + 1)
-        print(f"cluster {i + 1}: {int(sizes[i])} cells = {sizes[i] * CELL * CELL:.0f} m2 at "
-              f"E {X0 + cc.mean() * CELL:.0f} N {Y1 - rr.mean() * CELL:.0f}")
+    d = dtm(); beta = slope(d); sca = catchment(d)
+    for q in (0.03, 0.06, Q_MAX):
+        m = wetness(beta, sca, q)
+        print(f"q={q * 1000:.0f} mm/d: mean m {m.mean():.2f}, FS<1 on {100 * (factor_of_safety(beta, m) < 1).mean():.2f} %")
+    fs = factor_of_safety(beta, wetness(beta, sca, Q_MAX))
     hs = hillshade(d)
     rgb = np.dstack([hs * 255] * 3).astype(np.uint8)
     rgb[fs < 1] = [220, 50, 30]
     Image.fromarray(rgb).save(WORK / "ls_scan.png")
 
 
-if __name__ == "__main__" and "--scan" in sys.argv:
-    scan()
-
-
 # ------------------------------------------------------------------ render ---
-W, H, FPS, SECONDS = 1600, 900, 30, 15
-WIN_C = (420850.0, 5638610.0)     # window centre (E, N): the main unstable slope and its runout
-WIN_W = 900.0                     # window width (m); height follows 16:9
-SRC_HINT = (420907.0, 5638640.0)  # the scenario's landslide = the FS<1 cluster nearest to this
+W, H, FPS, SECONDS = 1600, 900, 30, 16
+WIN_C = (420850.0, 5638640.0)     # window centre (E, N)
+WIN_W = 900.0
+SRC_HINT = (420913.0, 5638707.0)
 ACCENT = (210, 65, 15)
+SCAR = (112, 82, 60)              # exposed ground in the scar
 MONO = "/System/Library/Fonts/Menlo.ttc"
+T_RAIN, T_FAIL, T_FLOW, T_FLOW_END = (1.5, 8.0), 8.5, 9.2, 13.8   # seconds in the video
+RAMP_S = 2.5                      # a cell's deposit builds up over this much simulated time
 
 
 def smooth(t):
@@ -195,135 +216,139 @@ def window_slice():
     return slice(r0, r1), slice(c0, c1)
 
 
-def fmt(v):  # thin-space thousands: valid in English and German (SI style)
+def fmt(v):  # thin-space thousands (SI style, reads in English and German)
     return f"{v:,.0f}".replace(",", " ")
 
 
-def render(preview=False, mode3d=False):
-    d = dtm()
-    beta, _, _ = slope_aspect(d)
-    fs1 = factor_of_safety(beta, 1.0)
-    # thin strips (road and building cuts) are not landslide sources: morphological opening
-    lab, n = ndimage.label(ndimage.binary_opening(fs1 < 1, iterations=2))
+def simulate():
+    d = dtm(); beta = slope(d); sca = catchment(d)
+    fs_peak = factor_of_safety(beta, wetness(beta, sca, Q_MAX))
+    lab, _ = ndimage.label(ndimage.binary_opening(fs_peak < 1, iterations=2))
     hr = int((Y1 - SRC_HINT[1]) / CELL); hc = int((SRC_HINT[0] - X0) / CELL)
     rr, cc = np.nonzero(lab > 0)
     k = np.argmin((rr - hr) ** 2 + (cc - hc) ** 2)
     source = lab == lab[rr[k], cc[k]]
-    reach, dist, alpha, V, weight = runout(d, source)
-    mass = V * GAMMA / G / 1000.0                     # tonnes
-    # runout length L: horizontal distance from the crown (highest source cell) to the toe
-    sr, sc = np.unravel_index(np.argmax(np.where(source, d, -np.inf)), d.shape)
-    rr2, cc2 = np.nonzero(reach)
-    toe = np.argmax(np.hypot(rr2 - sr, cc2 - sc))
-    L = float(np.hypot(rr2[toe] - sr, cc2[toe] - sc) * CELL)
-    H_drop = float(d[sr, sc] - d[rr2[toe], cc2[toe]])
-    res = {"area_m2": float(source.sum() * CELL * CELL), "volume_m3": float(V), "mass_t": float(mass),
-           "runout_m": L, "drop_m": H_drop, "reach_angle_deg": alpha,
+    reach, weight, vel, tarr = runout(d, source)
+    V = float(source.sum() * CELL * CELL * Z_SOIL)
+    # deposit: volume spread over the runout cells outside the scar, weighted by
+    # flow share and slowness (fast flow passes, slow flow deposits)
+    out = reach & ~source
+    vmax = float(vel[reach].max())
+    dw = np.where(out, weight * (1.0 - vel / max(vmax, 1e-6)), 0.0)
+    dw = ndimage.gaussian_filter(dw, 3.0) * out          # spread, no single-cell spikes
+    dep = ndimage.gaussian_filter(dw / dw.sum() * V / (CELL * CELL), 2.5)   # soft edges
+    dep *= V / (dep.sum() * CELL * CELL)                                        # volume conserved
+    # runout length along the slide axis (source centroid -> deposit centroid):
+    # crown = source cell furthest back on the axis, toe = runout cell furthest ahead
+    rs_, cs_ = np.nonzero(source)
+    rd_, cd_ = np.nonzero(dep > 0.05 * dep.max())
+    ax = np.array([rd_.mean() - rs_.mean(), cd_.mean() - cs_.mean()])
+    ax /= np.hypot(*ax)
+    r2, c2 = np.nonzero(reach)
+    ps, pr = rs_ * ax[0] + cs_ * ax[1], r2 * ax[0] + c2 * ax[1]
+    crown, toe = np.argmin(ps), np.argmax(pr)
+    L = float((pr[toe] - ps[crown]) * CELL)
+    Hd = float(d[rs_[crown], cs_[crown]] - d[r2[toe], c2[toe]])
+    res = {"area_m2": float(source.sum() * CELL * CELL), "volume_m3": V, "mass_t": V * GAMMA / G / 1000,
+           "runout_m": L, "drop_m": Hd, "apparent_angle_deg": math.degrees(math.atan(Hd / L)),
+           "corominas_angle_deg": math.degrees(math.atan(0.97 * V ** -0.105)),
+           "v_max_ms": vmax, "travel_s": float(np.nanmax(np.where(reach, tarr, np.nan))),
+           "deposit_max_m": float(dep.max()),
            "params": {"c_kPa": C_EFF / 1e3, "phi_deg": math.degrees(PHI), "gamma_kN": GAMMA / 1e3,
-                      "z_m": Z_SOIL, "cell_m": CELL}}
+                      "z_m": Z_SOIL, "T_m2d": T_SOIL, "q_max_mmd": Q_MAX * 1000, "mu": MU, "xi": XI,
+                      "cell_m": CELL, "vis": VIS, "vis_dep": VIS_DEP}}
     (WORK / "landslide.json").write_text(json.dumps(res, indent=1))
-    print(res)
+    print(json.dumps(res, indent=1))
+    return d, beta, sca, source, reach, weight, tarr, dep, res
 
+
+def render():
+    d, beta, sca, source, reach, weight, tarr, dep, res = simulate()
     sl = window_slice()
-    hs = hillshade(d)[sl]
-    base = Image.fromarray((40 + hs * 200).astype(np.uint8)).convert("RGB").resize((W, H), Image.BICUBIC)
-    beta_w = beta[sl]; src_w = source[sl]; wgt_w = weight[sl]
-    dist_w = dist[sl]                 # the front advances along the flow paths (path length from the scar)
-    dmax = float(np.nanmax(dist))
-    up = lambda a: np.asarray(Image.fromarray(a.astype(np.float32)).resize((W, H), Image.BILINEAR))
+    dw, bw, aw = d[sl], beta[sl], sca[sl]
+    srcw, rw, ww, tw, depw = source[sl], reach[sl], weight[sl], tarr[sl], dep[sl]
+    t_end = res["travel_s"]
+    # geometry for the 3D page: base heights, scar (-z), deposit (+), arrival time
+    base = dw.astype(np.float32)
+    zmin = float(base.min())
+    (WORK / "ls_dem.bin").write_bytes((base - zmin).tobytes())
+    scar = -Z_SOIL * ndimage.gaussian_filter(srcw.astype(float), 0.8)          # rounded scarp
+    (WORK / "ls_scar.bin").write_bytes(scar.astype(np.float32).tobytes())
+    (WORK / "ls_dep.bin").write_bytes(depw.astype(np.float32).tobytes())
+    (WORK / "ls_arr.bin").write_bytes(np.where(rw, tw, 1e9).astype(np.float32).tobytes())
+    n_frames = FPS * SECONDS
+    timeline = []
+    tex, pan = WORK / "landslide_tex", WORK / "landslide_panel"
+    for p in (tex, pan):
+        shutil.rmtree(p, ignore_errors=True); p.mkdir(parents=True)
+    up = lambda a: np.asarray(Image.fromarray(np.asarray(a, np.float32)).resize((W, H), Image.BILINEAR))
     mono = lambda s: ImageFont.truetype(MONO, s)
     f_small, f_mid, f_big = mono(17), mono(20), mono(26)
-    frames = WORK / ("landslide_panel" if mode3d else "landslide_frames")
-    shutil.rmtree(frames, ignore_errors=True); frames.mkdir(parents=True)
-    tex = WORK / "landslide_tex"
-    if mode3d:
-        shutil.rmtree(tex, ignore_errors=True); tex.mkdir(parents=True)
-        win = d[sl].astype(np.float32)
-        (WORK / "ls_dem.bin").write_bytes((win - float(win.min())).tobytes())
-        (WORK / "ls_dem.json").write_text(json.dumps({"rows": win.shape[0], "cols": win.shape[1], "cell": CELL,
-                                                        "frames": FPS * SECONDS}))
-    n_frames = FPS * SECONDS
-    picks = (0, 150, 240, 330, n_frames - 1)
-    src_up = up(src_w.astype(np.float32)) > 0.5
-    dist_up = up(np.nan_to_num(dist_w, nan=1e9))
-    wgt_up = up(np.log1p(wgt_w * 50))
-    wmax = float(np.percentile(wgt_up[wgt_up > 0], 99)) if (wgt_up > 0).any() else 1.0
+    src_up = up(srcw) > 0.5
+    arr_up = up(np.where(rw, tw, 1e4))
+    wgt_up = up(np.log1p(ww * 50) * rw)
+    wmax = float(np.percentile(wgt_up[wgt_up > 0], 99))
     for i in range(n_frames):
-        if preview and i not in picks:
-            continue
         t = i / FPS
-        m = smooth((t - 1.5) / 6.0)                   # 1.5 s ... 7.5 s: soil saturates
-        fail = smooth((t - 8.0) / 0.8)                 # 8 s: failure
-        flow = smooth((t - 9.0) / 3.5)                 # 9 ... 12.5 s: runout
-        fs = up(factor_of_safety(beta_w, m))
-        img = np.asarray(base).astype(np.float32)
-        # FS: 1.5 ... 1.0 amber, < 1 red
-        warn = np.clip((1.5 - fs) / 0.5, 0, 1)[..., None] * (fs >= 1)[..., None]
-        # after the failure the other unstable cells step back, so the event stands out
-        warn = warn * (1 - 0.6 * fail)
+        q = Q_MAX * smooth((t - T_RAIN[0]) / (T_RAIN[1] - T_RAIN[0]))
+        fail = smooth((t - T_FAIL) / 0.7)
+        sim_t = t_end * smooth((t - T_FLOW) / (T_FLOW_END - T_FLOW)) if t > T_FLOW else 0.0
+        timeline.append({"fail": fail, "sim_t": sim_t})
+        m = wetness(bw, aw, q)
+        fs = factor_of_safety(bw, m)
+        # hillshade of the current surface (scar and deposit change the shading)
+        grow = np.clip((sim_t - np.where(np.isfinite(tw), tw, 1e9)) / RAMP_S, 0, 1)
+        surf = dw + VIS * fail * scar + VIS_DEP * depw * grow
+        hs = up(hillshade(surf))
+        img = np.dstack([40 + hs * 200] * 3)
+        fsu = up(fs)
+        warn = (np.clip((1.5 - fsu) / 0.5, 0, 1) * (fsu >= 1))[..., None] * (1 - 0.6 * fail)
         img = img * (1 - 0.55 * warn) + np.array([235, 160, 40]) * 0.55 * warn
-        bad = (fs < 1)[..., None] * (0.75 - 0.5 * fail)
+        bad = (fsu < 1)[..., None] * (0.75 - 0.5 * fail)
         img = img * (1 - bad) + np.array([200, 40, 30]) * bad
-        if fail > 0:                                  # the scenario's landslide: dark source scar
+        if fail > 0:   # exposed ground in the scar, keeps the new shading
             s = src_up[..., None] * fail
-            img = img * (1 - s) + np.array([90, 20, 15]) * s
-        if flow > 0:                                  # runout front advances with path distance
-            front = flow * dmax + 1.0
-            on = (dist_up <= front) & (wgt_up > 0)
-            inten = np.clip(wgt_up / wmax, 0.25, 1)[..., None] * on[..., None]
-            img = img * (1 - 0.85 * inten) + np.array(ACCENT) * 0.85 * inten
-        im = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
-        if mode3d:   # the map becomes the terrain texture; the panel goes on a separate layer
-            im.save(tex / f"{i:04d}.jpg", quality=92)
-            im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        dr = ImageDraw.Draw(im, "RGBA")
-        # panel: model, wetness, results (symbols and SI units only: works in both languages)
-        dr.rectangle((24, 24, 640, 236 if t < 8 else 352), fill=(14, 18, 21, 205))
+            img = img * (1 - 0.7 * s) + (np.array(SCAR) * (0.55 + 0.6 * hs[..., None])) * 0.7 * s
+        if sim_t > 0:  # debris where it has arrived
+            on = (arr_up <= sim_t) & (wgt_up > 0) & ~src_up
+            inten = np.clip(wgt_up / wmax, 0.3, 1)[..., None] * on[..., None]
+            img = img * (1 - 0.8 * inten) + (np.array(ACCENT) * (0.6 + 0.5 * hs[..., None])) * 0.8 * inten
+        Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(tex / f"{i:04d}.jpg", quality=92)
+
+        # panel layer (symbols and SI units: reads in both languages)
+        im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        dr = ImageDraw.Draw(im)
+        dr.rectangle((24, 24, 660, 250 if t < T_FAIL else 404), fill=(14, 18, 21, 205))
         dr.text((44, 40), "FS = [c′ + (γ − m·γw) z cos²β tanφ′] / (γ z sinβ cosβ)",
                 font=f_small, fill=(228, 230, 231))
-        dr.text((44, 74), f"c′ = {C_EFF / 1e3:.0f} kPa   φ′ = {math.degrees(PHI):.0f}°   z = {Z_SOIL:g} m".replace(".", " "[:0] or "."),
+        dr.text((44, 66), "m = min(1, q·a / (T·sinβ))", font=f_small, fill=(228, 230, 231))
+        dr.text((44, 94), f"c′ {C_EFF / 1e3:.0f} kPa  φ′ {math.degrees(PHI):.0f}°  z {Z_SOIL:g} m  T {T_SOIL:.0f} m²/d",
                 font=f_small, fill=(141, 151, 158))
-        dr.text((44, 112), "m", font=f_mid, fill=(228, 230, 231))
-        dr.rectangle((84, 116, 444, 132), outline=(141, 151, 158, 255))
-        dr.rectangle((84, 116, 84 + 360 * m, 132), fill=(70, 130, 180, 255))
-        dr.text((460, 110), f"{m * 100:3.0f} %", font=f_mid, fill=(228, 230, 231))
-        unstable = float((factor_of_safety(beta_w, m) < 1).sum() * CELL * CELL)
-        dr.rectangle((44, 158, 62, 176), fill=(200, 40, 30, 255)); dr.text((74, 156), "FS < 1", font=f_small, fill=(228, 230, 231))
-        dr.rectangle((210, 158, 228, 176), fill=(235, 160, 40, 255)); dr.text((240, 156), "1 ≤ FS < 1,5" if False else "FS 1 … 1.5", font=f_small, fill=(228, 230, 231))
-        dr.text((44, 196), f"FS < 1: {fmt(unstable)} m²", font=f_mid, fill=(228, 230, 231))
-        if t >= 8:
-            a = int(255 * smooth((t - 8) / 0.6))
-            dr.text((44, 236), f"V ≈ {fmt(round(V, -2))} m³", font=f_big, fill=(255, 106, 43, a))
-            dr.text((44, 272), f"M ≈ {fmt(round(mass, -2))} t", font=f_big, fill=(228, 230, 231, a))
-            if t >= 9:
-                b = int(255 * smooth((t - 9) / 0.6))
-                shown = min(L, flow * L)
-                dr.text((44, 308), f"L ≈ {fmt(round(shown, -1))} m   α = {alpha:.0f}°", font=f_big, fill=(228, 230, 231, b))
-        if mode3d:
-            im.save(frames / f"{i:04d}.png")
-            if i % 60 == 0:
-                print("frame", i)
-            continue
-        # scale bar (100 m) and north arrow
-        px = 100.0 / WIN_W * W
-        dr.rectangle((W - 60 - px, H - 52, W - 60, H - 46), fill=(14, 18, 21, 230))
-        dr.text((W - 60 - px, H - 80), "100 m", font=f_small, fill=(14, 18, 21, 255))
-        dr.polygon([(W - 40, 40), (W - 50, 70), (W - 40, 64), (W - 30, 70)], fill=(14, 18, 21, 230))
-        dr.text((W - 46, 74), "N", font=f_small, fill=(14, 18, 21, 255))
-        im.save(frames / f"{i:04d}.png")
+        dr.text((44, 128), "q", font=f_mid, fill=(228, 230, 231))
+        dr.rectangle((84, 132, 404, 148), outline=(141, 151, 158))
+        dr.rectangle((84, 132, 84 + 320 * q / Q_MAX, 148), fill=(70, 130, 180))
+        dr.text((420, 126), f"{q * 1000:3.0f} mm/d", font=f_mid, fill=(228, 230, 231))
+        dr.rectangle((44, 172, 62, 190), fill=(200, 40, 30)); dr.text((74, 170), "FS < 1", font=f_small, fill=(228, 230, 231))
+        dr.rectangle((210, 172, 228, 190), fill=(235, 160, 40)); dr.text((240, 170), "FS 1 … 1.5", font=f_small, fill=(228, 230, 231))
+        dr.text((44, 208), f"FS < 1: {fmt((fs < 1).sum() * CELL * CELL)} m²", font=f_mid, fill=(228, 230, 231))
+        if t >= T_FAIL:
+            a = int(255 * smooth((t - T_FAIL) / 0.6))
+            dr.text((44, 252), f"V ≈ {fmt(round(res['volume_m3'], -2))} m³   M ≈ {fmt(round(res['mass_t'], -2))} t",
+                    font=f_big, fill=(255, 106, 43, a))
+            dr.text((44, 292), f"v₂² = v₁² + 2g(Δz − μΔs) − 2gΔs v₁²/ξ   μ {MU:g}  ξ {XI:.0f}",
+                    font=f_small, fill=(228, 230, 231, a))
+            if sim_t > 0:
+                b = int(255 * smooth((t - T_FLOW) / 0.5))
+                k = sim_t / t_end
+                dr.text((44, 324), f"t = {sim_t:4.0f} s", font=f_big, fill=(228, 230, 231, b))
+                dr.text((44, 360), f"v max ≈ {res['v_max_ms']:.0f} m/s   L ≈ {fmt(round(res['runout_m'] * k, -1))} m",
+                        font=f_big, fill=(228, 230, 231, b))
+        im.save(pan / f"{i:04d}.png")
         if i % 60 == 0:
             print("frame", i)
-    if preview or mode3d:
-        return
-    pat = str(frames / "%04d.png")
-    run = lambda *a: subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *a], check=True)
-    run("-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-c:v", "libvpx-vp9", "-crf", "34", "-b:v", "0",
-        "-row-mt", "1", str(OUT / "landslide-sim.webm"))
-    run("-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-c:v", "libx264",
-        "-preset", "slow", "-crf", "24", str(OUT / "landslide-sim.mp4"))
-    Image.open(frames / f"{n_frames - 1:04d}.png").convert("RGB").resize((720, 405), Image.LANCZOS).save(
-        OUT / "landslide-sim-720.webp", quality=80, method=6)
-    print("done")
+    (WORK / "ls_dem.json").write_text(json.dumps({"rows": dw.shape[0], "cols": dw.shape[1], "cell": CELL,
+                                                    "frames": n_frames, "vis": VIS, "vis_dep": VIS_DEP, "ramp": RAMP_S,
+                                                    "timeline": timeline}))
 
 
 def compose3d():
@@ -333,9 +358,8 @@ def compose3d():
     shutil.rmtree(out, ignore_errors=True); out.mkdir()
     files = sorted(src.glob("*.png"))
     for f in files:
-        im = Image.open(f).convert("RGBA")
-        im = Image.alpha_composite(im, Image.open(pan / f.name).convert("RGBA")).convert("RGB")
-        im.save(out / f.name)
+        im = Image.alpha_composite(Image.open(f).convert("RGBA"), Image.open(pan / f.name).convert("RGBA"))
+        im.convert("RGB").save(out / f.name)
     pat = str(out / "%04d.png")
     run = lambda *a: subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *a], check=True)
     run("-framerate", str(FPS), "-i", pat, "-pix_fmt", "yuv420p", "-c:v", "libvpx-vp9", "-crf", "33", "-b:v", "0",
@@ -347,8 +371,10 @@ def compose3d():
     print("done")
 
 
-if __name__ == "__main__" and "--scan" not in sys.argv:
-    if "--compose3d" in sys.argv:
+if __name__ == "__main__":
+    if "--scan" in sys.argv:
+        scan()
+    elif "--compose3d" in sys.argv:
         compose3d()
     else:
-        render(preview="--preview" in sys.argv, mode3d="--3d" in sys.argv)
+        render()

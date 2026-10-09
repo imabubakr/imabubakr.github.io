@@ -53,11 +53,12 @@ footprints drawing in. Data: Geobasis NRW, dl-de/zero-2-0 (credited in the capti
 houses, loose outlines; official footprints in white) and its caption says so. Captions must stay truthful: the building footprints are official ALKIS data, not model output (the owner
 asked; a false claim would be detectable and risky in applications). They are listed in `PLATES`
 with `src=None` (pre-rendered, skipped by `build_media`).
-Plate 04 is a landslide MODEL SCENARIO (`tools/media/landslide.py`): 2 m DTM from the Freudenberg LiDAR ground
-points, infinite-slope FS with rising wetness m, failure where FS < 1 (largest compact cluster after a morphological
-opening = the scenario's slide), volume/mass from area × 1.5 m, runout by MFD routing limited by the Corominas (1996)
-reach angle; rendered in 3D (`--3d` → `render_landslide3d.mjs` → `--compose3d`: map frames draped on the
-terrain mesh, heights ×1.6, panel composited on top); results in work/landslide.json and in the caption, which says it is a scenario with assumed soil values.
+Plate 04 is a landslide MODEL SCENARIO (`tools/media/landslide.py`, see its docstring): 2 m DTM from the Freudenberg
+LiDAR ground points; steady-state hydrology m = min(1, q·a/(T·sinβ)) with MFD catchment area (hollows saturate first);
+infinite-slope FS; the slide = compact FS<1 cluster at peak rain (150 mm/d, an extreme event); volume/mass from area
+× 1.5 m; runout = Voellmy mass point on MFD paths (μ 0.3, ξ 300) with velocity and arrival time, cross-checked with
+Corominas (1996); deposit volume-conserving. Rendered in 3D (three.js): the scar sinks (×3) and the deposit builds up
+(×1.5) in the mesh. Results in work/landslide.json and in the caption, which says it is a scenario with assumed values.
 Added 2026-10-10 from the owner's Downloads: vehicle detection video (pre-rendered, `src=None`; source stays in
 ~/Downloads, not in the repo), tree crowns (`tree-crowns.png`), population density Europe (`population-europe.png`,
 cropped from a geemap screenshot to remove the UI; basemap credit in the caption). Captions neutral until the owner

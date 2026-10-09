@@ -8,13 +8,18 @@
 <body>
 <script type="module">
 // Landslide scenario in 3D: the 2 m terrain window as a mesh, each frame's map
-// (FS colours, scar, runout; hillshade baked in) draped on it. Driven by
-// render_landslide3d.mjs, one frame at a time.
+// (FS colours, scar, runout; hillshade baked in) draped on it. After the failure
+// the scar sinks by the soil depth and the deposit builds up where the debris has
+// arrived (both x meta.vis for visibility). Driven by render_landslide3d.mjs.
 import * as THREE from "three";
 
 const W = 1600, H = 900, EXAG = 1.6;
 const meta = await (await fetch("work/ls_dem.json")).json();
-const dem = new Float32Array(await (await fetch("work/ls_dem.bin")).arrayBuffer());
+const bin = async (f) => new Float32Array(await (await fetch(f)).arrayBuffer());
+const dem = await bin("work/ls_dem.bin");
+const scar = await bin("work/ls_scar.bin");   // -soil depth inside the scar
+const dep = await bin("work/ls_dep.bin");     // deposit thickness (m)
+const arr = await bin("work/ls_arr.bin");     // arrival time of the debris (s)
 const { rows, cols, cell } = meta;
 const sizeX = (cols - 1) * cell, sizeZ = (rows - 1) * cell;
 
@@ -66,15 +71,21 @@ window.frameCount = meta.frames;
 window.renderFrame = async (i) => {
   tex.image = await loadImage(`work/landslide_tex/${String(i).padStart(4, "0")}.jpg`);
   tex.needsUpdate = true;
+  const { fail, sim_t } = meta.timeline[i];
+  for (let k = 0; k < dem.length; k++) {
+    const grow = Math.min(1, Math.max(0, (sim_t - arr[k]) / meta.ramp));
+    pos.setY(k, (dem[k] + meta.vis * fail * scar[k] + meta.vis_dep * dep[k] * grow) * EXAG);
+  }
+  pos.needsUpdate = true;
   const t = i / (meta.frames - 1);
   // from the south-west, swinging slowly round to the west (the slide faces west)
   // high and wide at the start (the whole block, FS spreading), lower and closer on the slide at the end
   const k = smooth(t);
   const a = THREE.MathUtils.degToRad(205 + 50 * k);
-  const r = 1000 - 360 * k, h = 720 - 340 * k;
-  const tx = 40 * k, tz = -40 * k;
+  const r = 1000 - 540 * k, h = 720 - 360 * k;
+  const tx = 63 * k, tz = -67 * k;             // ends on the scar (E 420913, N 5638707)
   camera.position.set(tx + Math.sin(a) * r, h, tz - Math.cos(a) * r);
-  camera.lookAt(tx + 60, 40, tz);
+  camera.lookAt(tx + 20 * (1 - k), 50 - 15 * k, tz);
   renderer.render(scene, camera);
   return true;
 };
