@@ -370,8 +370,8 @@
   fullBtn.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 6V1.5H6M10 1.5h4.5V6M14.5 10v4.5H10M6 14.5H1.5V10"/></svg>' + T.full;
   controls.appendChild(fullBtn);
   hero.appendChild(controls);
-  // the Feldberg link and the CRS label are not map clicks
-  [controls, hero.querySelector(".map-next"), hero.querySelector(".strip-crs")].forEach(function (el) {
+  // the CRS label is not a map click
+  [controls, hero.querySelector(".strip-crs")].forEach(function (el) {
     if (!el) return;
     ["click", "pointerdown"].forEach(function (t) {
       el.addEventListener(t, function (e) { e.stopPropagation(); });

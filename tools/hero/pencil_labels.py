@@ -4,38 +4,58 @@
     python3 tools/hero/pencil_labels.py index.html de/index.html   # needs fontTools, pyproj
 
 Writes an SVG (same 10 x 5 km frame as the hero map, viewBox in metres) between
-the <!-- build:hero-pencil --> markers, right after the hero map. Positions are
+the <!-- build:hero-pencil --> markers, right after the hero map, with the place
+names, the hero sentence (from the page's <h1>, which stays as visually hidden
+text) and the pencilled notes (text in the page's <html lang>). Positions are
 OpenStreetMap place nodes (fetched 2026-10-10); names are proper nouns, the same
-in both languages. The handwriting is Caveat (SIL OFL, tools/hero/fonts/),
+in both languages. The handwriting is Reenie Beanie (SIL OFL, tools/hero/fonts/),
 converted to outlines here, so no font is loaded on the site: each glyph is a
 <path> in <defs>, reused with <use>. Colour (--pencil) and the graphite grain
-filter live in CSS / the SVG itself.
+(a static noise mask; a live SVG filter here made the hero's scroll stutter) live in CSS.
 """
 import math
 import random
 import re
 import sys
+from html import unescape
 from pathlib import Path
 
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
-from fontTools.varLib.instancer import instantiateVariableFont
 from pyproj import Transformer
 
-FONT = Path(__file__).with_name("fonts") / "Caveat-wght.ttf"
-WEIGHT = 520
+FONT = Path(__file__).with_name("fonts") / "ReenieBeanie.ttf"
 X0, Y1 = 408660, 5319200          # hero bbox west / north (UTM 32N), see hero-contours.json
-# name, lat, lon (OSM place node), size in m (~px x 6), side of the mark, extra class
+# name, lat, lon (OSM place node), size in m (em; the hero sentence uses the same, 0.013 x --mw), side, class
 PLACES = [
-    ("Freiburg", 47.99609, 7.84940, 150, "l", "pc-city"),
-    ("Rieselfeld", 47.99947, 7.79143, 150, "r", "pc-wide"),
-    ("Lehen", 48.01677, 7.80227, 150, "r", "pc-wide"),
-    ("Waldsee", 47.98813, 7.88440, 150, "r", "pc-wide"),
+    ("Freiburg", 47.99609, 7.84940, 130, "l", "pc-city"),
+    ("Rieselfeld", 47.99947, 7.79143, 130, "r", "pc-wide"),
+    ("Lehen", 48.01677, 7.80227, 130, "r", "pc-wide"),
+    ("Waldsee", 47.98813, 7.88440, 130, "r", "pc-wide"),
+]
+# pencilled notes (owner's jokes, 2026-10-10): text per page language, start of the baseline in map metres
+# (from the top left), tilt, the arrow's target, class, where the arrow starts ("end" of the line or "below"
+# its middle; owner: the kite arrow from below the middle). Hiking: the 663 m summit north-east of Freiburg, a DEM
+# maximum that stays on screen on wide displays (the two higher ones sit right at the cropped east edge).
+# Kite: the Lorettoberg (OSM peak, 385 m, 47.97492 N 7.83959 E) lies 36 m south of the sheet, so the arrow
+# runs off the bottom edge at its longitude, as old maps point to places beyond the edge.
+# the hero sentence itself, drawn like the place names so it looks exactly the same (owner, 2026-10-10); the
+# real <h1> stays in the page, visually hidden. Text from the page's <h1>; start of the first baseline, line
+# step, wrap width (map metres), tilt, class. Centred just above Freiburg; phones crop the map to x ~3660-6340,
+# so they get their own copy inside that window.
+SAY = [
+    (4320, 2390, 150, 2200, -1.2, "pc-wide"),
+    (3800, 2390, 150, 2400, -1.2, "pc-narrow"),
+]
+NOTES = [
+    ({"en": "this is where I go hiking", "de": "hier gehe ich wandern"}, 5750, 1330, -2.5, (8975, 1675), "pc-wide",
+     "end"),
+    ({"en": "this is where I fly my kite", "de": "hier lasse ich meinen Drachen steigen"}, 3150, 3900, -2,
+     (4737, 4990), "pc-wide", "below"),                  # arrowhead just inside the bottom edge
 ]
 
-rnd = random.Random(7)
-font = instantiateVariableFont(TTFont(FONT), {"wght": WEIGHT})
+font = TTFont(FONT)
 gs, cmap, hmtx = font.getGlyphSet(), font.getBestCmap(), font["hmtx"]
 UPM = font["head"].unitsPerEm
 to_utm = Transformer.from_crs(4326, 32632, always_xy=True)
@@ -47,55 +67,94 @@ def glyph_path(name):
     return pen.getCommands()
 
 
-def ring(cx, cy, r):
-    """A quick pencil circle: not round, not closed, a little overshoot."""
-    a0 = rnd.uniform(0, 2 * math.pi)
-    pts = []
-    for i in range(23):
-        a = a0 + i / 20 * 2 * math.pi
-        rr = r * (1 + 0.12 * math.sin(3 * a + a0) + rnd.uniform(-0.04, 0.04))
-        pts.append(f"{cx + rr * math.cos(a):.0f} {cy + rr * math.sin(a) * 0.9:.0f}")
-    return "M" + " L".join(pts)
+def build(lang, say):
+    rnd = random.Random(7)                                 # same hand-drawn wobble on every page
+    used = {}
 
+    def ring(cx, cy, r):
+        """A quick pencil circle: not round, not closed, a little overshoot."""
+        a0 = rnd.uniform(0, 2 * math.pi)
+        pts = []
+        for i in range(23):
+            a = a0 + i / 20 * 2 * math.pi
+            rr = r * (1 + 0.12 * math.sin(3 * a + a0) + rnd.uniform(-0.04, 0.04))
+            pts.append(f"{cx + rr * math.cos(a):.0f} {cy + rr * math.sin(a) * 0.9:.0f}")
+        return "M" + " L".join(pts)
 
-used, labels = {}, []
-for name, lat, lon, size, side, cls in PLACES:
-    e, n = to_utm.transform(lon, lat)
-    x, y = e - X0, Y1 - n
-    s = size / UPM
-    s10 = s * 10                                           # glyph paths are in 1/100 em
-    glyphs, pen_x = [], 0
-    for ch in name:
-        g = cmap[ord(ch)]
-        gid = used.setdefault(g, f"pc{len(used)}")
-        glyphs.append((gid, pen_x))
-        pen_x += hmtx[g][0]
-    width = pen_x * s
-    gap = size * 0.5
-    tx = x + gap if side == "r" else x - gap - width
-    ty = y + size * 0.22                                   # baseline: x-height centred on the mark
-    rot = rnd.uniform(-4, 3)
-    uses = "".join(f'<use href="#{gid}" x="{gx / 10:.0f}"/>' for gid, gx in glyphs)
-    r = size * (0.3 if cls == "pc-city" else 0.24)
-    labels.append(
-        f'<g class="{("pc " + cls).strip()}">'
-        f'<path class="pc-line" d="{ring(x, y, r)}"/><circle cx="{x:.0f}" cy="{y:.0f}" r="{size * 0.06:.0f}"/>'
-        f'<g transform="translate({tx:.0f} {ty:.0f}) rotate({rot:.1f}) scale({s10:.4f})">{uses}</g>'
-        "</g>"
-    )
+    def words(text, tx, ty, rot, s):
+        """<g> with the text as reused glyphs; returns it and the text width in map metres."""
+        uses, pen_x = [], 0
+        for ch in text:
+            g = cmap[ord(ch)]
+            gid = used.setdefault(g, f"pc{len(used)}")
+            uses.append(f'<use href="#{gid}" x="{pen_x / 10:.0f}"/>')
+            pen_x += hmtx[g][0]
+        return (f'<g transform="translate({tx:.0f} {ty:.0f}) rotate({rot:.1f}) scale({s * 10:.4f})">'
+                f'{"".join(uses)}</g>'), pen_x * s
 
-defs = "".join(f'<path id="{gid}" d="{glyph_path(g)}"/>' for g, gid in used.items())
-svg = (
-    '<div class="pencil-box"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="pencil" '
-    'viewBox="0 0 10000 5000" preserveAspectRatio="xMidYMid slice">'
-    '<defs><filter id="pc-graphite" x="-5%" y="-30%" width="110%" height="160%" filterUnits="objectBoundingBox">'
-    '<feTurbulence type="fractalNoise" baseFrequency=".11" numOctaves="2" seed="4" result="n"/>'
-    '<feColorMatrix in="n" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2 1.68" result="grain"/>'
-    '<feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>'
-    '<feDisplacementMap in="g" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/>'
-    f"</filter>{defs}</defs>"
-    f'<g filter="url(#pc-graphite)">{"".join(labels)}</g></svg></div>'
-)
+    labels = []
+    for name, lat, lon, size, side, cls in PLACES:
+        e, n = to_utm.transform(lon, lat)
+        x, y = e - X0, Y1 - n
+        s = size / UPM
+        width = sum(hmtx[cmap[ord(ch)]][0] for ch in name) * s
+        gap = size * 0.5
+        tx = x + gap if side == "r" else x - gap - width
+        ty = y + size * 0.22                               # baseline: x-height centred on the mark
+        rot = rnd.uniform(-4, 3)
+        r = size * (0.3 if cls == "pc-city" else 0.24)
+        g, _ = words(name, tx, ty, rot, s)
+        labels.append(
+            f'<g class="{("pc " + cls).strip()}">'
+            f'<path class="pc-line" d="{ring(x, y, r)}"/><circle cx="{x:.0f}" cy="{y:.0f}" r="{size * 0.06:.0f}"/>'
+            f"{g}</g>"
+        )
+    size = PLACES[0][3]
+    space = hmtx[cmap[ord(" ")]][0] * size / UPM
+    for sx0, sy0, step, wrap, srot, scls in SAY:
+        lines, line, lw = [], [], 0
+        for word in say.split():
+            w = sum(hmtx[cmap[ord(ch)]][0] for ch in word) * size / UPM
+            if line and lw + space + w > wrap:
+                lines.append(" ".join(line)); line, lw = [], 0
+            line.append(word); lw += (space if lw else 0) + w
+        lines.append(" ".join(line))
+        a = math.radians(srot)                             # lines step down along the tilted text
+        say_g = "".join(words(ln, sx0 - i * step * math.sin(a), sy0 + i * step * math.cos(a), srot, size / UPM)[0]
+                        for i, ln in enumerate(lines))
+        labels.append(f'<g class="pc pc-say {scls}">{say_g}</g>')
+    for text, tx, ty, rot, (ex, ey), cls, start in NOTES:
+        g, width = words(text[lang], tx, ty, rot, size / UPM)
+        a = math.radians(rot)                              # the (tilted) line's direction
+        if start == "end":                                 # from just after the last word
+            sx, sy = tx + (width + size * 0.4) * math.cos(a), ty + (width + size * 0.4) * math.sin(a) - size * 0.3
+        else:                                              # from just below the middle of the line
+            sx, sy = tx + width / 2 * math.cos(a), ty + width / 2 * math.sin(a) + size * 0.45
+        d = math.hypot(ex - sx, ey - sy)
+        ex, ey = ex - (ex - sx) / d * size * 0.6, ey - (ey - sy) / d * size * 0.6   # stop short of the target
+        # "end": bulge out, then drop onto the target; "below": drop first, then swing over to it
+        cx, cy = (ex - size * 0.3, sy) if start == "end" else (sx, sy + (ey - sy) * 0.75)
+        # a quick freehand stroke: the curve sampled with a little sideways wobble
+        pts, n = [], max(12, int(d / (size * 0.9)))
+        for i in range(n + 1):
+            u = i / n
+            px = (1 - u) ** 2 * sx + 2 * (1 - u) * u * cx + u * u * ex
+            py = (1 - u) ** 2 * sy + 2 * (1 - u) * u * cy + u * u * ey
+            w = size * 0.05 * math.sin(u * math.pi) * rnd.uniform(-1, 1)
+            pts.append(f"{px + w:.0f} {py - w:.0f}")
+        hd = math.atan2(ey - cy, ex - cx)
+        head = " ".join(f"M{ex + size * 0.6 * math.cos(hd + math.pi + k):.0f} {ey + size * 0.6 * math.sin(hd + math.pi + k):.0f} L{ex:.0f} {ey:.0f}"
+                        for k in (-0.5, 0.42))
+        labels.append(f'<g class="{("pc " + cls).strip()}">{g}'
+                      f'<path class="pc-line pc-arrow" d="M{" L".join(pts)} {head}"/></g>')
+
+    defs = "".join(f'<path id="{gid}" d="{glyph_path(g)}"/>' for g, gid in used.items())
+    return (
+        '<div class="pencil-box"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="pencil" '
+        'viewBox="0 0 10000 5000" preserveAspectRatio="xMidYMid slice">'
+        f"<defs>{defs}</defs>{''.join(labels)}</svg></div>"
+    ), len(used)
+
 
 for page in sys.argv[1:]:
     p = Path(page)
@@ -103,7 +162,9 @@ for page in sys.argv[1:]:
     if "<!-- build:hero-pencil -->" not in html:
         html = html.replace("<!-- /build:hero-map -->",
                             "<!-- /build:hero-map --><!-- build:hero-pencil --><!-- /build:hero-pencil -->", 1)
+    say = unescape(re.sub(r"<[^>]+>", "", re.search(r'<h1 id="hero-title">(.*?)</h1>', html, re.S).group(1)))
+    svg, n = build(re.search(r'<html lang="(\w+)"', html).group(1), say)
     html = re.sub(r"<!-- build:hero-pencil -->.*?<!-- /build:hero-pencil -->",
                   lambda m: f"<!-- build:hero-pencil -->{svg}<!-- /build:hero-pencil -->", html, flags=re.S)
     p.write_text(html)
-    print(f"{page}: {len(svg) / 1024:.1f} KB of pencil labels ({len(used)} glyphs)")
+    print(f"{page}: {len(svg) / 1024:.1f} KB of pencil labels ({n} glyphs)")

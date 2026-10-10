@@ -29,6 +29,14 @@
   font-display: swap;
   src: url("../fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2");
 }
+/* IBM Plex Serif: only for the hero sheet's margin labels, the old engraved style (owner, 2026-10-10) */
+@font-face {
+  font-family: "IBM Plex Serif";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-serif-latin-500-normal.woff2") format("woff2");
+}
 
 /* --------------------------------------------------------------- tokens -- */
 :root {
@@ -44,6 +52,8 @@
   --sheet-age: rgb(150 106 40 / 0.4);
   --sheet-relief: 0.9;
   --pencil: #54585b; /* graphite place names on the sheet */
+  --pencil-blue: #2d5a94; /* the hero sentence, in blue pencil */
+  --water: #5d86ab; /* rivers and lakes in the orbit section's aerial survey */
 
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -69,6 +79,8 @@
     --sheet-age: rgb(170 135 80 / 0.14);
     --sheet-relief: 0.6;
     --pencil: #a2aaaf;
+    --pencil-blue: #86aee0;
+    --water: #6f97bb;
     color-scheme: dark;
   }
 }
@@ -84,6 +96,8 @@
   --sheet-age: rgb(170 135 80 / 0.14);
   --sheet-relief: 0.6;
   --pencil: #a2aaaf;
+  --pencil-blue: #86aee0;
+  --water: #6f97bb;
   color-scheme: dark;
 }
 
@@ -528,16 +542,9 @@ a:hover {
   vector-effect: non-scaling-stroke;
 }
 
-.hero {
-  /* phones/tablets: high enough to clear the scroll cue and the map controls */
-  --hero-text-b: clamp(84px, 12cqh, 112px);
-}
+/* holds the (visually hidden) <h1>; the sentence is drawn on the map with the pencil notes */
 .hero-text {
   position: absolute;
-  right: var(--pad);
-  bottom: var(--hero-text-b);
-  left: var(--pad);
-  z-index: 1;
 }
 
 .hero-loc {
@@ -1306,7 +1313,7 @@ dl.cv-list .cv-row {
   flex-direction: column;
   justify-content: flex-end;
   min-height: 92vh;
-  padding-top: 44vh;
+  padding-top: 70vh; /* the summit above the rows, and the finale's stage */
   padding-bottom: clamp(64px, 8cqw, 120px);
 }
 #contact .section-head {
@@ -1370,9 +1377,9 @@ dl.cv-list .cv-row {
 }
 @media (min-width: 900px) {
   #contact {
-    justify-content: center;
+    justify-content: flex-end;
     min-height: 100vh;
-    padding-top: clamp(40px, 5cqw, 80px);
+    padding-top: 80vh; /* an empty stretch of landscape: the finale's stage, after the plates have gone */
   }
   #contact .section-head,
   #contact .contact-body {
@@ -1772,6 +1779,28 @@ html.arrive-live .backdrop {
   -webkit-mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.2) 30%, rgb(0 0 0 / 0.2) 70%, #000 96%);
   mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.2) 30%, rgb(0 0 0 / 0.2) 70%, #000 96%);
 }
+/* The finale (finale.js): the Feldberg as a 3D digital twin over the flight, kept off the Contact
+   text on the left like the flight itself (html.arrive-live mask) */
+.finale {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+@media (min-width: 900px) {
+  .finale {
+    -webkit-mask-image: linear-gradient(to right, transparent 30%, #000 46%);
+    mask-image: linear-gradient(to right, transparent 30%, #000 46%);
+  }
+}
+@media print {
+  .finale {
+    display: none;
+  }
+}
 /* Flight readout: says what the background is (route, position, altitude).
    Wide screens only (the margin must hold it); hidden over the hero and [02]. */
 .flight-hud {
@@ -1910,9 +1939,6 @@ html.arrive-live .backdrop {
   .map-hint {
     right: auto;
     left: var(--pad);
-  }
-  .hero {
-    --hero-text-b: clamp(48px, 10cqh, 96px);
   }
 }
 @media (max-width: 599px) {
@@ -2089,13 +2115,6 @@ html.hero-rising .ridges {
   opacity: 0;
   transition: opacity 0.6s ease 0.7s;
 }
-/* the sentence lifts away as the map starts to rise (--hero-flat from hero-3d.js),
-   readable over the terrain while it fades */
-html.hero-rising .hero h1 {
-  opacity: var(--hero-flat, 1);
-  transform: translateY(calc((1 - var(--hero-flat, 1)) * -16px));
-  text-shadow: 0 0 6px var(--paper), 0 0 14px var(--paper), 0 0 22px var(--paper);
-}
 /* while risen: map tools, controls, hint and strip ticks step back */
 html.hero-risen .hero-map {
   pointer-events: none;
@@ -2171,7 +2190,9 @@ html.hero-risen .hero-strip .ticks {
    stay here. Layers: yellowing, browned edges, foxing and grain in --sheet-age;
    the relief (soft-light, 128 = flat); and the contour ink rubbed off along the
    folds (--paper through the wear mask, map only, the sentence stays crisp).
-   It fades out with the sentence as the map rises (--hero-flat).
+   It fades out as soon as the map starts to rise (html.hero-rising, a short CSS
+   transition on layers of their own: a per-frame fade value made the browser re-paint
+   these large masked layers on every frame of the scroll).
    Remove this block, the --sheet-* tokens and assets/img/paper-* to drop it. */
 .hero {
   --paper-age: url("../img/paper-wide-age.webp");
@@ -2187,12 +2208,24 @@ html.hero-risen .hero-strip .ticks {
 }
 .hero::before,
 .hero::after,
+.hero-map::after,
+.pencil-box {
+  transition: opacity 0.45s ease;
+  will-change: opacity;
+}
+html.hero-rising .hero::before,
+html.hero-rising .hero::after,
+html.hero-rising .hero-map::after,
+html.hero-rising .pencil-box {
+  opacity: 0;
+}
+.hero::before,
+.hero::after,
 .hero-map::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: var(--hero-flat, 1);
 }
 .hero::before,
 .hero::after {
@@ -2207,7 +2240,7 @@ html.hero-risen .hero-strip .ticks {
 .hero::after {
   background: var(--paper-relief) center / 100% 100% no-repeat;
   mix-blend-mode: soft-light;
-  opacity: calc(var(--hero-flat, 1) * var(--sheet-relief));
+  opacity: var(--sheet-relief);
 }
 /* the map sits below the strip: shift the wear mask so it lines up with the sheet */
 .hero-map::after {
@@ -2221,12 +2254,12 @@ html.hero-risen .hero-strip .ticks {
    the map; they go with the paper. Phones show only the ones in the centre. */
 .pencil-box {
   position: absolute;
+  z-index: 1; /* above the wear layer: pencil is written after the folds, the creases do not rub it off */
   top: 0;
   left: calc(50% - var(--mw) / 2);
   width: var(--mw);
   aspect-ratio: var(--map-aspect);
   pointer-events: none;
-  opacity: var(--hero-flat, 1);
 }
 .pencil {
   position: absolute;
@@ -2234,6 +2267,10 @@ html.hero-risen .hero-strip .ticks {
   width: 100%;
   height: 100%;
   fill: var(--pencil);
+  /* graphite grain: paper shows through the strokes. A static noise mask, drawn once;
+     a live SVG filter here cost ~20 ms per frame while the map rose */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2 1.68'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask-size: 240px 240px;
 }
 .pc-line {
   fill: none;
@@ -2243,61 +2280,35 @@ html.hero-risen .hero-strip .ticks {
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
+/* the sentence in blue pencil (owner, 2026-10-10); everything else stays graphite */
+.pc-say {
+  fill: var(--pencil-blue);
+}
+/* arrows: a light, quick pencil stroke, no heavier than the handwriting */
+.pc-arrow {
+  stroke-width: 0.9px;
+  opacity: 0.7;
+}
 @media (max-width: 719px) {
   .pc-wide {
     display: none;
   }
 }
-/* the sentence is printed on the sheet: map ink (sepia, from --contour and --ink), a
-   faint print speckle, and rubbed thin where a fold crosses it (the wear mask, lined
-   up with the hero: the text box sits --pad from the left, --hero-text-b up) */
-.hero h1 {
-  color: color-mix(in srgb, var(--contour) 40%, var(--ink));
-}
-.hero-text {
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.7 1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), var(--paper-wear), linear-gradient(#000 0 0);
-  mask-size: 240px 240px, 100cqw 100cqh, 100% 100%;
-  mask-position: 0 0, left calc(-1 * var(--pad)) bottom calc(-1 * var(--hero-text-b)), 0 0;
-  mask-repeat: repeat, no-repeat, no-repeat;
-  mask-composite: intersect, exclude, add;
-}
-/* adjoining sheet, as on printed maps: where the line to the Feldberg leaves this
-   sheet (bottom edge, 71 % across); it links to Contact, where the flight ends */
-.map-next {
-  position: absolute;
-  bottom: 14px;
-  left: clamp(50%, calc(50cqw + 0.2135 * var(--mw)), calc(100cqw - 380px));
-  z-index: 3;
-  display: none;
-  min-height: 24px;
-  padding: 4px 6px;
-  color: var(--muted);
-  font: 400 0.6875rem/1.5 var(--font-mono);
-  text-decoration: none;
-  transform: translateX(-50%);
-  transition: opacity 0.4s ease;
-}
-.map-next:hover {
-  color: var(--accent);
-}
-.map-next svg { /* turned to the true bearing, 139° */
-  width: 10px;
-  height: 10px;
-  margin-right: 6px;
-  vertical-align: -1px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.3;
-  transform: rotate(49deg);
-}
-@media (min-width: 900px) {
-  .map-next {
-    display: block;
+@media (min-width: 720px) {
+  .pc-narrow {
+    display: none;
   }
 }
-html.hero-risen .map-next {
-  opacity: 0;
-  pointer-events: none;
+/* the sentence is drawn in the pencil SVG exactly like the place names
+   (tools/hero/pencil_labels.py, SAY); the real <h1> stays for search engines and screen
+   readers, visually hidden */
+.hero h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 /* easter egg: the CRS label cycles through a few in-jokes on click (hero-map.js) */
 @media (hover: hover) {
@@ -2305,12 +2316,19 @@ html.hero-risen .map-next {
     cursor: pointer;
   }
 }
+/* the sheet's margin (sheet number, longitudes, CRS) in the old engraved style, printed
+   in the map's sepia ink (owner's pick "M3", 2026-10-10; no piano-key bars) */
+.hero-strip {
+  font: 500 0.75rem/1 "IBM Plex Serif", Georgia, serif;
+  letter-spacing: 0.06em;
+}
+html:not(.hero-rising) .hero-strip {
+  color: color-mix(in srgb, var(--contour) 40%, var(--ink));
+}
 /* on the aged paper the small labels are printed in ink (muted grey fell below AA) */
-html:not(.hero-rising) .hero-strip,
 html:not(.hero-rising) .map-hint,
 html:not(.hero-rising) .hero-cue,
-html:not(.hero-rising) .map-mode button,
-html:not(.hero-rising) .map-next:not(:hover) {
+html:not(.hero-rising) .map-mode button {
   color: var(--ink);
 }
 html:not(.hero-rising) .map-full {

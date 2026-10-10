@@ -8,16 +8,19 @@
 // says what it is.
 //
 // Section [02] "From orbit to drone": while its chapters scroll past, the camera
-// climbs to orbit (Earth's limb, 5° graticule, country outlines, a Sentinel-2
-// swath over Freiburg), descends to ~1 km looking straight down
-// (overlapping aerial photo frames) and tilts forward at drone height (a camera
-// viewfinder). The keyframes sit on the chapters' real positions; an
+// climbs to orbit (Earth's limb, 5° graticule, country outlines) and watches a
+// Sentinel-2 pass over Freiburg (the swath fills in behind a moving scan line and
+// satellite), descends to ~1 km
+// looking straight down and hovers while an aircraft flies a photo survey over
+// Wiehre (frames click in along the strips; buildings, roads, rail, the Dreisam and
+// woods from OpenStreetMap appear inside them), then tilts forward at drone height (a camera viewfinder). The keyframes sit on the chapters' real positions; an
 // altimeter on the right edge follows the height, and the active chapter is
 // emphasised. Reduced motion: one still frame, chapters as a plain list.
 //
 // Data: assets/topo/region-contours.{json,dem.bin} (400 x 360 cells of 100 m,
 // x east, y south, row 0 = north); assets/topo/earth.json (Natural Earth,
-// tools/orbit/build_earth.py), loaded when [02] comes near.
+// tools/orbit/build_earth.py) and assets/topo/aerial-features.json
+// (OpenStreetMap, tools/orbit/build_aerial.py), loaded when [02] comes near.
 (function () {
   var root = document.documentElement;
   var hero = document.querySelector("[data-topo]");
@@ -47,10 +50,22 @@
   var CRUISE = 1300;         // height above the highest ground ahead (scene m)
   var ARRIVE_PITCH = 30, ARRIVE_CLIMB = 1500; // contact: look down onto the Feldberg
   var ARRIVE_ZOOM = 0.7;     // contact: wider lens (focal length x 0.7)
+  var ARRIVE_RELIEF = 0.55;  // contact: relief factor (EX x 0.55 = ~1.4x real, for the Feldberg point cloud)
+  // The finale (finale.js), once the plates have scrolled away: the camera moves FIN_FORWARD m closer to the
+  // Feldberg, a little lower, with a longer lens, while the point cloud builds up.
+  var FIN_FORWARD = 1500, FIN_CLIMB = -300, FIN_ZOOM = 1.1, FIN_LIFT = 0.13;
   var R_EARTH = 6371000;
   var CENTER_LL = [48.0, 7.81], CENTER_XY = [20000, 18000]; // region centre
   var ORBIT_H = 705000, AERIAL_H = 1000, DRONE_H = 100;     // as in the chapters' spec lines
   var S2_TRACK = 13, S2_HALF = 145000; // Sentinel-2: ground track ~13° east of north here, 290 km swath
+  // The satellite pass: a descending (north to south) pass over Freiburg while chapter 1 is on screen; the
+  // swath fills in behind the scan line. PASS_FROM: where along the track (m north of Freiburg) it starts.
+  var PASS_FROM = 2600e3;
+  // Aerial survey block flown during chapter 2: 3 strips of 5 frames (0.6 x 0.4 km, illustrative, sized so
+  // the whole block and the aircraft stay in view at 1 km; 25 % forward and side overlap, owner's figure),
+  // fixed in the landscape around SURVEY_AT.
+  var SV = { fa: 400, fl: 600, da: 300, dl: 450, n: 5, strips: 3, turn: 1.4 };
+  var SURVEY_AT = 6900;      // the survey's route position: over Wiehre, ~1 km south-east of the old town
 
   var T = de
     ? { title: "Flug über den Schwarzwald", arrived: "Am Feldberg angekommen", route: "Freiburg → Feldberg", 
@@ -67,9 +82,9 @@
   canvas.setAttribute("aria-hidden", "true");
   var ctx = canvas.getContext("2d");
   var w = 0, h = 0, dpr = 1;
-  var dem = null, meta = null, earth = null, earthLoading = false;
+  var dem = null, meta = null, earth = null, earthLoading = false, feats = null;
   var cur = null, last = 0, running = false, lastFade = "";
-  var keys = null, zones = [0.33, 0.66];
+  var keys = null, zones = [0.33, 0.66], surveyS = 0, surveyT = [0, 1], hold = null;
   var hud = document.createElement("p");
   hud.className = "flight-hud";
   hud.setAttribute("aria-hidden", "true");
@@ -134,13 +149,35 @@
       .then(function (r) { return r.json(); })
       .then(function (d) { earth = d; if (cur) draw(cur); })
       .catch(function () {});
+    // map features for the aerial survey (tools/orbit/build_aerial.py, OpenStreetMap): per layer, each line
+    // or outline with absolute x, y and the ground elevation per vertex (once), and its route-coordinate
+    // bounding box for culling
+    fetch(base + "aerial-features.json")
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        feats = {};
+        Object.keys(d.layers).forEach(function (k) {
+          feats[k] = d.layers[k].map(function (f) {
+            var n = f.length / 2, xy = new Float64Array(n * 3), x = 0, y = 0, b = [1e9, -1e9, 1e9, -1e9];
+            for (var i = 0; i < n; i++) {
+              x += f[2 * i]; y += f[2 * i + 1];
+              xy[3 * i] = x; xy[3 * i + 1] = y; xy[3 * i + 2] = elev(x, y);
+              var a = (x - OX) * UX + (y - OY) * UY, l = (x - OX) * RX + (y - OY) * RY;
+              b = [Math.min(b[0], a), Math.max(b[1], a), Math.min(b[2], l), Math.max(b[3], l)];
+            }
+            return { p: xy, b: b };
+          });
+        });
+        if (cur) draw(cur);
+      })
+      .catch(function () {});
   }
 
   // ---------------------------------------------------------- helpers --
   var colors = {};
   function readColors() {
     var cs = getComputedStyle(root);
-    ["--paper", "--contour", "--ink", "--accent-mark"].forEach(function (n) { colors[n] = cs.getPropertyValue(n).trim(); });
+    ["--paper", "--contour", "--ink", "--accent-mark", "--water"].forEach(function (n) { colors[n] = cs.getPropertyValue(n).trim(); });
   }
   function color(name) { return colors[name]; }
   function smooth(t) { return t * t * (3 - 2 * t); }
@@ -192,6 +229,13 @@
     for (var i = 1; i < k.length; i++) k[i][0] = Math.max(k[i][0], k[i - 1][0] + 0.005);
     keys = k;
     zones = [(c[0] + c[1]) / 2, (c[1] + c[2]) / 2];
+    // The survey is flown from arriving at 1 km until the tilt towards the drone view (surveyT, in t).
+    // Meanwhile the camera hovers over the survey at SURVEY_AT (hold, in page fractions); the flight before
+    // and after is stretched a little to fit, so the block and the aircraft stay in view.
+    surveyT = [k[5][0] - 0.4 * (k[5][0] - k[4][0]), k[6][0] + 0.35 * (k[7][0] - k[6][0])];
+    var max = document.documentElement.scrollHeight - h, top = window.scrollY + r.top;
+    hold = surveyT.map(function (tt) { return clamp((top - h / 2 + tt * r.height) / (max || 1), 0.001, 0.999); });
+    surveyS = SURVEY_AT;
   }
 
   // camera target from the scroll position: s along the route, log height,
@@ -199,7 +243,11 @@
   function target() {
     var max = document.documentElement.scrollHeight - window.innerHeight;
     var p = reduce.matches ? 0.35 : clamp(window.scrollY / (max || 1), 0, 1);
-    var cam = { s: p * (ROUTE_LEN - END_GAP), la: Math.log(CRUISE), pitch: 0, cx: 0.5, cy: 0.26, yaw: ROUTE_BRG, boost: 1, zoom: 1 };
+    if (hold && !reduce.matches) {                 // hover over the aerial survey (see layoutKeys)
+      var sf = SURVEY_AT / (ROUTE_LEN - END_GAP);
+      p = p < hold[0] ? (p / hold[0]) * sf : p < hold[1] ? sf : sf + ((p - hold[1]) / (1 - hold[1])) * (1 - sf);
+    }
+    var cam = { s: p * (ROUTE_LEN - END_GAP), la: Math.log(CRUISE), pitch: 0, cx: 0.5, cy: 0.26, yaw: ROUTE_BRG, boost: 1, zoom: 1, fin: 0 };
     // arriving at the Feldberg (contact): on wide screens the summit moves right
     // of centre, beside the text block on the left
     // and the camera tilts down (ARRIVE_PITCH) and climbs a little, looking onto the summit
@@ -210,8 +258,18 @@
       if (w >= 900) cam.cx = 0.5 + 0.17 * ka;
       cam.pitch = (-ARRIVE_PITCH * Math.PI / 180) * ka;
       cam.la = Math.log(CRUISE + ARRIVE_CLIMB * ka);
-      cam.cy = 0.26 + 0.1 * ka; // summit lands in the upper third
+      cam.cy = w < 900 ? 0.26 - 0.09 * ka : 0.26 + 0.1 * ka; // summit in the upper third (centred layouts: above the contact rows)
       cam.zoom = 1 + (ARRIVE_ZOOM - 1) * ka;
+      cam.boost = 1 + (ARRIVE_RELIEF - 1) * ka;   // relief closer to real for the digital twin (finale.js)
+      // finale progress: from Contact's top at 10 % of the screen (the plates are gone) to the page end
+      var endTop = cr.top - (max - window.scrollY), f0 = h * 0.1, f1 = Math.min(f0 - 80, endTop + h * 0.02);
+      var kf = reduce.matches ? 0 : smooth(clamp((f0 - cr.top) / (f0 - f1), 0, 1));
+      cam.fin = kf;
+      var wide = w >= 900;                          // centred layouts: only a small step, the rows sit below
+      cam.s += FIN_FORWARD * kf * (wide ? 1 : 0.25);
+      cam.la = Math.log(CRUISE + ARRIVE_CLIMB * ka + FIN_CLIMB * kf * (wide ? 1 : 0.25));
+      if (wide) cam.zoom *= 1 + (FIN_ZOOM - 1) * kf;
+      cam.cy -= (wide ? FIN_LIFT : -0.035) * kf;    // wide: the summit moves up, clear of the footer; else its label clears the nav
     }
     var t = orbitT();
     if (keys && !reduce.matches && t > 0 && t < 1) {
@@ -261,7 +319,8 @@
       out[2] = zc;
       return true;
     }
-    var view = { alt: alt, CX: CX, CY: CY, CZ: CZ, proj: proj, out: out };
+    var view = { alt: alt, CX: CX, CY: CY, CZ: CZ, proj: proj, out: out,
+      pitch: cam.pitch, key: [cam.pitch * 2000, cam.yaw * 20, F, PX, PY].map(Math.round).join("/") };
     var paper = color("--paper"), line = color("--contour"), ink = color("--ink");
     var t = orbitT();
     var inOrbit = !!keys && t > 0 && t < 1;
@@ -272,7 +331,12 @@
     var mapA = clamp((alt - 60000) / 80000, 0, 1); // outlines are not draped: gone before the terrain rises
     if (orbA > 0) drawGlobe(orbA, view, line);
     if (mapA > 0 && earth) drawEarth(mapA, view, ink);
-    if (alt > 60000) drawSwath(clamp((alt - 60000) / 140000, 0, 1), view, ink, line);
+    if (alt > 60000) {
+      // the pass runs from arriving in orbit until the zoom into Freiburg is under way
+      var p0 = keys ? keys[1][0] : 0, p1 = keys ? keys[2][0] : 1;   // over Freiburg as the zoom begins
+      var satD = PASS_FROM * (1 - clamp((t - p0) / (p1 - p0), 0, 1));
+      drawSwath(clamp((alt - 60000) / 140000, 0, 1), view, ink, line, satD);
+    }
 
     // --- terrain: cross-section lines at fixed distances along the route
     var terrA = clamp((90000 - alt) / 60000, 0, 1);
@@ -365,14 +429,15 @@
 
     // --- what each platform covers: aerial survey frames, then a drone corridor
     if (live) {
-      var aerialA = clamp((6000 - alt) / 3000, 0, 1) * clamp((pitchDeg - 60) / 20, 0, 1);
-      if (aerialA > 0.02) drawFrames(aerialA, cam.s, view, ink);
+      // the whole survey fades out over the first degrees of the tilt to the drone view, with its map (featA)
+      var aerialA = clamp((6000 - alt) / 3000, 0, 1) * clamp((pitchDeg - 80) / 7, 0, 1);
+      if (aerialA > 0.02) drawSurvey(aerialA, clamp((t - surveyT[0]) / (surveyT[1] - surveyT[0]), 0, 1), view, ink, line);
       var droneA = clamp((pitchDeg - 8) / 12, 0, 1) * clamp((50 - pitchDeg) / 10, 0, 1) * clamp((700 - alt) / 400, 0, 1);
       if (droneA > 0.02) drawViewfinder(droneA, PX, PY, ink);
     }
 
     // --- summits ahead (flight and the arrival view): a tick and the name, like a map label
-    if (cam.pitch > -1.0 && alt < 5000) { // incl. the 55° view onto the Feldberg
+    if (cam.pitch > -1.0 && alt < 5000 && !window.flightFinaleOn) { // incl. the view onto the Feldberg; the finale labels its own
       setLabelFont(1.5);
       ctx.textAlign = "center";
       ctx.fillStyle = ink;
@@ -394,20 +459,26 @@
     if (live && pitchDeg > 40 && proj(FREIBURG[0], FREIBURG[1], sceneZ(FREIBURG[0], FREIBURG[1]))) {
       var mx = out[0], my = out[1];
       ctx.globalAlpha = clamp((pitchDeg - 40) / 15, 0, 1);
-      ctx.strokeStyle = color("--accent-mark");
+      // the site's location marker (as in the hero and the altimeter): an outlined diamond with a solid core
+      ctx.strokeStyle = ctx.fillStyle = color("--accent-mark");
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(mx, my, 6, 0, Math.PI * 2);
-      ctx.moveTo(mx - 12, my); ctx.lineTo(mx - 3, my);
-      ctx.moveTo(mx + 3, my); ctx.lineTo(mx + 12, my);
-      ctx.moveTo(mx, my - 12); ctx.lineTo(mx, my - 3);
-      ctx.moveTo(mx, my + 3); ctx.lineTo(mx, my + 12);
+      ctx.moveTo(mx, my - 7); ctx.lineTo(mx + 7, my); ctx.lineTo(mx, my + 7); ctx.lineTo(mx - 7, my); ctx.closePath();
       ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mx, my - 3.5); ctx.lineTo(mx + 3.5, my); ctx.lineTo(mx, my + 3.5); ctx.lineTo(mx - 3.5, my); ctx.closePath();
+      ctx.fill();
       setLabelFont(2);
       ctx.textAlign = "left";
       ctx.fillStyle = ink;
-      ctx.fillText("FREIBURG", mx + 16, my + 3.5);
+      ctx.fillText("FREIBURG", mx + 13, my + 3.5);
       ctx.globalAlpha = 1;
+    }
+
+    // --- the finale (finale.js): the Feldberg as a 3D digital twin, drawn with this camera
+    if (window.flightFinale) {
+      window.flightFinale({ CX: CX, CY: CY, CZ: CZ, hx: hx, hy: hy, rx: rx, ry: ry, cp: cp, sp: sp, F: F, PX: PX, PY: PY,
+        w: w, h: h, dpr: dpr, ex: ex, H0: H0, k: cam.fin || 0 });
     }
 
     // --- page state: section emphasis, altimeter, opacity, readout
@@ -571,56 +642,118 @@
     var p1 = a[0] * RAD, p2 = b[0] * RAD, dl = (b[1] - a[1]) * RAD;
     return Math.atan2(Math.sin(dl) * Math.cos(p2), Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl)) / RAD;
   }
-  // Sentinel-2's 290 km swath along a ground track through Freiburg
-  var swath = null;
-  function swathLines() {
-    if (!swath) {
+  // A swath (half-width in m) along the ground track through Freiburg: edges and track as lon/lat paths,
+  // index i at d = -3000 km + i * 50 km (north positive). Cached per width.
+  var swaths = {};
+  function swathLines(half) {
+    if (!swaths[half]) {
       var f = lonLat(FREIBURG[0], FREIBURG[1]), left = [], right = [], track = [];
       for (var d = -3000e3; d <= 3000e3; d += 50e3) {
-        var P = d < 0 ? dest(f[1], f[0], S2_TRACK + 180, -d) : dest(f[1], f[0], S2_TRACK, d);
-        var N = d + 1e3 < 0 ? dest(f[1], f[0], S2_TRACK + 180, -(d + 1e3)) : dest(f[1], f[0], S2_TRACK, d + 1e3);
-        var b = bearing(P, N);
-        var L = dest(P[0], P[1], b - 90, S2_HALF), R = dest(P[0], P[1], b + 90, S2_HALF);
-        left.push(L[1], L[0]);
-        right.push(R[1], R[0]);
-        track.push(P[1], P[0]);
+        var e = trackAt(f, d, half);
+        left.push(e.L[1], e.L[0]);
+        right.push(e.R[1], e.R[0]);
+        track.push(e.P[1], e.P[0]);
       }
-      swath = { left: left, right: right, track: track };
+      swaths[half] = { left: left, right: right, track: track };
     }
-    return swath;
+    return swaths[half];
   }
-  function drawSwath(a, v, ink, line) {
-    var sw = swathLines(), left = sw.left, right = sw.right, track = sw.track;
-    // fill between the visible parts of both edges
+  // point d (m, north positive) along the track through f, and the swath edges there
+  function trackAt(f, d, half) {
+    var P = d < 0 ? dest(f[1], f[0], S2_TRACK + 180, -d) : dest(f[1], f[0], S2_TRACK, d);
+    var N = d + 1e3 < 0 ? dest(f[1], f[0], S2_TRACK + 180, -(d + 1e3)) : dest(f[1], f[0], S2_TRACK, d + 1e3);
+    var b = bearing(P, N);
+    return { P: P, L: dest(P[0], P[1], b - 90, half), R: dest(P[0], P[1], b + 90, half) };
+  }
+  // screen point of a lat/lon on the visible side of the globe, or null
+  function seen(ll, v) {
+    var S = onSphere(ll[0], ll[1]);
+    return facing(S, v) && v.proj(S[0], S[1], S[2]) ? [v.out[0], v.out[1]] : null;
+  }
+  // stroke the part of a swath path from index i0 on (north of the scan line), starting at point `from`
+  function strokeFrom(flat, v, i0, from) {
+    var P3 = toScene(flat);
+    ctx.beginPath();
+    var pen = false;
+    if (from) { ctx.moveTo(from[0], from[1]); pen = true; }
+    for (var i = i0 * 3; i < P3.length; i += 3) {
+      if (facingXYZ(P3[i], P3[i + 1], P3[i + 2], v) && v.proj(P3[i], P3[i + 1], P3[i + 2])) {
+        if (pen) ctx.lineTo(v.out[0], v.out[1]);
+        else ctx.moveTo(v.out[0], v.out[1]);
+        pen = true;
+      } else pen = false;
+    }
+    ctx.stroke();
+  }
+  // The satellite pass: Sentinel-2's swath filling in north of the scan line at satD, the scan line itself
+  // and the satellite (a map symbol over its ground point).
+  function drawSwath(a, v, ink, line, satD) {
+    var f = lonLat(FREIBURG[0], FREIBURG[1]);
+    ctx.strokeStyle = ink;
+    ctx.lineJoin = "round";
+    var sw = swathLines(S2_HALF), i0 = Math.ceil((satD + 3000e3) / 50e3);
+    var e = trackAt(f, satD, S2_HALF), sL = seen(e.L, v), sR = seen(e.R, v), sP = seen(e.P, v);
+    // imaged part: fill between the edges from the scan line northwards
     function collect(flat) {
       var pts = [], P3 = toScene(flat);
-      for (var i = 0; i < P3.length; i += 3) {
+      for (var i = i0 * 3; i < P3.length; i += 3) {
         if (facingXYZ(P3[i], P3[i + 1], P3[i + 2], v) && v.proj(P3[i], P3[i + 1], P3[i + 2])) pts.push([v.out[0], v.out[1]]);
       }
       return pts;
     }
-    var poly = collect(left).concat(collect(right).reverse());
+    var poly = (sL ? [sL] : []).concat(collect(sw.left), collect(sw.right).reverse(), sR ? [sR] : []);
     if (poly.length > 3) {
       ctx.beginPath();
       poly.forEach(function (q, i) { if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]); });
       ctx.closePath();
       ctx.fillStyle = line;
-      ctx.globalAlpha = 0.1 * a;
+      ctx.globalAlpha = 0.14 * a;
       ctx.fill();
     }
-    ctx.strokeStyle = ink;
+    // the planned swath ahead faintly, the imaged part solid
     ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.7 * a;
-    strokeLonLat(left, v);
-    strokeLonLat(right, v);
+    ctx.globalAlpha = 0.22 * a;
+    strokeLonLat(sw.left, v);
+    strokeLonLat(sw.right, v);
+    ctx.globalAlpha = 0.75 * a;
+    strokeFrom(sw.left, v, i0, sL);
+    strokeFrom(sw.right, v, i0, sR);
     ctx.setLineDash([2, 5]);
     ctx.globalAlpha = 0.45 * a;
-    strokeLonLat(track, v);
+    strokeLonLat(sw.track, v);
     ctx.setLineDash([]);
+    // scan line and satellite
+    if (sL && sR) {
+      ctx.lineWidth = 1.6;
+      ctx.globalAlpha = 0.9 * a;
+      ctx.beginPath(); ctx.moveTo(sL[0], sL[1]); ctx.lineTo(sR[0], sR[1]); ctx.stroke();
+    }
+    var ahead = seen(trackAt(f, satD - 60e3, S2_HALF).P, v);
+    if (sP && ahead) drawSatellite(sP[0], sP[1], Math.atan2(ahead[1] - sP[1], ahead[0] - sP[0]), a, ink);
     // label along the eastern edge, north of Freiburg
-    var i = 2 * (60 + 16), S = onSphere(right[i + 1], right[i]);
+    var i = 2 * (60 + 16), S = onSphere(sw.right[i + 1], sw.right[i]);
     if (facing(S, v) && v.proj(S[0], S[1], S[2]) && v.out[1] > 20) label(T.swath, v.out[0] + 10, v.out[1], a);
     ctx.globalAlpha = 1;
+  }
+  // a small satellite: body and two solar panels across the flight direction (rad, screen)
+  function drawSatellite(x, y, dir, a, ink) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(dir);
+    ctx.scale(1.5, 1.5);
+    ctx.globalAlpha = a;
+    ctx.fillStyle = color("--paper");
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 0.9;
+    [[-3.5, -3.5, 7, 7], [-2.5, -17, 5, 10], [-2.5, 7, 5, 10]].forEach(function (r) {
+      ctx.fillRect(r[0], r[1], r[2], r[3]);
+      ctx.strokeRect(r[0], r[1], r[2], r[3]);
+    });
+    ctx.beginPath();
+    ctx.moveTo(0, -7); ctx.lineTo(0, -3.5); ctx.moveTo(0, 3.5); ctx.lineTo(0, 7);
+    ctx.moveTo(-2.5, -12); ctx.lineTo(2.5, -12); ctx.moveTo(-2.5, 12); ctx.lineTo(2.5, 12);
+    ctx.stroke();
+    ctx.restore();
   }
 
   // ------------------------------------------------ platform footprints --
@@ -684,11 +817,222 @@
     ctx.lineJoin = "round";
     ctx.globalAlpha = 1;
   }
-  // Aerial survey: frames 1.2 x 0.8 km (20 cm pixels), 60 % forward and 30 % side overlap.
-  function drawFrames(a, s, v, ink) {
-    drawFootprints({ a: a, here: s - 400, from: s - 2600, to: s + 2600, fa: 800, fl: 1200, da: 320, dl: 840,
-      strips: 2, step: 100, label: T.frames }, v, ink);
+  // The aerial survey being flown (u 0..1): planned flight lines (dashed), the aircraft on its serpentine
+  // path (strips joined by turns) and the photo frames exposed so far, overlaps building up as tint; the
+  // newest frame solid and labelled. Everything sits in the landscape, draped on the terrain.
+  function surveyFrame(k, j) {                        // frame j of strip k: [a0, l0] in route coordinates
+    var len = SV.fa + (SV.n - 1) * SV.da;
+    return [surveyS - len / 2 + j * SV.da, (k - (SV.strips - 1) / 2) * SV.dl - SV.fl / 2];
   }
+  function surveyPos(q) {                              // aircraft at path position q: [a, l]
+    var unit = SV.n - 1 + SV.turn, k = Math.min(Math.floor(q / unit), SV.strips - 1), r = q - k * unit;
+    var fwd = k % 2 === 0, lc = (k - (SV.strips - 1) / 2) * SV.dl;
+    var aOf = function (j) { return surveyFrame(k, fwd ? j : SV.n - 1 - j)[0] + SV.fa / 2; };
+    if (r <= SV.n - 1 || k === SV.strips - 1) {
+      var j = Math.min(r, SV.n - 1);
+      var a0 = aOf(Math.floor(j)), a1 = aOf(Math.min(Math.floor(j) + 1, SV.n - 1));
+      return [a0 + (a1 - a0) * (j - Math.floor(j)), lc];
+    }
+    // the turn: a half circle beyond the end of the strip over to the next one
+    var th = ((r - (SV.n - 1)) / SV.turn) * Math.PI, end = aOf(SV.n - 1), rad = SV.dl / 2;
+    return [end + (fwd ? 1 : -1) * rad * Math.sin(th), lc + rad * (1 - Math.cos(th))];
+  }
+  function drawSurvey(a, u, v, ink, line) {
+    var unit = SV.n - 1 + SV.turn, total = SV.strips * unit - SV.turn, q = u * total;
+    var w2 = function (al, l) { return [OX + UX * al + RX * l, OY + UY * al + RY * l]; };
+    ctx.strokeStyle = ink;
+    ctx.lineJoin = "miter";
+    // flight plan: one dashed line per strip
+    ctx.setLineDash([5, 6]);
+    ctx.lineWidth = 0.8;
+    ctx.globalAlpha = 0.35 * a;
+    for (var k = 0; k < SV.strips; k++) {
+      var lc = (k - (SV.strips - 1) / 2) * SV.dl, f0 = surveyFrame(k, 0), f1 = surveyFrame(k, SV.n - 1), p = [];
+      for (var al = f0[0] - 300; al <= f1[0] + SV.fa + 300; al += 100) { var xy = w2(al, lc); p.push(xy[0], xy[1]); }
+      strokeDraped(p, v);
+    }
+    ctx.setLineDash([]);
+    // exposed frames: tint (overlaps add up), outlines, the newest one solid
+    var shot = [], rects = [], newest = null;
+    for (k = 0; k < SV.strips; k++) {
+      for (var j = 0; j < SV.n; j++) {
+        var order = k % 2 === 0 ? j : SV.n - 1 - j, at = k * unit + order;   // path position of its exposure
+        if (at > q + 1e-6) continue;
+        var fr = surveyFrame(k, j), path = routeRect(fr[0], fr[1], fr[0] + SV.fa, fr[1] + SV.fl, 100);
+        shot.push([path, clamp((q - at) / 0.35 + 0.2, 0, 1)]);
+        rects.push([fr[0], fr[1], fr[0] + SV.fa, fr[1] + SV.fl]);
+        if (!newest || at > newest[1]) newest = [fr, at];
+      }
+    }
+    // the mosaic: all frames taken so far as one seamless area (one fill, so overlaps do not show)
+    ctx.beginPath();
+    shot.forEach(function (s) {
+      var n = 0;
+      for (var i = 0; i < s[0].length; i += 2) {
+        if (!v.proj(s[0][i], s[0][i + 1], sceneZ(s[0][i], s[0][i + 1]))) continue;
+        if (n++) ctx.lineTo(v.out[0], v.out[1]); else ctx.moveTo(v.out[0], v.out[1]);
+      }
+      ctx.closePath();
+    });
+    ctx.fillStyle = color("--paper");             // the photos cover the terrain lines below them
+    ctx.globalAlpha = 0.85 * a;
+    ctx.fill();
+    // what the photos show: buildings, roads, rail, water and woods, only inside the frames taken so far.
+    // While the camera rests (it hovers during the survey) they are drawn once into an offscreen canvas
+    // and reused; while it moves, only the features touching photographed frames are projected.
+    // The cached map is moved with an affine transform, which is only right looking (almost) straight down;
+    // as the camera tilts towards the drone view it fades out over the first degrees (featA) instead, with
+    // no repaint during the tilt, so it never warps or snaps.
+    var tiltDeg = -v.pitch * 180 / Math.PI, featA = clamp((tiltDeg - 80) / 7, 0, 1);
+    if (feats && shot.length && featA > 0.01) {
+      ctx.save();
+      ctx.beginPath();
+      shot.forEach(function (s) {
+        var n = 0;
+        for (var i = 0; i < s[0].length; i += 2) {
+          if (!v.proj(s[0][i], s[0][i + 1], sceneZ(s[0][i], s[0][i + 1]))) continue;
+          if (n++) ctx.lineTo(v.out[0], v.out[1]); else ctx.moveTo(v.out[0], v.out[1]);
+        }
+        ctx.closePath();
+      });
+      ctx.clip();
+      // The features are drawn into an offscreen canvas and re-used: looking (almost) straight down, a
+      // camera move is close to a shift and scale of that picture, so each frame maps three ground points
+      // from the cached view to the current one (affine) and draws the cache with that transform. It is
+      // redrawn when the zoom or tilt has drifted too far, or once the camera rests.
+      var key = [v.CX / 2, v.CY / 2, v.CZ / 2, v.key, ex * 100, w, h, dpr, ink].map(function (x) { return typeof x === "number" ? Math.round(x) : x; }).join();
+      var refs = [[-500, -400], [500, -400], [0, 500]].map(function (q) {
+        var g = w2(surveyS + q[0], q[1]);
+        return v.proj(g[0], g[1], sceneZ(g[0], g[1])) ? [v.out[0], v.out[1]] : null;
+      });
+      var fc = featCache, M = refs[0] && refs[1] && refs[2] && fc.refs ? affine(fc.refs, refs) : null;
+      var drift = M ? Math.abs(Math.log(Math.sqrt(Math.abs(M[0] * M[3] - M[1] * M[2])))) : 9;
+      var rested = key === featKey && fc.key !== key;
+      var tilting = tiltDeg < 87 && M;               // mid-tilt: keep the cached picture, just fade it
+      if (refs[0] && refs[1] && refs[2] && !tilting && (!M || drift > 0.35 || Math.abs(v.pitch - fc.pitch) > 0.05 || fc.size !== w + "x" + h + "x" + dpr + ink || rested)) {
+        if (!fc.canvas) fc.canvas = document.createElement("canvas");
+        fc.canvas.width = canvas.width; fc.canvas.height = canvas.height;
+        var cc = fc.canvas.getContext("2d");
+        cc.setTransform(dpr, 0, 0, dpr, 0, 0);
+        paintFeatures(cc, v, null);
+        fc.key = key; fc.refs = refs; fc.pitch = v.pitch; fc.size = w + "x" + h + "x" + dpr + ink;
+        M = [1, 0, 0, 1, 0, 0];
+      }
+      if (M) {
+        ctx.globalAlpha = 0.85 * a * featA;
+        ctx.setTransform(dpr * M[0], dpr * M[1], dpr * M[2], dpr * M[3], dpr * M[4], dpr * M[5]);
+        ctx.drawImage(fc.canvas, 0, 0, w, h);
+      }
+      featKey = key;
+      ctx.restore();
+    }
+    if (newest) {
+      var fr2 = newest[0];
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.9 * a;
+      strokeDraped(routeRect(fr2[0], fr2[1], fr2[0] + SV.fa, fr2[1] + SV.fl, 50), v);
+      var c = w2(fr2[0] + SV.fa, fr2[1]);
+      if (v.proj(c[0], c[1], sceneZ(c[0], c[1]))) label(T.frames, v.out[0], v.out[1] - 10, 0.9 * a);
+    }
+    // the track flown so far: a solid line over the dashed plan
+    var trk = [];
+    for (var qq = 0; qq <= q; qq += 0.1) { var tp = surveyPos(qq), tw = w2(tp[0], tp[1]); trk.push(tw[0], tw[1]); }
+    var tp2 = surveyPos(Math.min(q, total)), tw2 = w2(tp2[0], tp2[1]); trk.push(tw2[0], tw2[1]);
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.6 * a;
+    strokeDraped(trk, v);
+    // the aircraft over its ground point, pointing along its track
+    var qa = Math.min(q, total - 0.05), pos = surveyPos(qa), nx = surveyPos(qa + 0.05);   // nose: a moment later
+    var here = w2(pos[0], pos[1]), nose = w2(nx[0], nx[1]);
+    if (v.proj(here[0], here[1], sceneZ(here[0], here[1]))) {
+      var hx = v.out[0], hy = v.out[1];
+      if (v.proj(nose[0], nose[1], sceneZ(nose[0], nose[1]))) drawAircraft(hx, hy, Math.atan2(v.out[1] - hy, v.out[0] - hx), a, ink);
+    }
+    ctx.lineJoin = "round";
+    ctx.globalAlpha = 1;
+  }
+  // The survey's map features, drawn as on a printed map (layer order from below): woods as a faint tint,
+  // water and streams in --water, footpaths dashed, streets as lines, main roads as cased double lines,
+  // tram and railway (with cross ticks), buildings lightly filled. rects: only features touching these
+  // route rectangles; A: overall opacity.
+  var featKey = "", featCache = { key: "", canvas: null, refs: null, pitch: 0, size: "" };
+  var FEAT_STYLE = [
+    ["wood", "--contour", 0, 0.1, null], ["water", "--water", 0.8, 0.3, null], ["stream", "--water", 1, 0, null],
+    ["river", "--water", 3, 0, null], ["path", "--ink", 0.5, 0, [2, 2.5]], ["minor", "--ink", 0.8, 0, null],
+    ["major", "--ink", 3.4, 0, null], ["tram", "--ink", 0.7, 0, [5, 2]], ["rail", "--ink", 1.2, 0, null],
+    ["building", "--ink", 0.6, 0.12, null],
+  ];
+  // the affine transform [a, b, c, d, e, f] mapping three screen points src onto dst
+  function affine(src, dst) {
+    var x0 = src[0][0], y0 = src[0][1], x1 = src[1][0] - x0, y1 = src[1][1] - y0, x2 = src[2][0] - x0, y2 = src[2][1] - y0;
+    var det = x1 * y2 - x2 * y1;
+    if (Math.abs(det) < 1e-6) return null;
+    var u1 = dst[1][0] - dst[0][0], v1 = dst[1][1] - dst[0][1], u2 = dst[2][0] - dst[0][0], v2 = dst[2][1] - dst[0][1];
+    var A = (u1 * y2 - u2 * y1) / det, C = (u2 * x1 - u1 * x2) / det, B = (v1 * y2 - v2 * y1) / det, D = (v2 * x1 - v1 * x2) / det;
+    return [A, B, C, D, dst[0][0] - A * x0 - C * y0, dst[0][1] - B * x0 - D * y0];
+  }
+  function paintFeatures(c, v, rects, A) {
+    A = A || 1;
+    var half = (SV.fa + (SV.n - 1) * SV.da) / 2 + 150, side = ((SV.strips - 1) / 2) * SV.dl + SV.fl / 2 + 150;
+    FEAT_STYLE.forEach(function (st) {
+      var list = feats[st[0]], closed = st[3] > 0;
+      if (!list) return;
+      c.beginPath();
+      list.forEach(function (f) {
+        var b = f.b;
+        if (b[1] < surveyS - half || b[0] > surveyS + half || b[3] < -side || b[2] > side) return;
+        if (rects && !rects.some(function (r) { return b[1] >= r[0] && b[0] <= r[2] && b[3] >= r[1] && b[2] <= r[3]; })) return;
+        var P = f.p, n = 0;
+        for (var i = 0; i < P.length; i += 3) {
+          if (!v.proj(P[i], P[i + 1], (P[i + 2] - H0) * ex)) { n = 0; continue; }
+          if (n++) c.lineTo(v.out[0], v.out[1]); else c.moveTo(v.out[0], v.out[1]);
+        }
+        if (closed && n > 2) c.closePath();
+      });
+      c.setLineDash(st[4] || []);
+      c.lineJoin = "round";
+      c.lineCap = "round";
+      if (closed) { c.fillStyle = color(st[1]); c.globalAlpha = st[3] * A; c.fill(); }
+      if (st[2]) {
+        c.strokeStyle = color(st[1]);
+        c.lineWidth = st[2];
+        c.globalAlpha = A;
+        c.stroke();
+        if (st[0] === "major") {              // open the road: a paper core inside the casing
+          c.strokeStyle = color("--paper");
+          c.lineWidth = 1.8;
+          c.stroke();
+        }
+        if (st[0] === "rail") {               // cross ticks
+          c.setLineDash([1, 7]);
+          c.lineCap = "butt";
+          c.lineWidth = 4.5;
+          c.strokeStyle = color(st[1]);
+          c.stroke();
+        }
+      }
+      c.setLineDash([]);
+    });
+    c.lineCap = "butt";
+    c.globalAlpha = 1;
+  }
+  // the aircraft's position as on a navigation display: a notched chevron pointing along its track
+  function drawAircraft(x, y, dir, a, ink) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(dir + Math.PI / 2);                  // drawn pointing up
+    ctx.globalAlpha = a;
+    ctx.fillStyle = ink;
+    ctx.strokeStyle = color("--paper");
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, -9); ctx.lineTo(7, 7); ctx.lineTo(0, 3.5); ctx.lineTo(-7, 7);
+    ctx.closePath();
+    ctx.stroke();                                   // a paper halo keeps it clear of the map below
+    ctx.fill();
+    ctx.restore();
+  }
+
   // Drone: we look through its camera, so a viewfinder (corner brackets and a
   // centre cross) frames the view.
   function drawViewfinder(a, px, py, ink) {
@@ -734,7 +1078,7 @@
     var goal = target();
     var k = reduce.matches ? 1 : 1 - Math.exp(-dt / 0.2);
     var moving = false;
-    ["s", "la", "pitch", "cx", "cy", "yaw", "boost", "zoom"].forEach(function (key) {
+    ["s", "la", "pitch", "cx", "cy", "yaw", "boost", "zoom", "fin"].forEach(function (key) {
       cur[key] += (goal[key] - cur[key]) * k;
       var eps = key === "s" ? 1 : 1e-3;
       if (Math.abs(goal[key] - cur[key]) > eps) moving = true;

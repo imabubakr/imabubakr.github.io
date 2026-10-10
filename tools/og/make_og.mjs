@@ -14,7 +14,7 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, colorScheme: 'light' });
 await page.goto(url, { waitUntil: 'networkidle' });
 // Hero only: hide the nav, map tools and scroll cue and make the hero exactly the image height.
-await page.addStyleTag({ content: '.site-nav,.map-hint,.map-controls,.map-next,.hero-cue{display:none!important} .sheet{--hero-h:630px!important}' });
+await page.addStyleTag({ content: '.site-nav,.map-hint,.map-controls,.hero-cue{display:none!important} .sheet{--hero-h:630px!important}' });
 await page.evaluate(() => document.fonts.ready);
 // The pinned hero sits below the (hidden) nav's height, so crop from its top.
 const y = await page.evaluate(() => document.querySelector('.hero').getBoundingClientRect().top);
