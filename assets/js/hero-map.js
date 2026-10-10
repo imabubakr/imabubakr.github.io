@@ -18,14 +18,18 @@
         title: "Region Freiburg · Kaiserstuhl bis Feldberg · Copernicus GLO-30",
         ci: "Äquidistanz 20 m · gestrichelt: Ausschnitt der Startseite",
         hint: "Überfahren: Koordinaten · Klick, Klick: Höhenprofil · Ziehen: verschieben · Mausrad: zoomen",
-        exag: function (x) { return "Ridgelines: " + String(x).replace(".", ",") + "-fach überhöht"; } }
+        exag: function (x) { return "Ridgelines: " + String(x).replace(".", ",") + "-fach überhöht"; },
+        crs: ["EPSG:32632 · eigentlich UTM 32N", "EPSG:3857 · bitte keine Flächen messen",
+          "EPSG:4326 · Lat/Lon oder Lon/Lat?"] }
     : { profile: "elevation profile", close: "Close profile", length: "length", dec: ".", E: "E", W: "W",
         contours: "contours", ridges: "ridges", full: "fullscreen", view: "Map view",
         zoomIn: "Zoom in", zoomOut: "Zoom out", reset: "Whole map", closeMap: "Close map",
         title: "Freiburg region · Kaiserstuhl to Feldberg · Copernicus GLO-30",
         ci: "CI 20 m · dashed: the area on the homepage",
         hint: "hover: coordinates · click, click: elevation profile · drag: pan · wheel: zoom",
-        exag: function (x) { return "ridges: vertical exaggeration " + x + "×"; } };
+        exag: function (x) { return "ridges: vertical exaggeration " + x + "×"; },
+        crs: ["EPSG:32632 · actually UTM 32N", "EPSG:3857 · do not measure areas",
+          "EPSG:4326 · lat/lon or lon/lat?"] };
 
   var NS = "http://www.w3.org/2000/svg";
   var base = hero.dataset.topo;
@@ -366,14 +370,32 @@
   fullBtn.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 6V1.5H6M10 1.5h4.5V6M14.5 10v4.5H10M6 14.5H1.5V10"/></svg>' + T.full;
   controls.appendChild(fullBtn);
   hero.appendChild(controls);
-  ["click", "pointerdown"].forEach(function (t) {
-    controls.addEventListener(t, function (e) { e.stopPropagation(); });
+  // the Feldberg link and the CRS label are not map clicks
+  [controls, hero.querySelector(".map-next"), hero.querySelector(".strip-crs")].forEach(function (el) {
+    if (!el) return;
+    ["click", "pointerdown"].forEach(function (t) {
+      el.addEventListener(t, function (e) { e.stopPropagation(); });
+    });
+  });
+
+  // easter egg: clicking the CRS label cycles through a few in-jokes, then back to EPSG:4326
+  var crs = hero.querySelector(".strip-crs"), crsDefault = crs ? crs.textContent : "", crsI = -1;
+  if (crs) crs.addEventListener("click", function () {
+    if (crs.classList.contains("is-live")) return;
+    crsI = crsI + 1 < T.crs.length ? crsI + 1 : -1;
+    crs.textContent = crsI < 0 ? crsDefault : T.crs[crsI];
   });
 
   hero.addEventListener("pointerenter", load);
   hero.addEventListener("pointerdown", load);
+  var inStrip = false;
   hero.addEventListener("pointermove", function (e) {
-    if (e.pointerType === "mouse") heroView.move(e);
+    if (e.pointerType !== "mouse") return;
+    // over the top strip: no readout, so the CRS label (and its jokes) can be read
+    var s = !!e.target.closest(".hero-strip");
+    if (!s) heroView.move(e);
+    else if (!inStrip) heroView.leave();
+    inStrip = s;
   });
   hero.addEventListener("pointerleave", function () { heroView.leave(); });
   hero.addEventListener("click", function (e) {

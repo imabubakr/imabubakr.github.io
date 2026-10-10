@@ -3,6 +3,7 @@
 //
 // The hero sits in a taller wrapper (.hero-pin) and sticks under the nav while the
 // scroll inside the wrapper drives one sequence (pinned progress pp 0..1):
+//   0    - 0.15  the sentence lifts away
 //   0    - 0.5   the flat map lifts into stacked paper terraces, one per 10 m level
 //                (assets/topo/hero-terraces.json, tools/hero/build_terraces.py), and the
 //                view turns east into the Black Forest; height labels on the 50 m
@@ -260,6 +261,7 @@
     root.classList.toggle("hero-rising", S.k > 0.004);
     root.classList.toggle("hero-risen", S.k > 0.04);
     hero.style.setProperty("--hero-bg", (1 - S.fade).toFixed(3));
+    hero.style.setProperty("--hero-flat", (1 - smooth(S.k / 0.3)).toFixed(3));
     cv.style.opacity = S.k > 0.004 ? (1 - 0.15 * S.fade).toFixed(3) : "";
     if (S.k > 0.004 && hr.bottom > 0) draw();
     requestAnimationFrame(loop);
