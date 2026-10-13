@@ -111,25 +111,29 @@ aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors. Three chapt
   chapter 1 shows a **Sentinel-2 pass**: a descending pass (north to south) along the ground track, timed so the
   satellite is mid-screen while the chapter is centred and over Freiburg as the zoom begins; the swath fills in
   behind a scan line with a small satellite symbol, the swath ahead is faint. (Other sensors' swath edges,
-  Landsat / Sentinel-1 / MODIS, were tried and removed by the owner: just the sweep.) Chapter 2 shows an **aerial survey being flown**: the camera hovers
+  Landsat / Sentinel-1 / MODIS, were tried and removed by the owner: just the sweep.) Chapter 2 shows **aerial photos being taken** (reworked 2026-10-13): the camera hovers
   (`hold`: the route position stops at `SURVEY_AT` = 6900 m, over Wiehre, and the flight before/after is
-  stretched to fit) while the aircraft flies 3 strips of 5 frames (0.6 x 0.4 km, illustrative; 25 % forward
-  and side overlap, the owner's figure; `SV`) with turns between them. The aircraft is a navigation-display
-  chevron (the owner disliked a plane icon), with a solid line for the track flown over the dashed plan. The
-  frames taken so far form one seamless mosaic (one fill, no seams or frame outlines: owner), only the frame
-  being taken is outlined and labelled. The mosaic covers the terrain lines (paper fill)
-  and show a small map of what the photo sees (owner: "add roads or a few more features, so it becomes more
-  clear"): woods (faint tint), water, streams and the Dreisam in `--water`, footpaths dashed, streets, main roads
-  as cased double lines, tram, railway with cross ticks, buildings lightly filled (OpenStreetMap,
-  `assets/topo/aerial-features.json`, ~70 KB gzipped, from `tools/orbit/build_aerial.py`; layer styles in
-  `FEAT_STYLE`). Performance: drawing all features live cost up to 40 ms a frame (the camera is usually still
-  easing during the survey), so they are painted into an offscreen canvas and each frame draws it with an
-  affine transform fitted to three ground points (looking straight down a camera move is ~a shift and scale);
-  it is repainted only when zoom or tilt drift too far or the camera rests (~8 repaints per pass). The affine
-  shortcut is wrong once the camera tilts, so the whole survey (map, mosaic, track, frame) fades out between
-  87° and 80° pitch, with no repaint during the tilt (the owner saw the map warp and snap there). Orbit scroll
-  then costs the same as before the survey existed (~20 ms/frame in headless Chromium). Footer credits OpenStreetMap (ODbL). Not built: the 30 m "handful of squares"
-  inset and a tilted aerial view (offered, not chosen).
+  stretched to fit) while one row of 5 photos (0.6 x 0.4 km, illustrative; 25 % forward overlap, the owner's
+  figure; `SV`) appears along the route, one after another. **No aircraft, no track, no plan lines, no turns**
+  (owner: "I do not want the plane logo, nor the straight line"; the earlier 3 strips with turns, a chevron and
+  a dashed plan were dropped). Each new photo exposes with a short soft flash (an ink tint that fades);
+  taken photos keep small corner (fiducial) marks as on real aerial photos; only the newest is outlined and
+  labelled. The photos taken so far form one seamless mosaic (one paper fill, no seams: owner) that covers the
+  terrain lines and shows what the photos see: OpenStreetMap features (`assets/topo/aerial-features.json`,
+  ~70 KB gzipped, from `tools/orbit/build_aerial.py`) **drawn like the hero's old survey sheet** (owner's pick
+  over figure-ground, pencil sketch and dots): sepia map ink (`--contour`), stippled woods, dotted footpaths,
+  thin cased main roads, railway with cross ticks, hatched buildings, blue (`--water`) only for water;
+  layer styles in `FEAT_STYLE`, at 0.85 strength (a 0.42 version was too faint). The owner keeps the location
+  (Wiehre) but the stop must not be "about Freiburg": the Freiburg marker is hidden below 8 km altitude.
+  Rejected (2026-10-13, don't bring back): a numbered flight plan with photos snapping into place and finer
+  ridge lines instead of the map, a village (Oberried) instead of Wiehre. Performance: drawing all features
+  live cost up to 40 ms a frame (the camera is usually still easing during the survey), so they are painted
+  into an offscreen canvas and each frame draws it with an affine transform fitted to three ground points
+  (looking straight down a camera move is ~a shift and scale); it is repainted only when zoom or tilt drift too
+  far or the camera rests (~8 repaints per pass). The affine shortcut is wrong once the camera tilts, so the
+  whole survey fades out between 87° and 80° pitch, with no repaint during the tilt (the owner saw the map warp
+  and snap there). Footer credits OpenStreetMap (ODbL). Not built: the 30 m "handful of squares" inset and a
+  tilted aerial view (offered, not chosen).
 - Keyframes sit on the chapters' real positions (`layoutKeys`): climb to orbit for chapter 1 (705 km, north-up so
   Europe reads the right way: 5° graticule, limb, country outlines only (Natural Earth coastlines + land borders,
   solid, no rivers or small islands: owner's wish, 2026-10-09),
@@ -158,8 +162,8 @@ aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors. Three chapt
 - `html.ds-on` (set by backdrop.js unless reduced motion) gives each chapter a screen; `html.orbit-live` while the
   section is on screen (stronger background, mask keeps it off the text column). Phones: the scene centre moves
   below the text. Reduced motion / no JS: the chapters as a plain list.
-- Freiburg is marked with the site's diamond (`--accent-mark`, as in the hero and the altimeter); the owner
-  disliked the earlier crosshair.
+- Freiburg is marked with the site's diamond (`--accent-mark`, as in the hero and the altimeter) while looking
+  down from above 8 km (not at the aerial stop, see above); the owner disliked the earlier crosshair.
 - Labels never overlap the altimeter (`label()` guard). The figure numbers (frame size, overlap, swath, track angle)
   are illustrative of typical surveys; the chapter spec lines (~705 km · 30 m, ~1 km · 20 cm, ~100 m · ~2 cm) are the
   reference.

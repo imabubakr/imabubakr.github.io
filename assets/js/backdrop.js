@@ -63,10 +63,9 @@
   // The satellite pass: a descending (north to south) pass over Freiburg while chapter 1 is on screen; the
   // swath fills in behind the scan line. PASS_FROM: where along the track (m north of Freiburg) it starts.
   var PASS_FROM = 2600e3;
-  // Aerial survey block flown during chapter 2: 3 strips of 5 frames (0.6 x 0.4 km, illustrative, sized so
-  // the whole block and the aircraft stay in view at 1 km; 25 % forward and side overlap, owner's figure),
-  // fixed in the landscape around SURVEY_AT.
-  var SV = { fa: 400, fl: 600, da: 300, dl: 450, n: 5, strips: 3, turn: 1.4 };
+  // Aerial survey during chapter 2: one row of 5 photos (0.6 x 0.4 km, illustrative; 25 % forward overlap,
+  // owner's figure), fixed in the landscape around SURVEY_AT.
+  var SV = { fa: 400, fl: 600, da: 300, n: 5 };
   var SURVEY_AT = 6900;      // the survey's route position: over Wiehre, ~1 km south-east of the old town
 
   var T = de
@@ -434,7 +433,7 @@
     if (live) {
       // the whole survey fades out over the first degrees of the tilt to the drone view, with its map (featA)
       var aerialA = clamp((6000 - alt) / 3000, 0, 1) * clamp((pitchDeg - 80) / 7, 0, 1);
-      if (aerialA > 0.02) drawSurvey(aerialA, clamp((t - surveyT[0]) / (surveyT[1] - surveyT[0]), 0, 1), view, ink, line);
+      if (aerialA > 0.02) drawSurvey(aerialA, clamp((t - surveyT[0]) / (surveyT[1] - surveyT[0]), 0, 1), view, ink);
       var droneA = clamp((pitchDeg - 8) / 12, 0, 1) * clamp((50 - pitchDeg) / 10, 0, 1) * clamp((700 - alt) / 400, 0, 1);
       if (droneA > 0.02) drawViewfinder(droneA, PX, PY, ink);
     }
@@ -458,8 +457,9 @@
       ctx.globalAlpha = 1;
     }
 
-    // --- Freiburg marked while looking down (accent: "you are here")
-    if (live && pitchDeg > 40 && proj(FREIBURG[0], FREIBURG[1], sceneZ(FREIBURG[0], FREIBURG[1]))) {
+    // --- Freiburg marked while looking down from high up (accent: "you are here"); not at the aerial stop
+    // (owner, 2026-10-13: the survey should not be about Freiburg)
+    if (live && pitchDeg > 40 && alt >= 8000 && proj(FREIBURG[0], FREIBURG[1], sceneZ(FREIBURG[0], FREIBURG[1]))) {
       var mx = out[0], my = out[1];
       ctx.globalAlpha = clamp((pitchDeg - 40) / 15, 0, 1);
       // the site's location marker (as in the hero and the altimeter): an outlined diamond with a solid core
@@ -820,92 +820,83 @@
     ctx.lineJoin = "round";
     ctx.globalAlpha = 1;
   }
-  // The aerial survey being flown (u 0..1): planned flight lines (dashed), the aircraft on its serpentine
-  // path (strips joined by turns) and the photo frames exposed so far, overlaps building up as tint; the
-  // newest frame solid and labelled. Everything sits in the landscape, draped on the terrain.
-  function surveyFrame(k, j) {                        // frame j of strip k: [a0, l0] in route coordinates
+  // The aerial survey (u 0..1, owner's pick 2026-10-13): one row of SV.n photos along the route over
+  // Wiehre, taken one after another, with no aircraft, track or plan lines: only the photos. Each new one
+  // exposes with a short soft flash; taken ones keep small corner (fiducial) marks, as on real aerial
+  // photos; the newest is outlined and labelled. Inside them the OpenStreetMap features are drawn like the
+  // hero's old survey sheet (FEAT_STYLE). Everything sits in the landscape, draped on the terrain.
+  function surveyFrame(j) {                          // photo j: [a0, l0] in route coordinates
     var len = SV.fa + (SV.n - 1) * SV.da;
-    return [surveyS - len / 2 + j * SV.da, (k - (SV.strips - 1) / 2) * SV.dl - SV.fl / 2];
+    return [surveyS - len / 2 + j * SV.da, -SV.fl / 2];
   }
-  function surveyPos(q) {                              // aircraft at path position q: [a, l]
-    var unit = SV.n - 1 + SV.turn, k = Math.min(Math.floor(q / unit), SV.strips - 1), r = q - k * unit;
-    var fwd = k % 2 === 0, lc = (k - (SV.strips - 1) / 2) * SV.dl;
-    var aOf = function (j) { return surveyFrame(k, fwd ? j : SV.n - 1 - j)[0] + SV.fa / 2; };
-    if (r <= SV.n - 1 || k === SV.strips - 1) {
-      var j = Math.min(r, SV.n - 1);
-      var a0 = aOf(Math.floor(j)), a1 = aOf(Math.min(Math.floor(j) + 1, SV.n - 1));
-      return [a0 + (a1 - a0) * (j - Math.floor(j)), lc];
-    }
-    // the turn: a half circle beyond the end of the strip over to the next one
-    var th = ((r - (SV.n - 1)) / SV.turn) * Math.PI, end = aOf(SV.n - 1), rad = SV.dl / 2;
-    return [end + (fwd ? 1 : -1) * rad * Math.sin(th), lc + rad * (1 - Math.cos(th))];
-  }
-  function drawSurvey(a, u, v, ink, line) {
-    var unit = SV.n - 1 + SV.turn, total = SV.strips * unit - SV.turn, q = u * total;
+  function drawSurvey(a, u, v, ink) {
+    var q = -0.8 + u * (SV.n - 1 + 1.6);           // photos taken so far, with a pause before and after
     var w2 = function (al, l) { return [OX + UX * al + RX * l, OY + UY * al + RY * l]; };
-    ctx.strokeStyle = ink;
-    ctx.lineJoin = "miter";
-    // flight plan: one dashed line per strip
-    ctx.setLineDash([5, 6]);
-    ctx.lineWidth = 0.8;
-    ctx.globalAlpha = 0.35 * a;
-    for (var k = 0; k < SV.strips; k++) {
-      var lc = (k - (SV.strips - 1) / 2) * SV.dl, f0 = surveyFrame(k, 0), f1 = surveyFrame(k, SV.n - 1), p = [];
-      for (var al = f0[0] - 300; al <= f1[0] + SV.fa + 300; al += 100) { var xy = w2(al, lc); p.push(xy[0], xy[1]); }
-      strokeDraped(p, v);
+    var shot = [], newest = null;
+    for (var j = 0; j < SV.n && j <= q + 1e-6; j++) {
+      var fr = surveyFrame(j);
+      shot.push({ path: routeRect(fr[0], fr[1], fr[0] + SV.fa, fr[1] + SV.fl, 100), fr: fr, age: q - j });
+      newest = fr;
     }
-    ctx.setLineDash([]);
-    // exposed frames: tint (overlaps add up), outlines, the newest one solid
-    var shot = [], rects = [], newest = null;
-    for (k = 0; k < SV.strips; k++) {
-      for (var j = 0; j < SV.n; j++) {
-        var order = k % 2 === 0 ? j : SV.n - 1 - j, at = k * unit + order;   // path position of its exposure
-        if (at > q + 1e-6) continue;
-        var fr = surveyFrame(k, j), path = routeRect(fr[0], fr[1], fr[0] + SV.fa, fr[1] + SV.fl, 100);
-        shot.push([path, clamp((q - at) / 0.35 + 0.2, 0, 1)]);
-        rects.push([fr[0], fr[1], fr[0] + SV.fa, fr[1] + SV.fl]);
-        if (!newest || at > newest[1]) newest = [fr, at];
-      }
-    }
-    // the mosaic: all frames taken so far as one seamless area (one fill, so overlaps do not show)
-    ctx.beginPath();
-    shot.forEach(function (s) {
+    if (!shot.length) return;
+    function trace(path) {
       var n = 0;
-      for (var i = 0; i < s[0].length; i += 2) {
-        if (!v.proj(s[0][i], s[0][i + 1], sceneZ(s[0][i], s[0][i + 1]))) continue;
+      for (var i = 0; i < path.length; i += 2) {
+        if (!v.proj(path[i], path[i + 1], sceneZ(path[i], path[i + 1]))) continue;
         if (n++) ctx.lineTo(v.out[0], v.out[1]); else ctx.moveTo(v.out[0], v.out[1]);
       }
       ctx.closePath();
-    });
+    }
+    ctx.lineJoin = "miter";
+    // the mosaic: all photos taken so far as one seamless area (one fill, so overlaps do not show)
+    ctx.beginPath();
+    shot.forEach(function (s) { trace(s.path); });
     ctx.fillStyle = color("--paper");             // the photos cover the terrain lines below them
     ctx.globalAlpha = 0.85 * a;
     ctx.fill();
-    // what the photos show: buildings, roads, rail, water and woods, only inside the frames taken so far.
-    // While the camera rests (it hovers during the survey) they are drawn once into an offscreen canvas
-    // and reused; while it moves, only the features touching photographed frames are projected.
-    // The cached map is moved with an affine transform, which is only right looking (almost) straight down;
-    // as the camera tilts towards the drone view it fades out over the first degrees (featA) instead, with
-    // no repaint during the tilt, so it never warps or snaps.
+    // corner marks on every photo; a new one flashes softly as it is exposed
+    ctx.lineWidth = 1;
+    shot.forEach(function (s) {
+      var c = [[0, 0], [1, 0], [1, 1], [0, 1]].map(function (o) {
+        var g = w2(s.fr[0] + o[0] * SV.fa, s.fr[1] + o[1] * SV.fl);
+        return v.proj(g[0], g[1], sceneZ(g[0], g[1])) ? [v.out[0], v.out[1]] : null;
+      });
+      if (c.some(function (p) { return !p; })) return;
+      var flash = 1 - clamp(s.age / 0.6, 0, 1);
+      if (flash > 0) {
+        ctx.beginPath();
+        c.forEach(function (p, i) { if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); });
+        ctx.closePath();
+        ctx.fillStyle = ink;
+        ctx.globalAlpha = 0.1 * flash * flash * a;
+        ctx.fill();
+      }
+      ctx.strokeStyle = ink;
+      ctx.globalAlpha = 0.55 * a;
+      ctx.beginPath();
+      c.forEach(function (p, i) {
+        var nx = c[(i + 1) % 4], pr = c[(i + 3) % 4], f = 0.09;
+        ctx.moveTo(p[0] + (nx[0] - p[0]) * f, p[1] + (nx[1] - p[1]) * f);
+        ctx.lineTo(p[0], p[1]);
+        ctx.lineTo(p[0] + (pr[0] - p[0]) * f, p[1] + (pr[1] - p[1]) * f);
+      });
+      ctx.stroke();
+    });
+    // what the photos show: the map features, only inside the photos taken so far. They are drawn once
+    // into an offscreen canvas and re-used: looking (almost) straight down, a camera move is close to a
+    // shift and scale of that picture, so each frame maps three ground points from the cached view to the
+    // current one (affine) and draws the cache with that transform. It is redrawn when the zoom or tilt has
+    // drifted too far, or once the camera rests. As the camera tilts towards the drone view the map fades
+    // out over the first degrees (featA) instead, with no repaint during the tilt, so it never warps or snaps.
     var tiltDeg = -v.pitch * 180 / Math.PI, featA = clamp((tiltDeg - 80) / 7, 0, 1);
-    if (feats && shot.length && featA > 0.01) {
+    if (feats && featA > 0.01) {
       ctx.save();
       ctx.beginPath();
-      shot.forEach(function (s) {
-        var n = 0;
-        for (var i = 0; i < s[0].length; i += 2) {
-          if (!v.proj(s[0][i], s[0][i + 1], sceneZ(s[0][i], s[0][i + 1]))) continue;
-          if (n++) ctx.lineTo(v.out[0], v.out[1]); else ctx.moveTo(v.out[0], v.out[1]);
-        }
-        ctx.closePath();
-      });
+      shot.forEach(function (s) { trace(s.path); });
       ctx.clip();
-      // The features are drawn into an offscreen canvas and re-used: looking (almost) straight down, a
-      // camera move is close to a shift and scale of that picture, so each frame maps three ground points
-      // from the cached view to the current one (affine) and draws the cache with that transform. It is
-      // redrawn when the zoom or tilt has drifted too far, or once the camera rests.
       var key = [v.CX / 2, v.CY / 2, v.CZ / 2, v.key, ex * 100, w, h, dpr, ink].map(function (x) { return typeof x === "number" ? Math.round(x) : x; }).join();
-      var refs = [[-500, -400], [500, -400], [0, 500]].map(function (q) {
-        var g = w2(surveyS + q[0], q[1]);
+      var refs = [[-500, -400], [500, -400], [0, 500]].map(function (r) {
+        var g = w2(surveyS + r[0], r[1]);
         return v.proj(g[0], g[1], sceneZ(g[0], g[1])) ? [v.out[0], v.out[1]] : null;
       });
       var fc = featCache, M = refs[0] && refs[1] && refs[2] && fc.refs ? affine(fc.refs, refs) : null;
@@ -917,7 +908,7 @@
         fc.canvas.width = canvas.width; fc.canvas.height = canvas.height;
         var cc = fc.canvas.getContext("2d");
         cc.setTransform(dpr, 0, 0, dpr, 0, 0);
-        paintFeatures(cc, v, null);
+        paintFeatures(cc, v);
         fc.key = key; fc.refs = refs; fc.pitch = v.pitch; fc.size = w + "x" + h + "x" + dpr + ink;
         M = [1, 0, 0, 1, 0, 0];
       }
@@ -929,42 +920,52 @@
       featKey = key;
       ctx.restore();
     }
-    if (newest) {
-      var fr2 = newest[0];
-      ctx.lineWidth = 1.5;
-      ctx.globalAlpha = 0.9 * a;
-      strokeDraped(routeRect(fr2[0], fr2[1], fr2[0] + SV.fa, fr2[1] + SV.fl, 50), v);
-      var c = w2(fr2[0] + SV.fa, fr2[1]);
-      if (v.proj(c[0], c[1], sceneZ(c[0], c[1]))) label(T.frames, v.out[0], v.out[1] - 10, 0.9 * a);
-    }
-    // the track flown so far: a solid line over the dashed plan
-    var trk = [];
-    for (var qq = 0; qq <= q; qq += 0.1) { var tp = surveyPos(qq), tw = w2(tp[0], tp[1]); trk.push(tw[0], tw[1]); }
-    var tp2 = surveyPos(Math.min(q, total)), tw2 = w2(tp2[0], tp2[1]); trk.push(tw2[0], tw2[1]);
-    ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.6 * a;
-    strokeDraped(trk, v);
-    // the aircraft over its ground point, pointing along its track
-    var qa = Math.min(q, total - 0.05), pos = surveyPos(qa), nx = surveyPos(qa + 0.05);   // nose: a moment later
-    var here = w2(pos[0], pos[1]), nose = w2(nx[0], nx[1]);
-    if (v.proj(here[0], here[1], sceneZ(here[0], here[1]))) {
-      var hx = v.out[0], hy = v.out[1];
-      if (v.proj(nose[0], nose[1], sceneZ(nose[0], nose[1]))) drawAircraft(hx, hy, Math.atan2(v.out[1] - hy, v.out[0] - hx), a, ink);
-    }
+    // the newest photo: outlined and labelled
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.9 * a;
+    strokeDraped(routeRect(newest[0], newest[1], newest[0] + SV.fa, newest[1] + SV.fl, 50), v);
+    var lc = w2(newest[0] + SV.fa, newest[1]);
+    if (v.proj(lc[0], lc[1], sceneZ(lc[0], lc[1]))) label(T.frames, v.out[0], v.out[1] - 10, 0.9 * a);
     ctx.lineJoin = "round";
     ctx.globalAlpha = 1;
   }
-  // The survey's map features, drawn as on a printed map (layer order from below): woods as a faint tint,
-  // water and streams in --water, footpaths dashed, streets as lines, main roads as cased double lines,
-  // tram and railway (with cross ticks), buildings lightly filled. rects: only features touching these
-  // route rectangles; A: overall opacity.
+  // The survey's map features (OpenStreetMap), drawn like the hero's old survey sheet (owner's pick,
+  // 2026-10-13), in sepia map ink (--contour), blue only for water; layer order from below:
+  // [layer, colour, line width, fill ("stipple", "hatch" or an opacity), dash]. Woods stippled, footpaths
+  // dotted, main roads as cased double lines, railway with cross ticks, buildings hatched.
   var featKey = "", featCache = { key: "", canvas: null, refs: null, pitch: 0, size: "" };
   var FEAT_STYLE = [
-    ["wood", "--contour", 0, 0.1, null], ["water", "--water", 0.8, 0.3, null], ["stream", "--water", 1, 0, null],
-    ["river", "--water", 3, 0, null], ["path", "--ink", 0.5, 0, [2, 2.5]], ["minor", "--ink", 0.8, 0, null],
-    ["major", "--ink", 3.4, 0, null], ["tram", "--ink", 0.7, 0, [5, 2]], ["rail", "--ink", 1.2, 0, null],
-    ["building", "--ink", 0.6, 0.12, null],
+    ["wood", "--contour", 0, "stipple", null], ["water", "--water", 0.8, 0.22, null], ["stream", "--water", 0.9, 0, null],
+    ["river", "--water", 2.6, 0, null], ["path", "--contour", 0.9, 0, [0.1, 2.6]], ["minor", "--contour", 0.75, 0, null],
+    ["major", "--contour", 3, 0, null], ["tram", "--contour", 0.6, 0, [4, 2]], ["rail", "--contour", 1, 0, null],
+    ["building", "--contour", 0.55, "hatch", null],
   ];
+  // fill patterns in map ink: a scatter of dots (woods), fine diagonal hatching (buildings); made at device
+  // resolution and scaled back, so they stay crisp
+  var patterns = {};
+  function pattern(c, kind, col) {
+    var key = kind + col + dpr;
+    if (!patterns[key]) {
+      var n = Math.round(12 * dpr), pc = document.createElement("canvas");
+      pc.width = pc.height = n;
+      var g = pc.getContext("2d");
+      g.fillStyle = g.strokeStyle = col;
+      if (kind === "stipple") {
+        [[2, 3], [8, 1.5], [5, 8], [10.5, 9.5], [1, 10]].forEach(function (d) {
+          g.beginPath(); g.arc(d[0] * dpr, d[1] * dpr, 0.55 * dpr, 0, 2 * Math.PI); g.fill();
+        });
+      } else {
+        g.lineWidth = 0.6 * dpr;
+        [-n, 0, n].forEach(function (o) { g.beginPath(); g.moveTo(o, n); g.lineTo(o + n, 0); g.stroke(); });
+        [-n / 3, n / 3, 2 * n / 3].forEach(function (o) { g.beginPath(); g.moveTo(o, n); g.lineTo(o + n, 0); g.stroke(); });
+      }
+      patterns[key] = pc;
+    }
+    var pat = c.createPattern(patterns[key], "repeat");
+    if (pat.setTransform && window.DOMMatrix) pat.setTransform(new DOMMatrix().scale(1 / dpr));
+    return pat;
+  }
   // the affine transform [a, b, c, d, e, f] mapping three screen points src onto dst
   function affine(src, dst) {
     var x0 = src[0][0], y0 = src[0][1], x1 = src[1][0] - x0, y1 = src[1][1] - y0, x2 = src[2][0] - x0, y2 = src[2][1] - y0;
@@ -974,17 +975,15 @@
     var A = (u1 * y2 - u2 * y1) / det, C = (u2 * x1 - u1 * x2) / det, B = (v1 * y2 - v2 * y1) / det, D = (v2 * x1 - v1 * x2) / det;
     return [A, B, C, D, dst[0][0] - A * x0 - C * y0, dst[0][1] - B * x0 - D * y0];
   }
-  function paintFeatures(c, v, rects, A) {
-    A = A || 1;
-    var half = (SV.fa + (SV.n - 1) * SV.da) / 2 + 150, side = ((SV.strips - 1) / 2) * SV.dl + SV.fl / 2 + 150;
+  function paintFeatures(c, v) {
+    var half = (SV.fa + (SV.n - 1) * SV.da) / 2 + 150, side = SV.fl / 2 + 150;
     FEAT_STYLE.forEach(function (st) {
-      var list = feats[st[0]], closed = st[3] > 0;
+      var list = feats[st[0]], closed = typeof st[3] === "string" || st[3] > 0;
       if (!list) return;
       c.beginPath();
       list.forEach(function (f) {
         var b = f.b;
         if (b[1] < surveyS - half || b[0] > surveyS + half || b[3] < -side || b[2] > side) return;
-        if (rects && !rects.some(function (r) { return b[1] >= r[0] && b[0] <= r[2] && b[3] >= r[1] && b[2] <= r[3]; })) return;
         var P = f.p, n = 0;
         for (var i = 0; i < P.length; i += 3) {
           if (!v.proj(P[i], P[i + 1], (P[i + 2] - H0) * ex)) { n = 0; continue; }
@@ -995,15 +994,19 @@
       c.setLineDash(st[4] || []);
       c.lineJoin = "round";
       c.lineCap = "round";
-      if (closed) { c.fillStyle = color(st[1]); c.globalAlpha = st[3] * A; c.fill(); }
+      if (typeof st[3] === "string") {
+        c.fillStyle = pattern(c, st[3], color(st[1]));
+        c.globalAlpha = st[3] === "stipple" ? 0.55 : 0.7;
+        c.fill();
+      } else if (closed) { c.fillStyle = color(st[1]); c.globalAlpha = st[3]; c.fill(); }
       if (st[2]) {
         c.strokeStyle = color(st[1]);
         c.lineWidth = st[2];
-        c.globalAlpha = A;
+        c.globalAlpha = 1;
         c.stroke();
         if (st[0] === "major") {              // open the road: a paper core inside the casing
           c.strokeStyle = color("--paper");
-          c.lineWidth = 1.8;
+          c.lineWidth = 1.5;
           c.stroke();
         }
         if (st[0] === "rail") {               // cross ticks
@@ -1018,22 +1021,6 @@
     });
     c.lineCap = "butt";
     c.globalAlpha = 1;
-  }
-  // the aircraft's position as on a navigation display: a notched chevron pointing along its track
-  function drawAircraft(x, y, dir, a, ink) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(dir + Math.PI / 2);                  // drawn pointing up
-    ctx.globalAlpha = a;
-    ctx.fillStyle = ink;
-    ctx.strokeStyle = color("--paper");
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(0, -9); ctx.lineTo(7, 7); ctx.lineTo(0, 3.5); ctx.lineTo(-7, 7);
-    ctx.closePath();
-    ctx.stroke();                                   // a paper halo keeps it clear of the map below
-    ctx.fill();
-    ctx.restore();
   }
 
   // Drone: we look through its camera, so a viewfinder (corner brackets and a
