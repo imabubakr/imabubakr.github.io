@@ -30,6 +30,8 @@
   var AHEAD = 1000;           // (route heading HEAD), so its near side stays short
   var HEAD = [0.6329, 0.7742];
   var STRIP_W = 280;          // width of one flight strip (m); the strips run across the heading
+  var FRINGE = 8, SCAN = 22;  // the LiDAR edge: scan lines beyond each strip's end, SCAN m apart, thinning out
+  var SCAN_DL = 2.5;          // point spacing along a scan line (m)
   var EDL = 160;              // eye-dome lighting strength
   var SHADOW_RELIEF = 1.4;    // cast shadows with the relief as drawn (~1.4x real at the Feldberg)
 
@@ -80,7 +82,7 @@
 
   // ------------------------------------------------------------- shaders --
   var VS = [
-    "attribute vec3 aPos;",            // x, y: m from the tile's north-west corner (y south); z: elevation (m)
+    "attribute vec4 aPos;",            // x, y: m from the tile's north-west corner (y south); z: elevation (m); w: spacing (m, sets the size)
     "attribute vec3 aCol;",            // orthophoto color
     "attribute vec3 aRnd;",            // per point: delay, start x, start y (0..1)
     "attribute vec3 aNrm;",            // the ground's normal (relief x2, for the sun)
@@ -121,7 +123,7 @@
     "  vec4 p = vec4((2.0 * uS.y / uWH.x - 1.0) * zc + 2.0 * uS.x * rt / uWH.x,",
     "                (1.0 - 2.0 * uS.z / uWH.y) * zc + 2.0 * uS.x * yc / uWH.y,",
     "                (zc * (f + n) - 2.0 * f * n) / (f - n), zc);",
-    "  float size = clamp(uS.x * uWH.z * 1.9 / zc, 1.0, 7.0);",                 // close the gaps, near and far
+    "  float size = clamp(uS.x * aPos.w * 1.9 / zc, 1.0, 7.0);",                // close the gaps, near and far
     // the sand: from a start above the top left, along a curve, each grain after its own delay
     "  float t = clamp((uWH.w - aRnd.x * 0.6) / 0.4, 0.0, 1.0); t = t * t * (3.0 - 2.0 * t);",
     "  if (t < 1.0) {",
@@ -240,23 +242,22 @@
       [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(function (q) { gl.texParameteri(gl.TEXTURE_2D, q, gl.NEAREST); });
       [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(function (q) { gl.texParameteri(gl.TEXTURE_2D, q, gl.CLAMP_TO_EDGE); });
     }
-    // the flight strips: across the heading, each as long as the circle there, with staggered crisp ends
+    // the flight strips: across the heading, each as long as the circle there, with staggered ends
     function hash(i) { var h = Math.sin(i * 127.1 + 311.7) * 43758.5453; return h - Math.floor(h); }
-    function inStrips(x, y) {
-      var u = (x - cx) * HEAD[0] + (y - cy) * HEAD[1], v = -(x - cx) * HEAD[1] + (y - cy) * HEAD[0];
-      var si = Math.floor(u / STRIP_W), uc = (si + 0.5) * STRIP_W;
-      if (Math.abs(uc) > RADIUS) return false;
-      var half = Math.sqrt(RADIUS * RADIUS - uc * uc) * (0.78 + 0.3 * hash(si)), shift = (hash(si + 50) - 0.5) * 500;
-      return Math.abs(v - shift) < half;
+    var strips = {};
+    for (var si = Math.floor(-RADIUS / STRIP_W); si * STRIP_W < RADIUS; si++) {
+      var uc = (si + 0.5) * STRIP_W;
+      if (Math.abs(uc) > RADIUS) continue;
+      var half = Math.sqrt(RADIUS * RADIUS - uc * uc) * (0.78 + 0.3 * hash(si));
+      strips[si] = { uc: uc, mid: (hash(si + 50) - 0.5) * 500, half: half };
     }
+    function toXY(u, v) { return [cx + HEAD[0] * u - HEAD[1] * v, cy + HEAD[1] * u + HEAD[0] * v]; }
     var pos = [], col = [], rn = [], nrm = [], zmin = 1e9, seed = 7, k = 0;
     function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
-    var nx = Math.floor((x1 - x0) / SPACING), ny = Math.floor((y1 - y0) / SPACING);
-    for (var j = 0; j < ny; j++) for (i = 0; i < nx; i++) {
-      var x = x0 + (i + 0.2 + 0.6 * rnd()) * SPACING, y = y0 + (j + 0.2 + 0.6 * rnd()) * SPACING;
-      if (x < 0 || y < 0 || x >= size || y >= size || !inStrips(x, y)) continue;
+    function add(x, y, sp) {
+      if (x < 0 || y < 0 || x >= size || y >= size) return;
       var hz = height(x, y);
-      pos.push(x, y, hz);
+      pos.push(x, y, hz, sp);
       if (hz < zmin) zmin = hz;
       var gx = (height(x + 12, y) - height(x - 12, y)) / 12, gy = (height(x, y + 12) - height(x, y - 12)) / 12, gn = Math.hypot(gx, gy, 1);
       nrm.push(-gx / gn, -gy / gn, 1 / gn);         // relief x2 (gradient over 24 m, doubled), for livelier shading
@@ -265,6 +266,42 @@
       rn.push(rnd() * 255, rnd() * 255, rnd() * 255);
       k++;
     }
+    // the strips' body: jittered points every SPACING m
+    var nx = Math.floor((x1 - x0) / SPACING), ny = Math.floor((y1 - y0) / SPACING);
+    for (var j = 0; j < ny; j++) for (i = 0; i < nx; i++) {
+      var x = x0 + (i + 0.2 + 0.6 * rnd()) * SPACING, y = y0 + (j + 0.2 + 0.6 * rnd()) * SPACING;
+      var u = (x - cx) * HEAD[0] + (y - cy) * HEAD[1], v = -(x - cx) * HEAD[1] + (y - cy) * HEAD[0];
+      var st = strips[Math.floor(u / STRIP_W)];
+      if (st && Math.abs(v - st.mid) < st.half) add(x, y, SPACING);
+    }
+    // the LiDAR edge: beyond each strip's end the last scan lines run on as rows of single points, each a little
+    // shorter and sparser than the one before, broken off at random, like the end of a real flight line;
+    // the outermost strips get the same along their open long side
+    function scanLine(a, b, ln, gone, key) {        // a, b: the line's ends in (u, v); ln: its number outwards
+      var len = Math.hypot(b[0] - a[0], b[1] - a[1]), cut = 0.5 * gone * hash(key) * len, keep = Math.pow(1 - gone, 1.3);
+      for (var l = cut * hash(key + 7); l < len - cut * hash(key + 9); l += SCAN_DL) {
+        if (rnd() > keep) { rnd(); continue; }
+        var t2 = l / len, jit = (rnd() - 0.5) * 0.8;
+        var q = toXY(a[0] + (b[0] - a[0]) * t2 + jit, a[1] + (b[1] - a[1]) * t2);
+        add(q[0], q[1], SCAN_DL * 1.3);
+      }
+    }
+    var keys = Object.keys(strips).map(Number), sMin = Math.min.apply(null, keys), sMax = Math.max.apply(null, keys);
+    keys.forEach(function (si) {
+      var st = strips[si], u0 = st.uc - STRIP_W / 2, u1 = st.uc + STRIP_W / 2;
+      for (var ln = 0; ln < FRINGE; ln++) {
+        var gone = (ln + 1) / (FRINGE + 1), off = (ln + 0.6) * SCAN;
+        [-1, 1].forEach(function (side) {
+          var ve = st.mid + side * (st.half + off);
+          scanLine([u0, ve], [u1, ve], ln, gone, si * 97 + ln * 13 + side * 5);
+        });
+        if (si === sMax || (si === sMin && ln < FRINGE / 2)) {   // the open long side of the first and last strip
+          // (the near side's fringe is half as long: it would reach over the footer line)
+          var ue = si === sMin ? u0 - off : u1 + off;
+          scanLine([ue, st.mid - st.half], [ue, st.mid + st.half], ln, gone, si * 31 + ln * 17);
+        }
+      }
+    });
     cloud = {
       pos: buf(new Float32Array(pos)), col: buf(new Uint8Array(col)), rnd: buf(new Uint8Array(rn)), nrm: buf(new Float32Array(nrm)),
       count: k, zmin: zmin, demTex: demTex, height: height, centre: [cx, cy],
@@ -340,11 +377,11 @@
     if (cloud.demTex) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, cloud.demTex); gl.uniform1i(P.uDem, 2); gl.activeTexture(gl.TEXTURE0); }
     gl.uniform3fv(P.uSand, rgb(cs.getPropertyValue("--contour").trim()));
     gl.uniform1f(P.uDim, dark ? 0.85 : 1);
-    [[cloud.pos, P.aPos, gl.FLOAT, false], [cloud.col, P.aCol, gl.UNSIGNED_BYTE, true], [cloud.rnd, P.aRnd, gl.UNSIGNED_BYTE, true], [cloud.nrm, P.aNrm, gl.FLOAT, false]].forEach(function (a) {
+    [[cloud.pos, P.aPos, gl.FLOAT, false, 4], [cloud.col, P.aCol, gl.UNSIGNED_BYTE, true, 3], [cloud.rnd, P.aRnd, gl.UNSIGNED_BYTE, true, 3], [cloud.nrm, P.aNrm, gl.FLOAT, false, 3]].forEach(function (a) {
       if (a[1] < 0) return;
       gl.bindBuffer(gl.ARRAY_BUFFER, a[0]);
       gl.enableVertexAttribArray(a[1]);
-      gl.vertexAttribPointer(a[1], 3, a[2], a[3], 0, 0);
+      gl.vertexAttribPointer(a[1], a[4], a[2], a[3], 0, 0);
     });
     gl.enable(gl.DEPTH_TEST);
     gl.viewport(0, 0, W, H);
