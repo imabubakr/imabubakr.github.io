@@ -626,115 +626,92 @@ a:hover {
 }
 
 /* -------------------------------------------------------------- plates -- */
-/* Visualizations: a plate index, like the sheet index of a map series. A
-   numbered list of titles beside one large still preview (site.js swaps it on
-   hover/focus); clicking opens the viewer (dialog.lightbox), where animations
-   play. Phones: each row carries a small thumbnail, no preview. */
+/* Visualizations: a contact sheet (owner's pick, 2026-10-13: the long list beside a large color preview took
+   over the page). Small thumbnails in the page's tones (grey, a touch of sepia) until hovered or focused, number
+   and title below; a click opens the viewer (dialog.lightbox), where animations play. site.js folds it to the
+   first 6 plates (.can-fold) with a "show all" button; without JS all show. */
 .pidx-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 16px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .pidx-list .plate-link {
-  display: grid;
-  grid-template-columns: 64px 2.2rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0 12px;
-  padding: 8px 0;
-  color: var(--ink);
+  display: block;
+  color: var(--muted);
+  line-height: 1.4;
   text-decoration: none;
 }
 .pidx-list img {
   display: block;
-  width: 64px;
-  height: 48px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 8px;
   object-fit: cover;
   background: var(--grid);
+  filter: grayscale(1) sepia(0.18) contrast(0.92);
+  opacity: 0.82;
+}
+.pidx-list .plate-link:hover,
+.pidx-list .plate-link:focus-visible {
+  color: var(--ink);
+}
+.pidx-list .plate-link:hover img,
+.pidx-list .plate-link:focus-visible img {
+  filter: none;
+  opacity: 1;
 }
 .pidx-list .plate-no {
-  color: var(--muted);
+  margin-right: 6px;
   font: 400 0.75rem/1 var(--font-mono);
   letter-spacing: 0.04em;
 }
 .pidx-list .plate-title {
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.35;
+  font-size: 0.8125rem;
 }
 .pidx-list .plate-tag {
-  color: var(--muted);
-  font: 400 0.6875rem/1 var(--font-mono);
+  display: none;
+}
+.pidx-more-li {
+  display: none;
+  grid-column: 1 / -1;
+  padding-top: 4px;
+  text-align: center;
+}
+.can-fold .pidx-more-li {
+  display: block;
+}
+.can-fold:not(.is-open) .pidx-list > .plate:nth-child(n + 7) {
+  display: none;
+}
+.pidx-more {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 400 0.75rem/1.5 var(--font-mono);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-}
-.pidx-list .plate-link:hover .plate-title {
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-color: var(--grid);
+  text-underline-offset: 4px;
+  cursor: pointer;
 }
-.pidx-preview {
-  display: none;
-  margin: 0;
+.pidx-more:hover {
+  text-decoration-color: currentColor;
 }
 @media (min-width: 900px) {
-  .pidx {
-    display: grid;
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    gap: 48px;
-    align-items: start;
-  }
-  .pidx-list img {
-    display: none;
-  }
-  .pidx-list .plate-link {
-    grid-template-columns: 2.2rem minmax(0, 1fr) auto;
-    padding: 7px 0;
-    color: var(--muted);
-  }
-  .pidx-list .plate-link:hover .plate-title {
-    text-decoration: none;
-  }
-  .pidx-list .plate-link:hover,
-  .pidx-list .plate-link.is-current {
-    color: var(--ink);
-  }
-  .pidx-list .plate-link.is-current .plate-no {
-    color: var(--accent);
-  }
-  .pidx-preview {
-    position: sticky;
-    top: calc(var(--nav-h) + 40px); /* stays beside a long list */
-    display: block;
-  }
-  .pidx-open {
-    display: block;
-    width: 100%;
-    padding: 0;
-    border: 0;
-    background: none;
-    cursor: zoom-in;
-  }
-  .pidx-open img {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    background: var(--grid);
-  }
-  .pidx-preview figcaption {
-    margin-top: 10px;
-    color: var(--muted);
-    font-size: 0.8125rem;
-    line-height: 1.5;
-  }
-  .pidx-hint {
-    color: var(--ink);
-    font: 400 0.6875rem/1.5 var(--font-mono);
-    letter-spacing: 0.04em;
-    white-space: nowrap;
+  .pidx-list {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
-@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+@media (prefers-reduced-motion: no-preference) {
+  .pidx-list img {
+    transition: filter 0.3s ease, opacity 0.3s ease;
+  }
   .pidx-list .plate-link {
     transition: color 0.15s ease;
   }

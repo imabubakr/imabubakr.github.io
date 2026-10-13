@@ -31,19 +31,19 @@ PLATES = [
     # Pre-rendered videos (tools/media, src None): media already in assets/plates.
     ("lidar-flyaround", None, True, 0,
      ("LiDAR point cloud, Freudenberg", "Freudenberg (Siegerland) from airborne laser scanning."),
-     ("LiDAR-Punktwolke, Freudenberg", "Freudenberg (Siegerland) aus flugzeuggestütztem Laserscanning.")),
+     ("LiDAR-Punkt&shy;wolke, Freudenberg", "Freudenberg (Siegerland) aus flugzeuggestütztem Laserscanning.")),
     ("ortho-errors", None, True, 0,
      ("Building outlines, Freudenberg",
       "Freudenberg (Siegerland) in a 10 cm orthophoto with simulated building-segmentation outlines."),
-     ("Gebäudeumrisse, Freudenberg",
+     ("Gebäude&shy;umrisse, Freudenberg",
       "Freudenberg (Siegerland) im 10-cm-Orthofoto mit simulierten Umrissen einer Gebäudesegmentierung.")),
     ("landslide-sim", None, True, 0,
      ("Landslide simulation, Freudenberg", "A shallow-landslide scenario on real terrain in Freudenberg: LiDAR elevation model (2 m) with the 10 cm orthophoto draped on it, in 3D (heights ×1.6). Rain of up to 150 mm/day saturates the soil, first in hollows (steady-state hydrology, Montgomery & Dietrich 1994, shown in blue); where the factor of safety of the infinite-slope model falls below 1, the slope fails. About 2 900 m³ (5 600 t) slide out and leave an empty scar; the debris particles run out along the terrain with Voellmy friction (μ = 0.3, ξ = 300 m/s²), reaching about 10 m/s and coming to rest after about 60 m and 10 s. The travel angle of 20° agrees with the empirical 23° for this volume (Corominas 1996). Assumed soil: c′ = 4 kPa, φ′ = 33°, depth 1.5 m, T = 30 m²/day; scar and deposit drawn ×3 and ×1.5 deeper. A model scenario, not a recorded event. Data: Geobasis NRW (dl-de/zero-2-0)."),
-     ("Rutschungssimulation, Freudenberg", "Ein Szenario für eine flachgründige Rutschung auf realem Gelände in Freudenberg: LiDAR-Höhenmodell (2 m) mit darübergelegtem 10-cm-Orthofoto, in 3D (Höhen ×1,6). Regen von bis zu 150 mm/Tag sättigt den Boden, zuerst in Hangmulden (stationäre Hydrologie nach Montgomery & Dietrich 1994, blau dargestellt); wo der Sicherheitsfaktor des Modells der unendlichen Böschung unter 1 fällt, versagt der Hang. Rund 2 900 m³ (5 600 t) rutschen ab und hinterlassen eine leere Abrissnische; die Partikel fließen mit Voellmy-Reibung (μ = 0,3, ξ = 300 m/s²) über das Gelände ab, erreichen etwa 10 m/s und kommen nach rund 60 m und 10 s zur Ruhe. Das Pauschalgefälle von 20° stimmt mit den empirischen 23° für dieses Volumen überein (Corominas 1996). Angenommener Boden: c′ = 4 kPa, φ′ = 33°, Mächtigkeit 1,5 m, T = 30 m²/Tag; Abrissnische und Ablagerung ×3 bzw. ×1,5 überhöht. Ein Modellszenario, kein beobachtetes Ereignis. Daten: Geobasis NRW (dl-de/zero-2-0).")),
+     ("Rutschungs&shy;simulation, Freudenberg", "Ein Szenario für eine flachgründige Rutschung auf realem Gelände in Freudenberg: LiDAR-Höhenmodell (2 m) mit darübergelegtem 10-cm-Orthofoto, in 3D (Höhen ×1,6). Regen von bis zu 150 mm/Tag sättigt den Boden, zuerst in Hangmulden (stationäre Hydrologie nach Montgomery & Dietrich 1994, blau dargestellt); wo der Sicherheitsfaktor des Modells der unendlichen Böschung unter 1 fällt, versagt der Hang. Rund 2 900 m³ (5 600 t) rutschen ab und hinterlassen eine leere Abrissnische; die Partikel fließen mit Voellmy-Reibung (μ = 0,3, ξ = 300 m/s²) über das Gelände ab, erreichen etwa 10 m/s und kommen nach rund 60 m und 10 s zur Ruhe. Das Pauschalgefälle von 20° stimmt mit den empirischen 23° für dieses Volumen überein (Corominas 1996). Angenommener Boden: c′ = 4 kPa, φ′ = 33°, Mächtigkeit 1,5 m, T = 30 m²/Tag; Abrissnische und Ablagerung ×3 bzw. ×1,5 überhöht. Ein Modellszenario, kein beobachtetes Ereignis. Daten: Geobasis NRW (dl-de/zero-2-0).")),
     ("vehicle-detection", None, True, 0,
      ("Vehicle detection and tracking",
       "Vehicles detected and tracked in drone video of a highway, each with an ID and its track."),
-     ("Fahrzeugerkennung und -verfolgung",
+     ("Fahrzeug&shy;erkennung und -&#8288;verfolgung",
       "Fahrzeuge in einem Drohnenvideo einer Autobahn erkannt und verfolgt, jeweils mit ID und Spur.")),
     ("tree-crowns", "tree-crowns.png", False, 0,
      ("Tree crowns in an orthophoto", "Tree crowns segmented with a fine-tuned model in a high-resolution orthophoto of a city."),
@@ -59,7 +59,7 @@ PLATES = [
      ("Polarlichter über dem Nordpol", "Polarlichter über dem Nordpol, in Python aus NOAA-Daten visualisiert.")),
     ("landslide-scandinavia", "norway-land.png", False, 0,
      ("Landslide risk, Scandinavia", "Landslide risk across Scandinavia and Finland, from moderate to severe."),
-     ("Rutschungsrisiko, Skandinavien", "Risiko für Hangrutschungen in Skandinavien und Finnland, von mittel bis hoch.")),
+     ("Rutschungs&shy;risiko, Skandinavien", "Risiko für Hangrutschungen in Skandinavien und Finnland, von mittel bis hoch.")),
     ("drought-us", "drought5.png", False, 0,
      ("Drought in the United States", "Drought across the contiguous United States. Data: U.S. Drought Monitor, valid until November 7, 2023."),
      ("Dürre in den USA", 'Dürre in den Vereinigten Staaten (ohne Alaska und Hawaii). Daten: <span lang="en">U.S. Drought Monitor</span>, Stand 7. November 2023.')),
@@ -82,7 +82,7 @@ PLATES = [
      ("Brandschwere", "Brandschwere.")),
     ("storm-emir-still", "storm.png", False, 0.5,
      ("Storm Emir, wind speed", "Storm Emir, wind speed."),
-     ("Sturm Emir, Windgeschwindigkeit", "Sturm Emir, Windgeschwindigkeit.")),
+     ("Sturm Emir, Wind&shy;geschwindigkeit", "Sturm Emir, Windgeschwindigkeit.")),
     ("feldberg-charts", "feldberg.png", False, 0.5,
      ("Temperature and wind charts", "Temperature and wind charts."),
      ("Temperatur- und Winddiagramme", "Temperatur- und Winddiagramme.")),
@@ -91,19 +91,19 @@ PLATES = [
      ("Mondphasen (2)", "Mondphasen (2).")),
     ("air-temperature", "europe.png", False, 0.5,
      ("Surface air temperature change", "Surface air temperature change."),
-     ("Änderung der Lufttemperatur", "Änderung der Lufttemperatur.")),
+     ("Änderung der Luft&shy;temperatur", "Änderung der Lufttemperatur.")),
     ("polar-temperature", "globe.png", False, 0.5,
      ("Temperature change at the poles", "Temperature change at the poles."),
-     ("Temperaturänderung an den Polen", "Temperaturänderung an den Polen.")),
+     ("Temperatur&shy;änderung an den Polen", "Temperaturänderung an den Polen.")),
     ("freiburg-lst", "temp2.png", False, 0.5,
      ("Land surface temperature, Freiburg", "Land surface temperature, Freiburg."),
-     ("Landoberflächen&shy;temperatur, Freiburg", "Landoberflächen&shy;temperatur, Freiburg.")),
+     ("Landoberflächen&shy;temperatur, Freiburg", "Landoberflächentemperatur, Freiburg.")),
     ("freiburg-precipitation", "precipitation.png", False, 0.5,
      ("Monthly precipitation, Freiburg", "Monthly precipitation, Freiburg."),
      ("Monatlicher Niederschlag, Freiburg", "Monatlicher Niederschlag, Freiburg.")),
     ("landslide-scandinavia-2", "simplee.png", False, 0.5,
      ("Landslide risk, Scandinavia (2)", "Landslide risk, Scandinavia (2)."),
-     ("Rutschungsrisiko, Skandinavien (2)", "Rutschungsrisiko, Skandinavien (2).")),
+     ("Rutschungs&shy;risiko, Skandinavien (2)", "Rutschungsrisiko, Skandinavien (2).")),
     ("kinematics", "kine.JPG", False, 0.5,
      ("Kinematic analysis", "Kinematic analysis."),
      ("Kinematische Analyse", "Kinematische Analyse.")),
@@ -112,13 +112,13 @@ PLATES = [
      ("Höhenkreise, Italien", "Höhenkreise, Italien.")),
     ("relief-1", "freiburg1.jpeg", False, 0.5,
      ("Shaded relief map", "Shaded relief map."),
-     ("Schummerungskarte", "Schummerungskarte.")),
+     ("Schummerungs&shy;karte", "Schummerungskarte.")),
     ("munich-1", "munich2.jpeg", False, 0.5,
      ("Munich street map", "Munich street map."),
      ("Stadtplan München", "Stadtplan München.")),
     ("qgis-buildings", "glacier1.JPG", False, 0.5,
      ("QGIS: building footprints", "QGIS: building footprints."),
-     ("QGIS: Gebäudegrundrisse", "QGIS: Gebäudegrundrisse.")),
+     ("QGIS: Gebäude&shy;grundrisse", "QGIS: Gebäudegrundrisse.")),
 ]
 
 
@@ -153,8 +153,10 @@ CERTS = [
 ]
 
 LABELS = {
-    "en": {"plate": "Plate", "anim": "animation", "open": "Open", "view": "open large", "list": "Plates"},
-    "de": {"plate": "Tafel", "anim": "Animation", "open": "Öffnen", "view": "groß öffnen", "list": "Tafeln"},
+    "en": {"plate": "Plate", "anim": "animation", "open": "Open", "view": "open large", "list": "Plates",
+           "all": "Show all {n} plates ↓"},
+    "de": {"plate": "Tafel", "anim": "Animation", "open": "Öffnen", "view": "groß öffnen", "list": "Tafeln",
+           "all": "Alle {n} Grafiken zeigen ↓"},
 }
 
 
@@ -224,12 +226,11 @@ def cert_markup(lang, prefix):
 
 
 def markup(lang, prefix):
-    """Plate index: a numbered list of titles beside one large preview. site.js
-    swaps the preview on hover/focus; a click opens the viewer. Phones show a
-    small thumbnail in each row instead of the preview."""
+    """Plate contact sheet: small thumbnails with number and title, in the page's tones until hovered
+    (site.css). site.js folds it to the first FEATURED plates with a "show all" button; a click opens the
+    viewer, where animations play. Without JS all plates show."""
     L = LABELS[lang]
     items = []
-    first = None
     for i, (pid, src, anim, frame, en, de) in enumerate(PLATES, 1):
         short, caption = en if lang == "en" else de
         base = f"{prefix}assets/plates/{pid}"
@@ -238,11 +239,9 @@ def markup(lang, prefix):
         data = f' data-webm="{base}.webm" data-mp4="{base}.mp4"' if anim else f' data-full="{base}-1600.webp"'
         tag = f'<span class="plate-tag">{L["anim"]}</span>' if anim else ""
         no = f'{L["plate"]} {i:02d}'
-        if first is None:
-            first = (base, w, h, short, caption, anim)
         items.append(
             f'              <li class="plate">\n'
-            f'                <a href="{full}" class="plate-link"{data} data-no="{no}" data-thumb="{base}-720.webp" data-caption="{html.escape(caption, quote=True)}">\n'
+            f'                <a href="{full}" class="plate-link"{data} data-no="{no}" data-caption="{html.escape(caption, quote=True)}">\n'
             f'                  <img src="{base}-720.webp" width="{w}" height="{h}" loading="lazy" decoding="async" alt="">\n'
             f'                  <span class="plate-no" aria-hidden="true">{i:02d}</span>\n'
             f'                  <span class="plate-title"><span class="visually-hidden">{no}: </span>{short}</span>\n'
@@ -250,18 +249,11 @@ def markup(lang, prefix):
             f"                </a>\n"
             f"              </li>"
         )
-    base, w, h, short, caption, anim = first
-    tag = f'<span class="plate-tag">{L["anim"]}</span>' if anim else ""
-    preview = (
-        f'            <figure class="pidx-preview" aria-hidden="true">\n'
-        f'              <button class="pidx-open" type="button" tabindex="-1">'
-        f'<img src="{base}-720.webp" width="{w}" height="{h}" loading="lazy" decoding="async" alt=""></button>\n'
-        f'              <figcaption><span class="pidx-cap">{caption}</span> <span class="pidx-hint">{L["view"]} ↗</span></figcaption>\n'
-        f"            </figure>\n"
-    )
+    more = (f'              <li class="pidx-more-li"><button class="pidx-more" type="button" aria-expanded="false">'
+            f'{L["all"].format(n=len(PLATES))}</button></li>')
     return ('\n          <div class="pidx">\n'
-            f'            <ol class="plates pidx-list" aria-label="{L["list"]}">\n' + "\n".join(items) + "\n            </ol>\n"
-            + preview + "          </div>\n          ")
+            f'            <ol class="plates pidx-list" aria-label="{L["list"]}">\n' + "\n".join(items) + "\n" + more
+            + "\n            </ol>\n          </div>\n          ")
 
 
 def main():

@@ -88,30 +88,18 @@
         box.showModal();
       });
     });
-    // Plate index: hovering or focusing a title shows it in the large preview;
-    // clicking the preview opens that plate. Stills only, nothing moves.
-    var pidx = document.querySelector(".pidx");
-    if (pidx) {
-      var previewImg = pidx.querySelector(".pidx-open img");
-      var previewCap = pidx.querySelector(".pidx-cap");
-      var pidxLinks = Array.prototype.slice.call(pidx.querySelectorAll(".plate-link"));
-      var currentPlate = pidxLinks[0];
-      var select = function (a) {
-        if (a === currentPlate && a.classList.contains("is-current")) return;
-        pidxLinks.forEach(function (l) { l.classList.toggle("is-current", l === a); });
-        currentPlate = a;
-        previewImg.src = a.dataset.thumb;
-        previewCap.innerHTML = a.dataset.caption;
-      };
-      pidxLinks.forEach(function (a) {
-        a.addEventListener("mouseenter", function () { select(a); });
-        a.addEventListener("focus", function () { select(a); });
+    // Plate contact sheet: folded to the first plates, "show all" unfolds the rest (without JS all show)
+    var pidx = document.querySelector(".pidx"), more = pidx && pidx.querySelector(".pidx-more");
+    if (more) {
+      var de = document.documentElement.lang === "de", showAll = more.textContent;
+      pidx.classList.add("can-fold");
+      more.addEventListener("click", function () {
+        var open = !pidx.classList.contains("is-open");
+        pidx.classList.toggle("is-open", open);
+        more.setAttribute("aria-expanded", String(open));
+        more.textContent = open ? (de ? "Weniger zeigen ↑" : "Show fewer ↑") : showAll;
+        if (!open) pidx.closest("section").scrollIntoView({ block: "start" });
       });
-      pidx.querySelector(".pidx-open").addEventListener("click", function () { currentPlate.click(); });
-      select(pidxLinks[0]);
-      // warm the cache so the preview swaps instantly
-      var warm = function () { pidxLinks.forEach(function (a) { new Image().src = a.dataset.thumb; }); };
-      pidx.addEventListener("mouseenter", warm, { once: true });
     }
 
     box.querySelectorAll("[data-step]").forEach(function (b) {
