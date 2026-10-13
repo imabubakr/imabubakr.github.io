@@ -113,14 +113,15 @@ aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors. Three chapt
   behind a scan line with a small satellite symbol, the swath ahead is faint. (Other sensors' swath edges,
   Landsat / Sentinel-1 / MODIS, were tried and removed by the owner: just the sweep.) Chapter 2 shows **aerial photos being taken** (reworked 2026-10-13): the camera hovers
   (`hold`: the route position stops at `SURVEY_AT` = 6900 m, over Wiehre, and the flight before/after is
-  stretched to fit) while one row of 5 photos (0.6 x 0.4 km, illustrative; 25 % forward overlap, the owner's
-  figure; `SV`) appears along the route, one after another. **No aircraft, no track, no plan lines, no turns**
+  stretched to fit) while one row of 7 photos (0.6 x 0.4 km, illustrative; 25 % forward overlap, the owner's
+  figure; `SV`) appears along the route, one after another. **No aircraft, no track, no plan lines, no turns,
+  no corner marks**
   (owner: "I do not want the plane logo, nor the straight line"; the earlier 3 strips with turns, a chevron and
-  a dashed plan were dropped). Each new photo exposes with a short soft flash (an ink tint that fades);
-  taken photos keep small corner (fiducial) marks as on real aerial photos; only the newest is outlined and
-  labelled. The photos taken so far form one seamless mosaic (one paper fill, no seams: owner) that covers the
+  a dashed plan were dropped; so were corner/fiducial marks: "camera black bars"). Each new photo exposes with a
+  short soft flash (an ink tint that fades); only the newest is outlined and labelled. The photos taken so far form one seamless mosaic (one paper fill, no seams: owner) that covers the
   terrain lines and shows what the photos see: OpenStreetMap features (`assets/topo/aerial-features.json`,
-  ~70 KB gzipped, from `tools/orbit/build_aerial.py`) **drawn like the hero's old survey sheet** (owner's pick
+  ~85 KB gzipped, from `tools/orbit/build_aerial.py`; its `SURVEY_A` must cover the photo row: more photos need
+  a wider area and a fresh Overpass export) **drawn like the hero's old survey sheet** (owner's pick
   over figure-ground, pencil sketch and dots): sepia map ink (`--contour`), stippled woods, dotted footpaths,
   thin cased main roads, railway with cross ticks, hatched buildings, blue (`--water`) only for water;
   layer styles in `FEAT_STYLE`, at 0.85 strength (a 0.42 version was too faint). The owner keeps the location

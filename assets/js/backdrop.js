@@ -63,9 +63,9 @@
   // The satellite pass: a descending (north to south) pass over Freiburg while chapter 1 is on screen; the
   // swath fills in behind the scan line. PASS_FROM: where along the track (m north of Freiburg) it starts.
   var PASS_FROM = 2600e3;
-  // Aerial survey during chapter 2: one row of 5 photos (0.6 x 0.4 km, illustrative; 25 % forward overlap,
+  // Aerial survey during chapter 2: one row of 7 photos (0.6 x 0.4 km, illustrative; 25 % forward overlap,
   // owner's figure), fixed in the landscape around SURVEY_AT.
-  var SV = { fa: 400, fl: 600, da: 300, n: 5 };
+  var SV = { fa: 400, fl: 600, da: 300, n: 7 };
   var SURVEY_AT = 6900;      // the survey's route position: over Wiehre, ~1 km south-east of the old town
 
   var T = de
@@ -821,9 +821,8 @@
     ctx.globalAlpha = 1;
   }
   // The aerial survey (u 0..1, owner's pick 2026-10-13): one row of SV.n photos along the route over
-  // Wiehre, taken one after another, with no aircraft, track or plan lines: only the photos. Each new one
-  // exposes with a short soft flash; taken ones keep small corner (fiducial) marks, as on real aerial
-  // photos; the newest is outlined and labelled. Inside them the OpenStreetMap features are drawn like the
+  // Wiehre, taken one after another, with no aircraft, track, plan lines or corner marks: only the photos.
+  // Each new one exposes with a short soft flash; the newest is outlined and labelled. Inside them the OpenStreetMap features are drawn like the
   // hero's old survey sheet (FEAT_STYLE). Everything sits in the landscape, draped on the terrain.
   function surveyFrame(j) {                          // photo j: [a0, l0] in route coordinates
     var len = SV.fa + (SV.n - 1) * SV.da;
@@ -854,8 +853,7 @@
     ctx.fillStyle = color("--paper");             // the photos cover the terrain lines below them
     ctx.globalAlpha = 0.85 * a;
     ctx.fill();
-    // corner marks on every photo; a new one flashes softly as it is exposed
-    ctx.lineWidth = 1;
+    // a new photo flashes softly as it is exposed
     shot.forEach(function (s) {
       var c = [[0, 0], [1, 0], [1, 1], [0, 1]].map(function (o) {
         var g = w2(s.fr[0] + o[0] * SV.fa, s.fr[1] + o[1] * SV.fl);
@@ -871,16 +869,6 @@
         ctx.globalAlpha = 0.1 * flash * flash * a;
         ctx.fill();
       }
-      ctx.strokeStyle = ink;
-      ctx.globalAlpha = 0.55 * a;
-      ctx.beginPath();
-      c.forEach(function (p, i) {
-        var nx = c[(i + 1) % 4], pr = c[(i + 3) % 4], f = 0.09;
-        ctx.moveTo(p[0] + (nx[0] - p[0]) * f, p[1] + (nx[1] - p[1]) * f);
-        ctx.lineTo(p[0], p[1]);
-        ctx.lineTo(p[0] + (pr[0] - p[0]) * f, p[1] + (pr[1] - p[1]) * f);
-      });
-      ctx.stroke();
     });
     // what the photos show: the map features, only inside the photos taken so far. They are drawn once
     // into an offscreen canvas and re-used: looking (almost) straight down, a camera move is close to a

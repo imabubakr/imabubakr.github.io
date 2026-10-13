@@ -3,14 +3,14 @@
 
     python3 tools/orbit/build_aerial.py buildings.json features.json      # needs pyproj
 
-Inputs: Overpass API JSON exports of OpenStreetMap around the survey (fetched 2026-10-10), bbox
-47.96454,7.84129,48.00241,7.89356:
+Inputs: Overpass API JSON exports of OpenStreetMap around the survey (fetched 2026-10-13; send a User-Agent,
+Overpass answers 406 without one), bbox 47.96454,7.83953,48.00357,7.89356:
     buildings.json  [out:json];way["building"](bbox);out geom;
     features.json   [out:json];(way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|
                     residential|living_street|pedestrian|..._link|service|footway|path|cycleway|track)$"](bbox);
                     way["railway"~"^(rail|tram|light_rail)$"](bbox);way["waterway"~"^(river|stream|canal)$"](bbox);
                     way["natural"="water"](bbox);way["landuse"="forest"](bbox);way["natural"="wood"](bbox););out geom;
-Keeps what lies in the area the survey block covers (route positions SURVEY_A, lateral +-SURVEY_L, see SV /
+Keeps what lies in the area the survey photos cover (route positions SURVEY_A, lateral +-SURVEY_L, see SV /
 SURVEY_AT in assets/js/backdrop.js), simplifies (Douglas-Peucker, TOL m) and writes region scene coordinates
 (m, x east from the region's west edge, y south from its north edge, as the DEM), each line or outline as
 [x0, y0, dx1, dy1, ...], grouped by layer (LAYERS). Data (c) OpenStreetMap contributors, ODbL.
@@ -25,7 +25,7 @@ from pyproj import Transformer
 OUT = Path(__file__).resolve().parents[2] / "assets" / "topo" / "aerial-features.json"
 W, N = 391230, 5334990                       # region bbox west / north (UTM 32N), region-contours.json
 FREIBURG, FELDBERG = (23143, 18541), (34350, 32250)
-SURVEY_A, SURVEY_L = (6000, 7800), 760       # route positions (SURVEY_AT 6900 +- block) and lateral half-width
+SURVEY_A, SURVEY_L = (5700, 8100), 760       # route positions (SURVEY_AT 6900 +- the 7 photos) and lateral half-width
 TOL, MIN_AREA = 1.0, 25.0
 MAJOR = {"motorway", "trunk", "primary", "secondary", "tertiary", "motorway_link", "trunk_link", "primary_link",
          "secondary_link", "tertiary_link"}
