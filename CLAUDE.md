@@ -191,10 +191,10 @@ Contact's top at 10 % of the screen (plates gone) to the page end. Sequence (own
   "POINT CLOUD · COLORED FROM ORTHOPHOTO" (11 px muted; dropped on phones), "SUNLIGHT · 13 OCT · 17:40" (11 px ink;
   DE "SONNENSTAND · 13. OKT."; never "SUN": the owner read it as Sunday). The owner found 9-10 px unreadable.
 - Footprint: **flight strips** across the heading (`STRIP_W` 280 m) with staggered ends, inside a 2.8 km
-  radius centred 1 km beyond the summit. **LiDAR edge** (owner's idea, 2026-10-13): beyond each strip's end the
-  last scan lines run on as rows of single, smaller points (`FRINGE` 8 lines, `SCAN` 22 m apart, `SCAN_DL` 2.5 m),
-  each shorter and sparser than the one before, broken off at random; also along the far strip's open side and,
-  half as long (footer line), the near strip's. At 9 m apart the rows blurred back into the edge. Eye-dome lighting (`EDL` 160) and single-pixel hole filling in the EDL
+  radius centred 1 km beyond the summit. **LiDAR edge** (owner's pick, 2026-10-13, "scatter"): beyond the strips the points thin out
+  over `FALL` 120 m into single dots (probability (1 - d/FALL)², slightly smaller points), half as far on the
+  near side (footer line). Rejected: scan-line rows running past the strip ends (looked like hatching, "weird"),
+  and the same scatter with dots shrinking outwards. Eye-dome lighting (`EDL` 160) and single-pixel hole filling in the EDL
   pass, so paper never shows through as white specks.
 - Camera: during the finale backdrop.js moves 1.5 km closer, 300 m lower, lens x1.38 and lifts the view
   (`FIN_*`; the lens, not a closer camera, so the whole cloud stays in view, above the footer line, with sky for

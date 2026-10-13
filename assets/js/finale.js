@@ -30,8 +30,7 @@
   var AHEAD = 1000;           // (route heading HEAD), so its near side stays short
   var HEAD = [0.6329, 0.7742];
   var STRIP_W = 280;          // width of one flight strip (m); the strips run across the heading
-  var FRINGE = 8, SCAN = 22;  // the LiDAR edge: scan lines beyond each strip's end, SCAN m apart, thinning out
-  var SCAN_DL = 2.5;          // point spacing along a scan line (m)
+  var FALL = 120;             // the LiDAR edge: beyond the strips the points thin out over FALL m into single dots
   var EDL = 160;              // eye-dome lighting strength
   var SHADOW_RELIEF = 1.4;    // cast shadows with the relief as drawn (~1.4x real at the Feldberg)
 
@@ -266,42 +265,29 @@
       rn.push(rnd() * 255, rnd() * 255, rnd() * 255);
       k++;
     }
-    // the strips' body: jittered points every SPACING m
-    var nx = Math.floor((x1 - x0) / SPACING), ny = Math.floor((y1 - y0) / SPACING);
+    // the strips' body: jittered points every SPACING m; beyond it the LiDAR edge: single points, ever
+    // sparser over FALL m, the way a point cloud fades at the edge of its coverage (half as far on the near
+    // side, which would otherwise reach over the footer line)
+    var nearU = Math.min.apply(null, Object.keys(strips).map(function (q) { return strips[q].uc; })) - STRIP_W / 2;
+    function outside(u, v) {                        // distance from the strips (0 inside)
+      var si = Math.floor(u / STRIP_W), best = 1e9;
+      for (var d = -1; d <= 1; d++) {
+        var st = strips[si + d];
+        if (!st) continue;
+        var du = Math.max(0, Math.abs(u - st.uc) - STRIP_W / 2), dv = Math.max(0, Math.abs(v - st.mid) - st.half);
+        best = Math.min(best, Math.hypot(du, dv));
+      }
+      return best;
+    }
+    var ex0 = Math.max(0, x0 - FALL), ey0 = Math.max(0, y0 - FALL);
+    var nx = Math.floor((Math.min(size, x1 + FALL) - ex0) / SPACING), ny = Math.floor((Math.min(size, y1 + FALL) - ey0) / SPACING);
     for (var j = 0; j < ny; j++) for (i = 0; i < nx; i++) {
-      var x = x0 + (i + 0.2 + 0.6 * rnd()) * SPACING, y = y0 + (j + 0.2 + 0.6 * rnd()) * SPACING;
+      var x = ex0 + (i + 0.2 + 0.6 * rnd()) * SPACING, y = ey0 + (j + 0.2 + 0.6 * rnd()) * SPACING;
       var u = (x - cx) * HEAD[0] + (y - cy) * HEAD[1], v = -(x - cx) * HEAD[1] + (y - cy) * HEAD[0];
-      var st = strips[Math.floor(u / STRIP_W)];
-      if (st && Math.abs(v - st.mid) < st.half) add(x, y, SPACING);
+      var o = outside(u, v), fall = u < nearU ? FALL / 2 : FALL;
+      if (o === 0) add(x, y, SPACING);
+      else if (o < fall && rnd() < Math.pow(1 - o / fall, 2)) add(x, y, SPACING * 0.7);
     }
-    // the LiDAR edge: beyond each strip's end the last scan lines run on as rows of single points, each a little
-    // shorter and sparser than the one before, broken off at random, like the end of a real flight line;
-    // the outermost strips get the same along their open long side
-    function scanLine(a, b, ln, gone, key) {        // a, b: the line's ends in (u, v); ln: its number outwards
-      var len = Math.hypot(b[0] - a[0], b[1] - a[1]), cut = 0.5 * gone * hash(key) * len, keep = Math.pow(1 - gone, 1.3);
-      for (var l = cut * hash(key + 7); l < len - cut * hash(key + 9); l += SCAN_DL) {
-        if (rnd() > keep) { rnd(); continue; }
-        var t2 = l / len, jit = (rnd() - 0.5) * 0.8;
-        var q = toXY(a[0] + (b[0] - a[0]) * t2 + jit, a[1] + (b[1] - a[1]) * t2);
-        add(q[0], q[1], SCAN_DL * 1.3);
-      }
-    }
-    var keys = Object.keys(strips).map(Number), sMin = Math.min.apply(null, keys), sMax = Math.max.apply(null, keys);
-    keys.forEach(function (si) {
-      var st = strips[si], u0 = st.uc - STRIP_W / 2, u1 = st.uc + STRIP_W / 2;
-      for (var ln = 0; ln < FRINGE; ln++) {
-        var gone = (ln + 1) / (FRINGE + 1), off = (ln + 0.6) * SCAN;
-        [-1, 1].forEach(function (side) {
-          var ve = st.mid + side * (st.half + off);
-          scanLine([u0, ve], [u1, ve], ln, gone, si * 97 + ln * 13 + side * 5);
-        });
-        if (si === sMax || (si === sMin && ln < FRINGE / 2)) {   // the open long side of the first and last strip
-          // (the near side's fringe is half as long: it would reach over the footer line)
-          var ue = si === sMin ? u0 - off : u1 + off;
-          scanLine([ue, st.mid - st.half], [ue, st.mid + st.half], ln, gone, si * 31 + ln * 17);
-        }
-      }
-    });
     cloud = {
       pos: buf(new Float32Array(pos)), col: buf(new Uint8Array(col)), rnd: buf(new Uint8Array(rn)), nrm: buf(new Float32Array(nrm)),
       count: k, zmin: zmin, demTex: demTex, height: height, centre: [cx, cy],
