@@ -11,9 +11,9 @@
 // climbs to orbit (Earth's limb, 5° graticule, country outlines) and watches a
 // Sentinel-2 pass over Freiburg (the swath fills in behind a moving scan line and
 // satellite), descends to ~1 km
-// looking straight down and hovers while an aircraft flies a photo survey over
-// Wiehre (frames click in along the strips; buildings, roads, rail, the Dreisam and
-// woods from OpenStreetMap appear inside them), then tilts forward at drone height (a camera viewfinder). The keyframes sit on the chapters' real positions; an
+// looking straight down and hovers while a row of aerial photos is taken over
+// Wiehre (OpenStreetMap water, roads and buildings appear inside them, drawn like a
+// card model), then tilts forward at drone height (a camera viewfinder). The keyframes sit on the chapters' real positions; an
 // altimeter on the right edge follows the height, and the active chapter is
 // emphasised. Reduced motion: one still frame, chapters as a plain list.
 //
@@ -178,7 +178,7 @@
   var colors = {};
   function readColors() {
     var cs = getComputedStyle(root);
-    ["--paper", "--contour", "--ink", "--accent-mark", "--water"].forEach(function (n) { colors[n] = cs.getPropertyValue(n).trim(); });
+    ["--paper", "--contour", "--ink", "--accent-mark", "--water", "--muted"].forEach(function (n) { colors[n] = cs.getPropertyValue(n).trim(); });
   }
   function color(name) { return colors[name]; }
   function smooth(t) { return t * t * (3 - 2 * t); }
@@ -822,8 +822,9 @@
   }
   // The aerial survey (u 0..1, owner's pick 2026-10-13): one row of SV.n photos along the route over
   // Wiehre, taken one after another, with no aircraft, track, plan lines or corner marks: only the photos.
-  // Each new one exposes with a short soft flash; the newest is outlined and labelled. Inside them the OpenStreetMap features are drawn like the
-  // hero's old survey sheet (FEAT_STYLE). Everything sits in the landscape, draped on the terrain.
+  // Each new one exposes with a short soft flash; the newest is outlined and labelled. Inside them the
+  // OpenStreetMap features are drawn like an architectural card model (FEAT_STYLE). Everything sits in the
+  // landscape, draped on the terrain.
   function surveyFrame(j) {                          // photo j: [a0, l0] in route coordinates
     var len = SV.fa + (SV.n - 1) * SV.da;
     return [surveyS - len / 2 + j * SV.da, -SV.fl / 2];
@@ -918,42 +919,16 @@
     ctx.lineJoin = "round";
     ctx.globalAlpha = 1;
   }
-  // The survey's map features (OpenStreetMap), drawn like the hero's old survey sheet (owner's pick,
-  // 2026-10-13), in sepia map ink (--contour), blue only for water; layer order from below:
-  // [layer, colour, line width, fill ("stipple", "hatch" or an opacity), dash]. Woods stippled, footpaths
-  // dotted, main roads as cased double lines, railway with cross ticks, buildings hatched.
+  // The survey's map features (OpenStreetMap), drawn like an architectural card model (owner's pick,
+  // 2026-10-13, over survey sheet, figure-ground, pencil, dots, blueprint, street network and cadastral
+  // styles): only water, roads and buildings. [layer, colour, line width, fill (an opacity, or "extrude"), dash];
+  // layer order from below. Main roads are cased double lines; buildings are raised blocks: a grey side under a
+  // paper roof lifted a few pixels, outlined.
   var featKey = "", featCache = { key: "", canvas: null, refs: null, pitch: 0, size: "" };
   var FEAT_STYLE = [
-    ["wood", "--contour", 0, "stipple", null], ["water", "--water", 0.8, 0.22, null], ["stream", "--water", 0.9, 0, null],
-    ["river", "--water", 2.6, 0, null], ["path", "--contour", 0.9, 0, [0.1, 2.6]], ["minor", "--contour", 0.75, 0, null],
-    ["major", "--contour", 3, 0, null], ["tram", "--contour", 0.6, 0, [4, 2]], ["rail", "--contour", 1, 0, null],
-    ["building", "--contour", 0.55, "hatch", null],
+    ["water", "--water", 0.8, 0.5, null], ["river", "--water", 3.2, 0, null], ["stream", "--water", 1.1, 0, null],
+    ["minor", "--muted", 1, 0, null], ["major", "--muted", 3.2, 0, null], ["building", "--ink", 0.45, "extrude", null],
   ];
-  // fill patterns in map ink: a scatter of dots (woods), fine diagonal hatching (buildings); made at device
-  // resolution and scaled back, so they stay crisp
-  var patterns = {};
-  function pattern(c, kind, col) {
-    var key = kind + col + dpr;
-    if (!patterns[key]) {
-      var n = Math.round(12 * dpr), pc = document.createElement("canvas");
-      pc.width = pc.height = n;
-      var g = pc.getContext("2d");
-      g.fillStyle = g.strokeStyle = col;
-      if (kind === "stipple") {
-        [[2, 3], [8, 1.5], [5, 8], [10.5, 9.5], [1, 10]].forEach(function (d) {
-          g.beginPath(); g.arc(d[0] * dpr, d[1] * dpr, 0.55 * dpr, 0, 2 * Math.PI); g.fill();
-        });
-      } else {
-        g.lineWidth = 0.6 * dpr;
-        [-n, 0, n].forEach(function (o) { g.beginPath(); g.moveTo(o, n); g.lineTo(o + n, 0); g.stroke(); });
-        [-n / 3, n / 3, 2 * n / 3].forEach(function (o) { g.beginPath(); g.moveTo(o, n); g.lineTo(o + n, 0); g.stroke(); });
-      }
-      patterns[key] = pc;
-    }
-    var pat = c.createPattern(patterns[key], "repeat");
-    if (pat.setTransform && window.DOMMatrix) pat.setTransform(new DOMMatrix().scale(1 / dpr));
-    return pat;
-  }
   // the affine transform [a, b, c, d, e, f] mapping three screen points src onto dst
   function affine(src, dst) {
     var x0 = src[0][0], y0 = src[0][1], x1 = src[1][0] - x0, y1 = src[1][1] - y0, x2 = src[2][0] - x0, y2 = src[2][1] - y0;
@@ -968,25 +943,32 @@
     FEAT_STYLE.forEach(function (st) {
       var list = feats[st[0]], closed = typeof st[3] === "string" || st[3] > 0;
       if (!list) return;
-      c.beginPath();
-      list.forEach(function (f) {
-        var b = f.b;
-        if (b[1] < surveyS - half || b[0] > surveyS + half || b[3] < -side || b[2] > side) return;
-        var P = f.p, n = 0;
-        for (var i = 0; i < P.length; i += 3) {
-          if (!v.proj(P[i], P[i + 1], (P[i + 2] - H0) * ex)) { n = 0; continue; }
-          if (n++) c.lineTo(v.out[0], v.out[1]); else c.moveTo(v.out[0], v.out[1]);
-        }
-        if (closed && n > 2) c.closePath();
-      });
+      var trace = function (dy) {                   // the layer's path, shifted up by dy px
+        c.beginPath();
+        list.forEach(function (f) {
+          var b = f.b;
+          if (b[1] < surveyS - half || b[0] > surveyS + half || b[3] < -side || b[2] > side) return;
+          var P = f.p, n = 0;
+          for (var i = 0; i < P.length; i += 3) {
+            if (!v.proj(P[i], P[i + 1], (P[i + 2] - H0) * ex)) { n = 0; continue; }
+            if (n++) c.lineTo(v.out[0], v.out[1] + dy); else c.moveTo(v.out[0], v.out[1] + dy);
+          }
+          if (closed && n > 2) c.closePath();
+        });
+      };
       c.setLineDash(st[4] || []);
       c.lineJoin = "round";
       c.lineCap = "round";
-      if (typeof st[3] === "string") {
-        c.fillStyle = pattern(c, st[3], color(st[1]));
-        c.globalAlpha = st[3] === "stipple" ? 0.55 : 0.7;
-        c.fill();
-      } else if (closed) { c.fillStyle = color(st[1]); c.globalAlpha = st[3]; c.fill(); }
+      if (st[3] === "extrude") {              // a card model: grey sides, the paper roof lifted, outlined
+        trace(0);
+        c.fillStyle = color("--muted"); c.globalAlpha = 0.55; c.fill();
+        trace(-2.6);
+        c.fillStyle = color("--paper"); c.globalAlpha = 1; c.fill();
+        c.strokeStyle = color(st[1]); c.lineWidth = st[2]; c.globalAlpha = 0.8; c.stroke();
+        return;
+      }
+      trace(0);
+      if (closed) { c.fillStyle = color(st[1]); c.globalAlpha = st[3]; c.fill(); }
       if (st[2]) {
         c.strokeStyle = color(st[1]);
         c.lineWidth = st[2];
@@ -995,13 +977,6 @@
         if (st[0] === "major") {              // open the road: a paper core inside the casing
           c.strokeStyle = color("--paper");
           c.lineWidth = 1.5;
-          c.stroke();
-        }
-        if (st[0] === "rail") {               // cross ticks
-          c.setLineDash([1, 7]);
-          c.lineCap = "butt";
-          c.lineWidth = 4.5;
-          c.strokeStyle = color(st[1]);
           c.stroke();
         }
       }

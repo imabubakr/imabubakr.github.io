@@ -121,10 +121,12 @@ aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors. Three chapt
   short soft flash (an ink tint that fades); only the newest is outlined and labelled. The photos taken so far form one seamless mosaic (one paper fill, no seams: owner) that covers the
   terrain lines and shows what the photos see: OpenStreetMap features (`assets/topo/aerial-features.json`,
   ~85 KB gzipped, from `tools/orbit/build_aerial.py`; its `SURVEY_A` must cover the photo row: more photos need
-  a wider area and a fresh Overpass export) **drawn like the hero's old survey sheet** (owner's pick
-  over figure-ground, pencil sketch and dots): sepia map ink (`--contour`), stippled woods, dotted footpaths,
-  thin cased main roads, railway with cross ticks, hatched buildings, blue (`--water`) only for water;
-  layer styles in `FEAT_STYLE`, at 0.85 strength (a 0.42 version was too faint). The owner keeps the location
+  a wider area and a fresh Overpass export) **drawn like an architectural card model** (owner's pick, 2026-10-13; seen and not chosen: survey sheet in
+  sepia ink, figure-ground, pencil sketch, dots, blueprint, street network only, cadastral plan): **only water,
+  roads and buildings** (no footpaths, rail or woods: owner). Buildings are raised blocks (a `--muted` side under
+  a `--paper` roof lifted 2.6 px, thin ink outline), streets `--muted` lines, main roads cased double lines,
+  the Dreisam, streams and ponds in `--water` (made stronger at the owner's request); layer styles in
+  `FEAT_STYLE`, drawn at 0.85. The owner keeps the location
   (Wiehre) but the stop must not be "about Freiburg": the Freiburg marker is hidden below 8 km altitude.
   Rejected (2026-10-13, don't bring back): a numbered flight plan with photos snapping into place and finer
   ridge lines instead of the map, a village (Oberried) instead of Wiehre. Performance: drawing all features
