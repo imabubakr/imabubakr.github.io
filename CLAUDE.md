@@ -170,34 +170,43 @@ Rejected along the way (don't bring back): an altitude slider explorer, a "Light
 OSM land-cover map of Ebringen (descent.js), and a calm three-column strip with resolution icons. The section must be
 about the career path, not a generic toy.
 
-## Finale: the Feldberg as a colored point cloud (preview, 2026-10-10)
+## Finale: the Feldberg as a colored point cloud (final, 2026-10-13)
 
 The page opens on an old folded paper map (hero) and ends on today's geodata (owner's idea: "show how far the
 advancement has come"). `assets/js/finale.js` (WebGL, own canvases `.finale` above the flight, masked off the
 Contact text on wide screens) is called by backdrop.js after every frame with its camera (`window.flightFinale`),
-so the points sit exactly on the ridge lines. **Owner's corrections, round 2:** the plates ruined the start (the
-build-up ran behind their sticky preview), so Contact has a long empty top padding (`#contact`, 80vh desktop /
-70vh phones) as the finale's stage, and the finale's progress (`cam.fin`, eased with the camera) runs from
-Contact's top at 10 % of the screen (plates gone) to the page end; the orthophoto is no longer draped as a solid
-mesh but shown **as LiDAR is shown: a point cloud colored from the orthophoto** (8 m jittered points inside a
-round footprint of 2.8 km radius centred 1 km beyond the summit, rim thinning out; a solid square tile with walls
-was tried and dropped); and the camera ended too far away, so during the finale it moves 1.5 km closer, 300 m
-lower, lens x1.1, and lifts the summit to the upper right (`FIN_*`; centred layouts < 900 px only a quarter of
-the step and a slight drop so the label clears the nav). **Round 3 (owner: "make it more eye-catching"; ideas
-1+2+3 chosen):** (1) the sand comes back: every point starts as a grain in `--contour` above the top left and
-drifts along a curve, after its own delay, into the cloud (k 0-0.4; the hero's paper blows away as sand at the
-start, so the page closes the loop); (3) a drone (navigation chevron + accent laser fan + "DRONE · LIDAR") flies
-the footprint in strips (`STRIP` 650 m, back and forth, each strip as wide as the circle there, `DRONE_AGL`) and
-the points behind it take the orthophoto color (k 0.42-0.97); (2) eye-dome lighting as in Potree/CloudCompare:
-the points are drawn into a color and a packed-log-depth texture, a full-screen pass darkens pixels whose
-neighbours are nearer (`EDL` 160, floor 0.5; 900 turned the cloud black). Without render-to-texture: no EDL.
-Sequence: sand settling into grey points (LiDAR intensity, ink tones) → the drone coloring them → label "FELDBERG 1,493 M" +
-"POINT CLOUD · COLORED FROM ORTHOPHOTO" (DE "PUNKTWOLKE · EINGEFÄRBT AUS ORTHOFOTO"). During the arrival the
-flight's relief eases to EX x 0.55 (`ARRIVE_RELIEF`, ~1.4x real) and backdrop.js hides its own summit labels
-(`flightFinaleOn`). Data from `tools/finale/build_feldberg.py`: `assets/topo/feldberg-dop.webp` (LGL-BW DOP20 via
-WMS, 2048 px for 7 km, ~950 KB), `feldberg-dem.bin` (Copernicus GLO-30 warped to 25 m), `feldberg.json`; loaded
-when Contact comes near. Footer credit: "Orthophoto: LGL-BW (2026) Datenlizenz Deutschland – Namensnennung –
-Version 2.0, www.lgl-bw.de" (holder + year of retrieval required). Reduced motion / no WebGL: no finale.
+so the points sit exactly on the ridge lines. Contact has a long empty top padding (`#contact`, 80vh desktop /
+70vh phones) as the finale's stage; the finale's progress (`cam.fin` = k, eased with the camera) runs from
+Contact's top at 10 % of the screen (plates gone) to the page end. Sequence (owner's picks, 2026-10-13):
+
+- k 0-0.4: the sand comes back (as the hero's paper blew away): grains in `--contour` drift in from the top left
+  and settle into a **flat colored map** (orthophoto colors, 8 m jittered points).
+- k 0.4-0.8: the map **rises** into the mountain (the hero's rise, mirrored), while the flight's ridge lines fade
+  to 8 % (`FIN_LINES` in backdrop.js: the owner found the brown lines did not go with the cloud).
+- k 0.4-0.95: **today's sun** crosses it: the real sun path at the Feldberg for the visitor's date (declination
+  and equation of time from the day of year, CET/CEST), from 45 min after sunrise to 45 min before sunset. Slope
+  shading (normals with relief x2), **cast shadows** marched through the DEM in the vertex shader (DEM as a 16-bit
+  RGBA texture; without vertex texture fetch: no shadows), warm light while the sun is low, slightly cool shade.
+- Label above the cloud in open sky, no boxes (they read as white patches): "FELDBERG 1,493 M" (12 px ink),
+  "POINT CLOUD · COLORED FROM ORTHOPHOTO" (11 px muted; dropped on phones), "SUNLIGHT · 13 OCT · 17:40" (11 px ink;
+  DE "SONNENSTAND · 13. OKT."; never "SUN": the owner read it as Sunday). The owner found 9-10 px unreadable.
+- Footprint: **flight strips** across the heading (`STRIP_W` 280 m) with staggered crisp ends, inside a 2.8 km
+  radius centred 1 km beyond the summit. Eye-dome lighting (`EDL` 160) and single-pixel hole filling in the EDL
+  pass, so paper never shows through as white specks.
+- Camera: during the finale backdrop.js moves 1.5 km closer, 300 m lower, lens x1.38 and lifts the view
+  (`FIN_*`; the lens, not a closer camera, so the whole cloud stays in view, above the footer line, with sky for
+  the label). Centred layouts < 900 px: only a quarter of the step.
+- Rejected (2026-10-13, don't bring back): the soft alpha-faded rim (white haze around the cloud), the paper boxes
+  behind the label, a round dithered edge, colored ridge lines instead of a cloud (forest reads black), a drone
+  flying the strips with a laser fan (owner disliked it), the grey-then-colored ring, a turntable rotation
+  (strip ends turned into "fingers"), moving the camera 3 km closer (cloud over the footer).
+
+During the arrival the flight's relief eases to EX x 0.55 (`ARRIVE_RELIEF`, ~1.4x real) and backdrop.js hides its
+own summit labels (`flightFinaleOn`). Data from `tools/finale/build_feldberg.py`: `assets/topo/feldberg-dop.webp`
+(LGL-BW DOP20 via WMS, 2048 px for 7 km, ~950 KB), `feldberg-dem.bin` (Copernicus GLO-30 warped to 25 m),
+`feldberg.json`; loaded when Contact comes near. Footer credit: "Orthophoto: LGL-BW (2026) Datenlizenz Deutschland
+– Namensnennung – Version 2.0, www.lgl-bw.de" (holder + year of retrieval required). Reduced motion / no WebGL: no
+finale.
 
 ## Legal notice (Impressum)
 

@@ -52,8 +52,10 @@
   var ARRIVE_ZOOM = 0.7;     // contact: wider lens (focal length x 0.7)
   var ARRIVE_RELIEF = 0.55;  // contact: relief factor (EX x 0.55 = ~1.4x real, for the Feldberg point cloud)
   // The finale (finale.js), once the plates have scrolled away: the camera moves FIN_FORWARD m closer to the
-  // Feldberg, a little lower, with a longer lens, while the point cloud builds up.
-  var FIN_FORWARD = 1500, FIN_CLIMB = -300, FIN_ZOOM = 1.1, FIN_LIFT = 0.13;
+  // Feldberg, a little lower, with a longer lens (not closer: the whole cloud stays in view, clear of the
+  // footer and with sky for its label), while the point cloud builds up and rises.
+  var FIN_FORWARD = 1500, FIN_CLIMB = -300, FIN_ZOOM = 1.38, FIN_LIFT = 0.11;
+  var FIN_LINES = 0.92;      // the ridge lines fade out (the old map gives way) as the point cloud rises
   var R_EARTH = 6371000;
   var CENTER_LL = [48.0, 7.81], CENTER_XY = [20000, 18000]; // region centre
   var ORBIT_H = 705000, AERIAL_H = 1000, DRONE_H = 100;     // as in the chapters' spec lines
@@ -341,6 +343,7 @@
     // --- terrain: cross-section lines at fixed distances along the route
     var terrA = clamp((90000 - alt) / 60000, 0, 1);
     var drawn = [];
+    var linesA = 1 - FIN_LINES * smooth(clamp(((cam.fin || 0) - 0.4) / 0.5, 0, 1));   // the old map gives way
     if (terrA > 0) {
       // line spacing: in level flight it grows with height; looking down (the
       // descent) it follows the screen, a line every ~6.5 px, so the joy plot
@@ -384,7 +387,7 @@
         var near = clamp(1 - (dist - H * 0.9) / fogFar, 0, 1);
         var thin = n0 <= 0 && k % 2 ? clamp((7000 - (a - cam.s)) / 2000, 0, 1) : 1;
         if (k % 2) thin *= 1 - frac;
-        var alpha = (0.25 + 0.75 * Math.pow(near, 1.3)) * thin * terrA;
+        var alpha = (0.25 + 0.75 * Math.pow(near, 1.3)) * thin * terrA * linesA;
         if (alpha < 0.03) continue;
         var dl = Math.max(25, ((down ? 5 : 3.5) * q * dist) / F);
         dl = 25 * Math.pow(2, Math.round(Math.log2(dl / 25)));
