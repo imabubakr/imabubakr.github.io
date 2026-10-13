@@ -921,13 +921,13 @@
   }
   // The survey's map features (OpenStreetMap), drawn like an architectural card model (owner's pick,
   // 2026-10-13, over survey sheet, figure-ground, pencil, dots, blueprint, street network and cadastral
-  // styles): only water, roads and buildings. [layer, colour, line width, fill (an opacity, or "extrude"), dash];
-  // layer order from below. Main roads are cased double lines; buildings are raised blocks: a grey side under a
+  // styles): only water, main roads and buildings. [layer, colour, line width, fill (an opacity, or "extrude"), dash];
+  // layer order from below. Main roads (no side streets) are cased double lines; buildings are raised blocks: a grey side under a
   // paper roof lifted a few pixels, outlined.
   var featKey = "", featCache = { key: "", canvas: null, refs: null, pitch: 0, size: "" };
   var FEAT_STYLE = [
     ["water", "--water", 0.8, 0.5, null], ["river", "--water", 3.2, 0, null], ["stream", "--water", 1.1, 0, null],
-    ["minor", "--muted", 1, 0, null], ["major", "--muted", 3.2, 0, null], ["building", "--ink", 0.45, "extrude", null],
+    ["major", "--muted", 3.2, 0, null], ["building", "--ink", 0.45, "extrude", null],
   ];
   // the affine transform [a, b, c, d, e, f] mapping three screen points src onto dst
   function affine(src, dst) {
