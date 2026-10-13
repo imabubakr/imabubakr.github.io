@@ -48,8 +48,10 @@ def layer(t):
         return "rail"
     if t.get("railway") in ("tram", "light_rail"):
         return "tram"
-    if t.get("waterway") == "river" or t.get("waterway") == "canal":
-        return "river"
+    if t.get("waterway") == "river":               # the named river (the Dreisam); unnamed side channels count
+        return "river" if t.get("name") else "stream"   # as streams
+    if t.get("waterway") == "canal":
+        return "canal"
     if t.get("waterway") == "stream":
         return "stream"
     if t.get("natural") == "water":
@@ -60,7 +62,7 @@ def layer(t):
 
 
 AREAS = {"building", "water", "wood"}
-LAYERS = ["wood", "water", "stream", "river", "path", "minor", "major", "tram", "rail", "building"]
+LAYERS = ["wood", "water", "stream", "canal", "river", "path", "minor", "major", "tram", "rail", "building"]
 
 vx, vy = FELDBERG[0] - FREIBURG[0], FELDBERG[1] - FREIBURG[1]
 n = math.hypot(vx, vy)
