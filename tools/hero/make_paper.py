@@ -20,6 +20,8 @@ Colours stay in CSS (--paper, --sheet-age); the images carry only shape.
 """
 from pathlib import Path
 
+import sys
+
 import numpy as np
 from PIL import Image
 
@@ -148,5 +150,13 @@ def make(name, W, H, vfolds, hfolds):
         print(f"{p.relative_to(OUT.parents[1])}: {p.stat().st_size / 1024:.0f} KB")
 
 
-for name, (W, H, v, hz) in FORMATS.items():
-    make(name, W, H, v, hz)
+# PREVIEW (2026-10-13): python3 tools/hero/make_paper.py --preview writes fold variants for the wide sheet to
+# assets/img/preview/ (committed while the choice is open): 3x2 (folds at the thirds and the middle) and 3x1 (two folds at the thirds)
+if "--preview" in sys.argv:
+    OUT = OUT / "preview"
+    for tag, v, hz in [("3x2", [(1 / 3, 1), (2 / 3, -1)], [(0.5, -1)]), ("3x1", [(1 / 3, 1), (2 / 3, -1)], [])]:
+        rng = np.random.default_rng(20261010)
+        make(f"wide-{tag}", 2000, 1000, v, hz)
+else:
+    for name, (W, H, v, hz) in FORMATS.items():
+        make(name, W, H, v, hz)

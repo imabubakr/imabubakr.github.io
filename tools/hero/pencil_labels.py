@@ -13,9 +13,11 @@ converted to outlines here, so no font is loaded on the site: each glyph is a
 <path> in <defs>, reused with <use>. Colour (--pencil) and the graphite grain
 (a static noise mask; a live SVG filter here made the hero's scroll stutter) live in CSS.
 """
+import json
 import math
 import random
 import re
+import struct
 import sys
 from html import unescape
 from pathlib import Path
@@ -55,6 +57,23 @@ NOTES = [
      (4737, 4990), "pc-wide", "below"),                  # arrowhead just inside the bottom edge
 ]
 
+# PREVIEW (2026-10-13, shown with ?geo=1): the main border fault of the Upper Rhine Graben, pencilled on as in a
+# geological mapping exercise: freehand line with ticks on the downthrown side (the Rhine plain, west), a gap
+# wherever it meets pencil text, and a two-line note beside it (start of the first baseline, line step, tilt).
+# Line: LGRB GÜK300 (tools/hero/build_faults.py).
+FAULTS = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-faults.json"
+FAULT_NOTE = ({"en": ["Rhine Graben fault:", "the plain sank, the Black Forest rose"],
+               "de": ["Rheingraben-Störung:", "die Ebene sank, der Schwarzwald hob sich"]}, 6720, 1790, 150, -2)
+
+# PREVIEW (2026-10-13, ?ex=1,2,4): contour-reading exercises, as a geology student pencils them onto a sheet.
+# 1: a slope worked out between A and B (straight uphill on the Black Forest edge; numbers from the DEM),
+# 2: "lines close: steep" / "lines far apart: flat", 4: a spot height on the hiking summit (the DEM maximum).
+DEM = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-contours-dem.bin"   # 200 x 100, 50 m
+SLOPE = ((7950, 3000), (7702, 2454), (8090, 2800), -2)   # A, B, start of the working, its tilt
+READ = [({"en": "lines close: steep", "de": "Linien eng: steil"}, 7350, 4420, -3),
+        ({"en": "lines far apart: flat", "de": "Linien weit: flach"}, 1100, 3550, 2)]
+SPOT = (8975, 1675)
+
 font = TTFont(FONT)
 gs, cmap, hmtx = font.getGlyphSet(), font.getBestCmap(), font["hmtx"]
 UPM = font["head"].unitsPerEm
@@ -81,6 +100,8 @@ def build(lang, say):
             pts.append(f"{cx + rr * math.cos(a):.0f} {cy + rr * math.sin(a) * 0.9:.0f}")
         return "M" + " L".join(pts)
 
+    boxes = []                                             # text boxes (map m), the fault leaves a gap there
+
     def words(text, tx, ty, rot, s):
         """<g> with the text as reused glyphs; returns it and the text width in map metres."""
         uses, pen_x = [], 0
@@ -89,6 +110,11 @@ def build(lang, say):
             gid = used.setdefault(g, f"pc{len(used)}")
             uses.append(f'<use href="#{gid}" x="{pen_x / 10:.0f}"/>')
             pen_x += hmtx[g][0]
+        wd, a, em = pen_x * s, math.radians(rot), s * UPM
+        cs = [(tx + u * math.cos(a) - v * math.sin(a), ty + u * math.sin(a) + v * math.cos(a))
+              for u in (0, wd) for v in (-0.85 * em, 0.3 * em)]
+        boxes.append((min(c[0] for c in cs) - 50, min(c[1] for c in cs) - 50, max(c[0] for c in cs) + 50,
+                      max(c[1] for c in cs) + 50))
         return (f'<g transform="translate({tx:.0f} {ty:.0f}) rotate({rot:.1f}) scale({s * 10:.4f})">'
                 f'{"".join(uses)}</g>'), pen_x * s
 
@@ -147,6 +173,91 @@ def build(lang, say):
                         for k in (-0.5, 0.42))
         labels.append(f'<g class="{("pc " + cls).strip()}">{g}'
                       f'<path class="pc-line pc-arrow" d="M{" L".join(pts)} {head}"/></g>')
+
+    if FAULTS.exists():
+        size = PLACES[0][3]
+        fl = [l for l in json.loads(FAULTS.read_text())["lines"]
+              if sum(math.dist(l[i], l[i + 1]) for i in range(len(l) - 1)) > 400]
+        lines_, nx0, ny0, step_, nrot = FAULT_NOTE[0][lang], FAULT_NOTE[1], FAULT_NOTE[2], FAULT_NOTE[3], FAULT_NOTE[4]
+        na = math.radians(nrot)
+        note = "".join(words(t, nx0 - i * step_ * math.sin(na), ny0 + i * step_ * math.cos(na), nrot, size / UPM)[0]
+                       for i, t in enumerate(lines_))
+        inbox = lambda x, y: any(b[0] <= x <= b[2] and b[1] <= y <= b[3] for b in boxes)
+        strokes, ticks = [], []
+        for l in fl:
+            pts = []                                       # densify every 40 m, with a slight freehand wobble
+            for i in range(len(l) - 1):
+                (x0, y0), (x1, y1) = l[i], l[i + 1]
+                n = max(1, int(math.dist(l[i], l[i + 1]) / 40))
+                pts += [(x0 + (x1 - x0) * k / n + rnd.uniform(-9, 9), y0 + (y1 - y0) * k / n + rnd.uniform(-9, 9))
+                        for k in range(n)]
+            pts.append(tuple(l[-1]))
+            run, along, next_tick = [], 0, 160
+            for i, (x, y) in enumerate(pts):
+                if i:
+                    along += math.dist(pts[i - 1], pts[i])
+                if inbox(x, y) or not (-50 <= x <= 10050 and -50 <= y <= 5050):
+                    if len(run) > 1:
+                        strokes.append(run)
+                    run = []
+                    continue
+                run.append((x, y))
+                if along >= next_tick and 0 < i < len(pts) - 1:   # a tick on the downthrown (west) side
+                    next_tick += 330
+                    tx_, ty_ = pts[i + 1][0] - pts[i - 1][0], pts[i + 1][1] - pts[i - 1][1]
+                    tl = math.hypot(tx_, ty_) or 1
+                    px, py = -ty_ / tl, tx_ / tl
+                    if px > 0:
+                        px, py = -px, -py
+                    if not inbox(x + px * 75, y + py * 75):
+                        ticks.append(f"M{x:.0f} {y:.0f} L{x + px * 75:.0f} {y + py * 75:.0f}")
+            if len(run) > 1:
+                strokes.append(run)
+        d = " ".join("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in r) for r in strokes)
+        labels.append(f'<g class="pc pc-wide pc-geo"><path class="pc-line pc-fault" d="{d}"/>'
+                      f'<path class="pc-line pc-tick" d="{" ".join(ticks)}"/>{note}</g>')
+
+    if DEM.exists():
+        size = PLACES[0][3]
+        z = struct.unpack(f"<{DEM.stat().st_size // 2}h", DEM.read_bytes())
+
+        def elev(x, y):                                    # bilinear between the 50 m cell centres
+            fx, fy = min(max(x / 50 - 0.5, 0), 198.999), min(max(y / 50 - 0.5, 0), 98.999)
+            i, j = int(fx), int(fy)
+            u, v, k = fx - i, fy - j, int(fy) * 200 + int(fx)
+            return (z[k] * (1 - u) + z[k + 1] * u) * (1 - v) + (z[k + 200] * (1 - u) + z[k + 201] * u) * v
+
+        def stroke(pts):                                   # a freehand pencil line
+            out = []
+            for i in range(len(pts) - 1):
+                (x0, y0), (x1, y1) = pts[i], pts[i + 1]
+                n = max(1, int(math.dist(pts[i], pts[i + 1]) / 40))
+                out += [(x0 + (x1 - x0) * k / n + rnd.uniform(-7, 7), y0 + (y1 - y0) * k / n + rnd.uniform(-7, 7))
+                        for k in range(n)]
+            out.append(pts[-1])
+            return "M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in out)
+
+        # 1: the slope, A (low) to B (high), the working from the rounded readings so the sum adds up
+        (ax, ay), (bx, by), (wx, wy), wrot = SLOPE
+        dh = round((elev(bx, by) - elev(ax, ay)) / 10) * 10
+        run = round(math.dist((ax, ay), (bx, by)) / 10) * 10
+        deg = round(math.degrees(math.atan(dh / run)))
+        ux, uy = (bx - ax) / math.dist((ax, ay), (bx, by)), (by - ay) / math.dist((ax, ay), (bx, by))
+        ends = " ".join(stroke([(x - uy * 55, y + ux * 55), (x + uy * 55, y - ux * 55)]) for x, y in ((ax, ay), (bx, by)))
+        la, _ = words("A", ax - ux * 140 - 40, ay - uy * 140 + 40, 0, size / UPM)
+        lb, _ = words("B", bx + ux * 90 - 30, by + uy * 90, 0, size / UPM)
+        wk, _ = words(f"Δh {dh} m / {run} m ≈ {deg}°", wx, wy, wrot, size / UPM)
+        labels.append(f'<g class="pc pc-wide pc-ex pc-ex1"><path class="pc-line pc-fault" d="{stroke([(ax, ay), (bx, by)])} {ends}"/>'
+                      f"{la}{lb}{wk}</g>")
+        # 2: reading the spacing
+        rd = "".join(words(t[lang], x, y, r, size / UPM)[0] for t, x, y, r in READ)
+        labels.append(f'<g class="pc pc-wide pc-ex pc-ex2">{rd}</g>')
+        # 4: the spot height (a pencilled cross and the reading)
+        sx, sy = SPOT
+        h = round(elev(sx, sy))
+        cross = stroke([(sx - 45, sy - 45), (sx + 45, sy + 45)]) + " " + stroke([(sx - 45, sy + 45), (sx + 45, sy - 45)])
+        sp, _ = words(str(h), sx + 90, sy + 150, -2, size * 0.9 / UPM)
+        labels.append(f'<g class="pc pc-wide pc-ex pc-ex4"><path class="pc-line" d="{cross}"/>{sp}</g>')
 
     defs = "".join(f'<path id="{gid}" d="{glyph_path(g)}"/>' for g, gid in used.items())
     return (

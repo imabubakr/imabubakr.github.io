@@ -12,7 +12,7 @@
 
   var de = document.documentElement.lang === "de";
   var T = de
-    ? { profile: "Höhenprofil", close: "Profil schließen", length: "Länge", dec: ",", E: "O", W: "W",
+    ? { profile: "Höhenprofil", close: "Profil schließen", length: "Länge", dec: ",", E: "O", W: "W", dip: "Fallen",
         contours: "Höhenlinien", ridges: "Ridgelines", full: "Vollbild", view: "Kartenansicht",
         zoomIn: "Hineinzoomen", zoomOut: "Herauszoomen", reset: "Ganze Karte", closeMap: "Karte schließen",
         title: "Region Freiburg · Kaiserstuhl bis Feldberg · Copernicus GLO-30",
@@ -21,7 +21,7 @@
         exag: function (x) { return "Ridgelines: " + String(x).replace(".", ",") + "-fach überhöht"; },
         crs: ["EPSG:32632 · eigentlich UTM 32N", "EPSG:3857 · bitte keine Flächen messen",
           "EPSG:4326 · Lat/Lon oder Lon/Lat?"] }
-    : { profile: "elevation profile", close: "Close profile", length: "length", dec: ".", E: "E", W: "W",
+    : { profile: "elevation profile", close: "Close profile", length: "length", dec: ".", E: "E", W: "W", dip: "dip",
         contours: "contours", ridges: "ridges", full: "fullscreen", view: "Map view",
         zoomIn: "Zoom in", zoomOut: "Zoom out", reset: "Whole map", closeMap: "Close map",
         title: "Freiburg region · Kaiserstuhl to Feldberg · Copernicus GLO-30",
@@ -97,10 +97,22 @@
     return Math.abs(v).toFixed(digits).replace(".", T.dec);
   }
 
+  // PREVIEW (2026-10-13, ?geo=1): the ground's dip and dip direction under the cursor, as a geologist reads
+  // a bedding plane (here the terrain surface, from the 50 m grid over +-50 m); nothing on (near) flat ground
+  var GEO = /[?&]geo=1/.test(location.search);
+  function dip(ds, x, y) {
+    var d = ds.meta.grid.cell_m[0];
+    var gx = (elevation(ds, x + d, y) - elevation(ds, x - d, y)) / (2 * d);   // up towards the east
+    var gy = (elevation(ds, x, y + d) - elevation(ds, x, y - d)) / (2 * d);   // up towards the south
+    var deg = Math.atan(Math.hypot(gx, gy)) * 180 / Math.PI;
+    if (deg < 2) return "";
+    var az = (Math.atan2(-gx, gy) * 180 / Math.PI + 360) % 360;               // downhill, from north clockwise
+    return " · " + T.dip + " " + Math.round(deg) + "° → " + ("00" + Math.round(az) % 360).slice(-3) + "°";
+  }
   function readout(ds, p) {
     var ll = lonLat(ds, p.x, p.y);
     return num(ll[1], 4) + "°" + (ll[1] >= 0 ? "N" : "S") + " " + num(ll[0], 4) + "°" +
-      (ll[0] >= 0 ? T.E : T.W) + " · " + Math.round(elevation(ds, p.x, p.y)) + " m";
+      (ll[0] >= 0 ? T.E : T.W) + " · " + Math.round(elevation(ds, p.x, p.y)) + " m" + (GEO ? dip(ds, p.x, p.y) : "");
   }
 
   function el(name, attrs, parent) {

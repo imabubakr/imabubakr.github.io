@@ -2266,6 +2266,27 @@ html.hero-rising .pencil-box {
   stroke-width: 0.9px;
   opacity: 0.7;
 }
+/* PREVIEW (2026-10-13, ?geo=1): the graben fault pencilled on like a mapping exercise */
+.pc-geo {
+  display: none;
+}
+html.geo-on .pc-geo {
+  display: inline;
+}
+.pc-fault {
+  stroke-width: 1.6px;
+}
+.pc-ex {
+  display: none;
+}
+html.ex-1 .pc-ex1,
+html.ex-2 .pc-ex2,
+html.ex-4 .pc-ex4 {
+  display: inline;
+}
+.pc-tick {
+  stroke-width: 1.1px;
+}
 @media (max-width: 719px) {
   .pc-wide {
     display: none;

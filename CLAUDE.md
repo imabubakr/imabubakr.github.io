@@ -218,6 +218,26 @@ own summit labels (`flightFinaleOn`). Data from `tools/finale/build_feldberg.py`
 – Namensnennung – Version 2.0, www.lgl-bw.de" (holder + year of retrieval required). Reduced motion / no WebGL: no
 finale.
 
+## Work in progress: hero geology and folds (previews, 2026-10-13)
+
+A friend of the owner found the hero's folds "weird" and suggested using the owner's geology background (BSc
+Geology, Bahria; MSc Geology, Freiburg; contour-map exercises in class), "serious but fun". Built as previews,
+all off unless switched on by URL, nothing decided yet:
+- `?folds=3x2` / `?folds=3x1`: other fold textures for the wide sheet (`make_paper.py --preview` writes
+  `assets/img/preview/paper-wide-*`; site.js swaps them). Claude's advice: 3 x 2 (real sheets fold both ways).
+- `?geo=1`: the Upper Rhine Graben main border fault pencilled on (freehand, ticks on the downthrown west side,
+  gaps at pencil text) + note "Rhine Graben fault: / the plain sank, the Black Forest rose" (DE "Rheingraben-
+  Störung: / die Ebene sank, der Schwarzwald hob sich"); owner likes it. Line from LGRB GÜK300 (WFS
+  `lgrb_uek350_geologie`, layer `ms:gu300tl_m`, proven faults) via `tools/hero/build_faults.py` ->
+  `assets/topo/hero-faults.json`. **Licence not yet confirmed** (the service points to the LGRB terms; some
+  services are paid): confirm and add a footer credit before making it default. Also adds "dip 20° → 321°"
+  (DE "Fallen") to the hero readout on slopes (hero-map.js `dip()`).
+- `?ex=1,2,4`: contour exercises in pencil (pencil_labels.py `SLOPE`, `READ`, `SPOT`): 1 slope A-B with
+  "Δh 190 m / 600 m ≈ 18°" (from the DEM), 2 "lines close: steep" / "lines far apart: flat" (owner may prefer
+  "gentle", DE "sanft"), 4 spot height "663" on the hiking summit. Claude's advice: keep 1 + 4.
+- Ideas not built yet: rule of V's at a valley, a cross-section A-A' across the fault (opening the profile).
+When decided: make the chosen ones default, drop the switches and unused variants, rerun pencil_labels.py.
+
 ## Legal notice (Impressum)
 
 There is deliberately no Impressum (owner's decision, 2026-10: no home address on the site). If one is added
