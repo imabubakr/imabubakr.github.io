@@ -33,7 +33,7 @@
     <meta property="og:locale" content="en_US">
     <meta property="og:locale:alternate" content="de_DE">
     <meta name="twitter:card" content="summary_large_image">
-    <link rel="stylesheet" href="assets/css/site.css?v=20261016b">
+    <link rel="stylesheet" href="assets/css/site.css?v=20261016c">
     <script src="assets/js/site.js?v=20261016a" defer></script>
     <script src="assets/js/hero-map.js?v=20261016a" defer></script>
     <script src="assets/js/backdrop.js?v=20261015o" defer></script>
@@ -155,11 +155,11 @@
                     <h4>Geospatial Data Specialist <span class="cv-org"><a href="https://beaglesystems.com/">Beagle Systems</a>, Hamburg</span></h4>
                     <p class="cv-about">Beagle Systems flies long-range drones beyond visual line of sight (BVLOS) to monitor pipelines, utilities and other infrastructure.</p>
                     <ul>
-                      <li>Built an open-source pipeline that georeferences and classifies raw drone LiDAR point clouds, measures vegetation-to-conductor clearances along power lines and assigns risk categories; currently extending it to tree-fall risk analysis.</li>
-                      <li>Developed right-of-way and construction-site monitoring for pipelines: georeferenced RGB imagery with open-source feature matching, detected objects with a fine-tuned foundation model and an open-source VLM, which also served as gatekeeper for every detection, and ran real-time heavy-machinery detection on an NVIDIA Jetson, sending results directly to the customer.</li>
-                      <li>Fine-tuned a foundation model to segment buildings across the entire city of Cologne from 10&nbsp;cm aerial imagery.</li>
-                      <li class="cv-full">Developed a PostGIS and TiTiler backend for serving large GeoTIFFs.</li>
-                      <li class="cv-full">Supported drone flight planning with pre-flight primary and duplicate checks, and helped source new data for the flight-planning geodatabase.</li>
+                      <li><strong>Power-line LiDAR:</strong> built an open-source pipeline that turns raw drone point clouds into classified data and vegetation-risk categories; now adding tree-fall risk analysis.</li>
+                      <li><strong>Right-of-way monitoring:</strong> georeferenced drone images by deep feature matching, fine-tuned a foundation model to detect construction activity, used an open-source VLM as gatekeeper, and ran real-time detection on an NVIDIA Jetson.</li>
+                      <li><strong>Building segmentation:</strong> fine-tuned a foundation model on 10&nbsp;cm aerial imagery covering all of Cologne.</li>
+                      <li><strong>Data backend:</strong> built PostGIS and TiTiler services for serving large GeoTIFFs.</li>
+                      <li><strong>Flight planning:</strong> ran pre-flight primary and duplicate checks and helped source new data for the planning geodatabase.</li>
                     </ul>
                   </div>
                 </li>
