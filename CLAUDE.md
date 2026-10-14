@@ -103,8 +103,8 @@ user found those looked broken.
 Section [02] tells the owner's path: satellite data (from 2016) → aerial imagery (from 2021, MapTransfer) → drones
 (since 11/2025, Beagle Systems). Chapter texts (owner's brief, 2026-10-10): title, then the platforms / sensors worked
 with (from the CV, no project or employer names), then one sentence on what that resolution shows. The owner
-confirmed the sensor lists (2026-10-10; Planet, Sentinel-3 and -5P added 2026-10-14): satellite = Landsat 7/8,
-Sentinel-1/-2/-3/-5P, MODIS, ASTER, TRMM, Planet; aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors
+confirmed the sensor lists (2026-10-10; Planet, Sentinel-3, -5P and EO-1 Hyperion added 2026-10-14): satellite = Landsat 7/8,
+Sentinel-1/-2/-3/-5P, MODIS, ASTER, EO-1 Hyperion, TRMM, Planet; aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors
 without the owner. Three chapters (`.ds-ch`, EN/DE text in the HTML) scroll past on the left while the
 **page background itself** (`backdrop.js`) does the descent on the right (owner's pick, 2026-10-09: "you nailed it"):
 
