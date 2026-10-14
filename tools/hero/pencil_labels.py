@@ -17,7 +17,6 @@ import json
 import math
 import random
 import re
-import struct
 import sys
 from html import unescape
 from pathlib import Path
@@ -65,51 +64,11 @@ FAULTS = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-faults.
 FAULT_NOTE = ({"en": ["Rhine Graben fault:", "the plain sank, the Black Forest rose"],
                "de": ["Rheingraben-Störung:", "die Ebene sank, der Schwarzwald hob sich"]}, 6720, 1790, 150, -2)
 
-# Contour-reading exercises, as a geology student pencils them onto a sheet (2026-10-14): a slope worked out
-# between A and B (straight uphill on the Black Forest edge; numbers from the DEM) and a spot height on the hiking
-# summit (the DEM maximum).
-DEM = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-contours-dem.bin"   # 200 x 100, 50 m
-SLOPE = ((7950, 3000), (7702, 2454), (8090, 2800), -2)   # A, B, start of the working, its tilt
-SPOT = (8975, 1675)
-# Rule of V's (2026-10-14): one contour's V traced over in pencil, in the valley between the fault note and B, where
-# the contours make the sharpest V's on the sheet (38-59 degrees; the DEM rises beyond each apex, so they are
-# valleys, not spurs), and a note just below the tip: apex (on the drawn contour), arm length along the contour,
-# note (start of the first baseline, line step, tilt).
-CONTOURS = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-contours.svg"
-VEE = ((7219, 2472), 300, {"en": ["rule of V's:", "the V points upstream"],
-                           "de": ["V-Regel:", "das V zeigt talaufwärts"]}, 6650, 2700, 150, -2)
 
 font = TTFont(FONT)
 gs, cmap, hmtx = font.getGlyphSet(), font.getBestCmap(), font["hmtx"]
 UPM = font["head"].unitsPerEm
 to_utm = Transformer.from_crs(4326, 32632, always_xy=True)
-
-
-def contour_lines():
-    """The hero's drawn contours (hero-contours.svg) as polylines in map metres."""
-    lines = []
-    for d in re.findall(r'<path d="([^"]+)"', CONTOURS.read_text()):
-        x = y = 0
-        for cmd, args in re.findall(r"([mMlLhHvV])([^mMlLhHvV]*)", d):
-            v = [float(t) for t in re.findall(r"-?\d*\.?\d+", args)]
-            rel = cmd.islower()
-            if cmd in "mM":
-                x, y = (x + v[0], y + v[1]) if rel else (v[0], v[1])
-                lines.append([(x, y)])
-                v, cmd = v[2:], "l" if rel else "L"
-            if cmd in "lL":
-                for i in range(0, len(v), 2):
-                    x, y = (x + v[i], y + v[i + 1]) if rel else (v[i], v[i + 1])
-                    lines[-1].append((x, y))
-            elif cmd in "hH":
-                for t in v:
-                    x = x + t if rel else t
-                    lines[-1].append((x, y))
-            elif cmd in "vV":
-                for t in v:
-                    y = y + t if rel else t
-                    lines[-1].append((x, y))
-    return lines
 
 
 def glyph_path(name):
@@ -248,60 +207,6 @@ def build(lang, say):
         d = " ".join("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in r) for r in strokes)
         labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="{d}"/>'
                       f'<path class="pc-line pc-tick" d="{" ".join(ticks)}"/>{note}</g>')
-
-    if DEM.exists():
-        size = PLACES[0][3]
-        z = struct.unpack(f"<{DEM.stat().st_size // 2}h", DEM.read_bytes())
-
-        def elev(x, y):                                    # bilinear between the 50 m cell centres
-            fx, fy = min(max(x / 50 - 0.5, 0), 198.999), min(max(y / 50 - 0.5, 0), 98.999)
-            i, j = int(fx), int(fy)
-            u, v, k = fx - i, fy - j, int(fy) * 200 + int(fx)
-            return (z[k] * (1 - u) + z[k + 1] * u) * (1 - v) + (z[k + 200] * (1 - u) + z[k + 201] * u) * v
-
-        def stroke(pts):                                   # a freehand pencil line
-            out = []
-            for i in range(len(pts) - 1):
-                (x0, y0), (x1, y1) = pts[i], pts[i + 1]
-                n = max(1, int(math.dist(pts[i], pts[i + 1]) / 40))
-                out += [(x0 + (x1 - x0) * k / n + rnd.uniform(-7, 7), y0 + (y1 - y0) * k / n + rnd.uniform(-7, 7))
-                        for k in range(n)]
-            out.append(pts[-1])
-            return "M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in out)
-
-        # the slope, A (low) to B (high), the working from the rounded readings so the sum adds up
-        (ax, ay), (bx, by), (wx, wy), wrot = SLOPE
-        dh = round((elev(bx, by) - elev(ax, ay)) / 10) * 10
-        run = round(math.dist((ax, ay), (bx, by)) / 10) * 10
-        deg = round(math.degrees(math.atan(dh / run)))
-        ux, uy = (bx - ax) / math.dist((ax, ay), (bx, by)), (by - ay) / math.dist((ax, ay), (bx, by))
-        ends = " ".join(stroke([(x - uy * 55, y + ux * 55), (x + uy * 55, y - ux * 55)]) for x, y in ((ax, ay), (bx, by)))
-        la, _ = words("A", ax - ux * 140 - 40, ay - uy * 140 + 40, 0, size / UPM)
-        lb, _ = words("B", bx + ux * 90 - 30, by + uy * 90, 0, size / UPM)
-        wk, _ = words(f"Δh {dh} m / {run} m ≈ {deg}°", wx, wy, wrot, size / UPM)
-        labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="{stroke([(ax, ay), (bx, by)])} {ends}"/>'
-                      f"{la}{lb}{wk}</g>")
-        # the spot height (a pencilled cross and the reading)
-        sx, sy = SPOT
-        h = round(elev(sx, sy))
-        cross = stroke([(sx - 45, sy - 45), (sx + 45, sy + 45)]) + " " + stroke([(sx - 45, sy + 45), (sx + 45, sy - 45)])
-        sp, _ = words(str(h), sx + 90, sy + 150, -2, size * 0.9 / UPM)
-        labels.append(f'<g class="pc pc-wide"><path class="pc-line" d="{cross}"/>{sp}</g>')
-        # rule of V's: the contour through the apex, followed both ways along the line for the arm length
-        (vx, vy), arm, vnote, vnx, vny, vstep, vrot = VEE
-        line = min(contour_lines(), key=lambda l: min(math.dist(q, (vx, vy)) for q in l))
-        k = min(range(len(line)), key=lambda i: math.dist(line[i], (vx, vy)))
-        vee = [line[k]]
-        for dirn in (-1, 1):
-            i, along = k, 0
-            while 0 <= i + dirn < len(line) and along < arm:
-                along += math.dist(line[i], line[i + dirn])
-                i += dirn
-                vee.insert(0, line[i]) if dirn < 0 else vee.append(line[i])
-        va = math.radians(vrot)
-        vn = "".join(words(t, vnx - i * vstep * math.sin(va), vny + i * vstep * math.cos(va), vrot, size / UPM)[0]
-                     for i, t in enumerate(vnote[lang]))
-        labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="{stroke(vee)}"/>{vn}</g>')
 
     defs = "".join(f'<path id="{gid}" d="{glyph_path(g)}"/>' for g, gid in used.items())
     return (

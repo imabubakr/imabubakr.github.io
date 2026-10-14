@@ -235,11 +235,10 @@ behind URL switches; the owner took Claude's picks (2026-10-14), now default, sw
   Regierungspräsidium Freiburg - LGRB, www.lgrb-bw.de" (checked on the GK50 metadata; the GÜK300 record itself
   could not be loaded on 2026-10-14). Credited in the footer. The hero readout adds the ground's "dip 20° → 321°"
   (DE "Fallen") on slopes (hero-map.js `dip()`).
-- Contour exercises in pencil (pencil_labels.py `SLOPE`, `SPOT`): slope A-B with "Δh 190 m / 600 m ≈ 18°" (from
-  the DEM) and the spot height "663" on the hiking summit. Dropped: "lines close: steep / far apart: flat".
-- Rule of V's (owner, 2026-10-14; `VEE`): one contour's V traced over in pencil in the valley between the fault
-  note and B (the sharpest V's on the sheet, checked against the DEM to be valleys, not spurs), note "rule of V's: /
-  the V points upstream" (DE "V-Regel: / das V zeigt talaufwärts") just below the tip.
+- Removed again the same day (a colleague found the hero "dirty and weird"; owner's pick "calm pencil, no age
+  stains" from four side-by-side versions): the contour exercises (slope A-B "Δh 190 m / 600 m ≈ 18°", spot height
+  "663") and the rule of V's (one contour's V traced, "the V points upstream"). Code is in git history (2026-10-14).
+  The sheet keeps the sentence, the four place names, the two jokes and the fault with its note.
 - Decided against (2026-10-14, owner left it to Claude): a cross-section across the fault. It would have been 2D
   (not 3D); dropped because the sheet is full, the fault note already tells the story, and the owner could not
   vouch for the subsurface (rocks from GÜK300 would be sourced, but the fault's dip near Freiburg has no solid
@@ -335,12 +334,13 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   survey sheet that was folded and opened again. `tools/hero/make_paper.py` models the sheet as a height field
   (accordion folds 3 × 2 on desktop, 2 × 3 on phones, slightly wavy and uneven, panels bending into the folds, a few
   handling wrinkles), lights it like a hillshade (sun top left) and writes a relief image (laid on with soft-light,
-  `--sheet-relief`), an age mask (yellowing, browned edges, foxing, one faint tide mark, grime in valley folds, in
-  `--sheet-age`) and a wear mask (contour ink rubbed off along the folds, `--paper` over the map only). All of it fades
+  `--sheet-relief`) and a wear mask (contour ink rubbed off along the folds, `--paper` over the map only). All of it fades
   out as soon as the map starts to rise (`html.hero-rising`, a 0.45 s CSS transition on layers of their own,
   `will-change: opacity`; a per-frame fade value made the browser re-paint these big masked layers every frame). While the sheet shows, the hero's small mono labels are ink and the
   fullscreen link a deeper accent (muted grey fell below AA on the aged paper). A first CSS-gradient version of the
-  creases looked fake: don't go back to it. Dark mode is deliberately subtler.
+  creases looked fake: don't go back to it. Dark mode is deliberately subtler. The ageing layer (yellowing, browned
+  edges, foxing, tide mark, grime in the folds) was removed 2026-10-14: it made the sheet look "dirty" (colleague,
+  owner); make_paper.py still computes it (same random draws) but no longer writes it. Don't bring it back.
 - Pencilled place names on the sheet (owner, 2026-10-10): only Freiburg, Lehen, Rieselfeld and Waldsee (the owner
   removed the others, incl. Stühlinger, Herdern, Wiehre, Betzenhausen), all the same size, Freiburg without
   underline; Reenie Beanie like the sentence; graphite grain filter, a quick hand-drawn circle with a dot at the OSM place node. Phones show only

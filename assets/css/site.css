@@ -49,7 +49,6 @@
   --accent-mark: #d2410f; /* non-text: location marker, focus ring */
   --tl-edu: #587082; /* timeline: education markers (slate blue, as in dark mode) */
   /* hero paper sheet (experiment): ageing colour, relief strength */
-  --sheet-age: rgb(150 106 40 / 0.4);
   --sheet-relief: 0.9;
   --pencil: #54585b; /* graphite place names on the sheet */
   --pencil-blue: #2d5a94; /* the hero sentence, in blue pencil */
@@ -76,7 +75,6 @@
     --accent: #ff6a2b;
     --accent-mark: #ff6a2b;
     --tl-edu: #6c7f8c;
-    --sheet-age: rgb(170 135 80 / 0.14);
     --sheet-relief: 0.6;
     --pencil: #a2aaaf;
     --pencil-blue: #86aee0;
@@ -93,7 +91,6 @@
   --accent: #ff6a2b;
   --accent-mark: #ff6a2b;
   --tl-edu: #6c7f8c;
-  --sheet-age: rgb(170 135 80 / 0.14);
   --sheet-relief: 0.6;
   --pencil: #a2aaaf;
   --pencil-blue: #86aee0;
@@ -2153,40 +2150,34 @@ html.hero-risen .hero-strip .ticks {
 /* --------------------------------------------- hero: paper sheet (try) -- */
 /* Experiment: on landing the hero reads as an old survey sheet that has been
    folded and opened again. The textures come from tools/hero/make_paper.py (a lit
-   height field of the folded sheet, plus masks for ageing and worn ink); colours
-   stay here. Layers: yellowing, browned edges, foxing and grain in --sheet-age;
-   the relief (soft-light, 128 = flat); and the contour ink rubbed off along the
+   height field of the folded sheet, plus a mask for worn ink); colours stay here.
+   Layers: the relief (soft-light, 128 = flat) and the contour ink rubbed off along the
    folds (--paper through the wear mask, map only, the sentence stays crisp).
    It fades out as soon as the map starts to rise (html.hero-rising, a short CSS
    transition on layers of their own: a per-frame fade value made the browser re-paint
    these large masked layers on every frame of the scroll).
    Remove this block, the --sheet-* tokens and assets/img/paper-* to drop it. */
 .hero {
-  --paper-age: url("../img/paper-wide-age.webp?v=20261016a");
   --paper-relief: url("../img/paper-wide-relief.webp?v=20261016a");
   --paper-wear: url("../img/paper-wide-wear.webp?v=20261016a");
 }
 @media (max-width: 719px) {
   .hero {
-    --paper-age: url("../img/paper-tall-age.webp?v=20261016a");
     --paper-relief: url("../img/paper-tall-relief.webp?v=20261016a");
     --paper-wear: url("../img/paper-tall-wear.webp?v=20261016a");
   }
 }
-.hero::before,
 .hero::after,
 .hero-map::after,
 .pencil-box {
   transition: opacity 0.45s ease;
   will-change: opacity;
 }
-html.hero-rising .hero::before,
 html.hero-rising .hero::after,
 html.hero-rising .hero-map::after,
 html.hero-rising .pencil-box {
   opacity: 0;
 }
-.hero::before,
 .hero::after,
 .hero-map::after {
   content: "";
@@ -2194,15 +2185,8 @@ html.hero-rising .pencil-box {
   inset: 0;
   pointer-events: none;
 }
-.hero::before,
 .hero::after {
   z-index: 4; /* over the strip and map controls too: all on the same sheet */
-}
-.hero::before {
-  background: var(--sheet-age);
-  mask-image: var(--paper-age), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.3 -.66'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mask-size: 100% 100%, 240px 240px;
-  mask-repeat: no-repeat, repeat;
 }
 .hero::after {
   background: var(--paper-relief) center / 100% 100% no-repeat;
@@ -2309,7 +2293,6 @@ html:not(.hero-rising) .map-full {
   color: color-mix(in srgb, var(--accent) 70%, var(--ink));
 }
 @media print {
-  .hero::before,
   .hero::after,
   .hero-map::after,
   .pencil-box {

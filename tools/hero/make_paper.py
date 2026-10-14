@@ -6,16 +6,16 @@
 Models the opened sheet as a height field: accordion folds that are not quite
 straight or even (a few px of wobble, a slight tilt, strength varying along the
 fold), panels that no longer lie flat, a handful of short handling wrinkles and
-a faint crumple. It is lit like a hillshade (sun top left) and written as three
+a faint crumple. It is lit like a hillshade (sun top left) and written as two
 images per format to assets/img/:
 
   paper-<fmt>-relief.webp  grey, 128 = flat; laid over the hero with soft-light
   paper-<fmt>-wear.webp    alpha mask: ink rubbed off along the folds (mountain
                            folds more, worn spots where folds cross)
-  paper-<fmt>-age.webp     alpha mask: yellowing, browned edges, foxing spots, a
-                           faint tide mark, grime in the valley folds
 
-Colours stay in CSS (--paper, --sheet-age); the images carry only shape.
+The ageing (yellowing, browned edges, foxing, tide mark, grime) is still computed, so the random
+draws and with them the folds stay the same, but no longer written: the owner found the stained
+sheet "dirty" and dropped it (2026-10-14). Colours stay in CSS (--paper); the images carry only shape.
 <fmt> is "wide" (desktop, 3 x 2 panels) or "tall" (phones, 2 x 3 panels).
 """
 from pathlib import Path
@@ -142,8 +142,7 @@ def make(name, W, H, vfolds, hfolds):
     OUT.mkdir(parents=True, exist_ok=True)
     Image.fromarray(relief, "L").save(OUT / f"paper-{name}-relief.webp", quality=82, method=6)
     alpha(wear).save(OUT / f"paper-{name}-wear.webp", quality=80, alpha_quality=70, method=6)
-    alpha(age).save(OUT / f"paper-{name}-age.webp", quality=80, alpha_quality=55, method=6)
-    for k in ("relief", "wear", "age"):
+    for k in ("relief", "wear"):
         p = OUT / f"paper-{name}-{k}.webp"
         print(f"{p.relative_to(OUT.parents[1])}: {p.stat().st_size / 1024:.0f} KB")
 
