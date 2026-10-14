@@ -1527,10 +1527,6 @@ html.arrive-live .backdrop {
     padding-bottom: 5mm;
     border-bottom: 0.5pt solid #c9cbc5;
   }
-  .print-head img {
-    width: 26mm;
-    height: auto;
-  }
   /* QR code to the website beside the portrait (tools/cv/make_qr.py): scanned from the printed CV */
   .print-qr {
     margin: 0 0 0 auto;

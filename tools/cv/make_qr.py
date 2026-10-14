@@ -4,8 +4,8 @@
     python3 -m venv /tmp/qrenv && /tmp/qrenv/bin/pip install segno       # once
     /tmp/qrenv/bin/python tools/cv/make_qr.py index.html de/index.html
 
-Writes an inline SVG (one path, no external request) between the <!-- build:cv-qr --> markers next to the
-portrait in .print-head: the English page links to the English site, the German page to /de/. Print only (the
+Writes an inline SVG (one path, no external request) between the <!-- build:cv-qr --> markers at the right of
+.print-head: the English page links to the English site, the German page to /de/. Print only (the
 header is hidden on screen). Change SITE when the site moves to its own domain, then rerun this and
 tools/cv/make_cv_pdf.mjs.
 """
@@ -39,9 +39,6 @@ for page in sys.argv[1:]:
     svg = (f'<figure class="print-qr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {n} {n}" '
            f'shape-rendering="crispEdges" aria-hidden="true"><path d="{"".join(d)}"/></svg>'
            f'<figcaption>{LABEL[lang]}</figcaption></figure>')
-    if "<!-- build:cv-qr -->" not in html:
-        img = re.search(r'\n(\s*)<img src="[^"]*portrait-320\.webp"[^>]*>', html)
-        html = html[:img.start()] + f"\n{img.group(1)}<!-- build:cv-qr --><!-- /build:cv-qr -->" + html[img.start():]
     html = re.sub(r"<!-- build:cv-qr -->.*?<!-- /build:cv-qr -->",
                   lambda m: f"<!-- build:cv-qr -->{svg}<!-- /build:cv-qr -->", html, flags=re.S)
     p.write_text(html)
