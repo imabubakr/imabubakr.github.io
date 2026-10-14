@@ -2105,10 +2105,10 @@ html.hero-risen .hero-strip .ticks {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: var(--muted);
-  font: 500 0.875rem/1 var(--font-mono);
-  letter-spacing: 0.16em;
+  font: 500 0.75rem/1 var(--font-mono);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   transform: translateX(-50%);
   pointer-events: none;
@@ -2120,7 +2120,7 @@ html.hero-risen .hero-strip .ticks {
 .hero-cue i {
   position: relative;
   width: 2px;
-  height: 44px;
+  height: 32px;
   overflow: hidden;
   background: var(--grid);
 }
@@ -2129,28 +2129,28 @@ html.hero-risen .hero-strip .ticks {
   position: absolute;
   left: 0;
   width: 2px;
-  height: 16px;
+  height: 12px;
   background: var(--accent-mark);
   animation: hero-cue 1.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
 /* a small chevron under the line, so it reads as "down" at a glance (owner: make it visible, 2026-10-14) */
 .hero-cue::after {
   content: "";
-  width: 10px;
-  height: 10px;
-  margin-top: -12px;
+  width: 7px;
+  height: 7px;
+  margin-top: -10px;
   border-right: 2px solid var(--accent-mark);
   border-bottom: 2px solid var(--accent-mark);
   transform: rotate(45deg);
 }
 @keyframes hero-cue {
-  from { top: -16px; }
-  to { top: 44px; }
+  from { top: -12px; }
+  to { top: 32px; }
 }
 /* phones: the map controls sit at the bottom edge, keep the cue clear of them */
 @media (max-width: 719px) {
   .hero-cue {
-    bottom: 64px;
+    bottom: 60px;
   }
 }
 @media print {
