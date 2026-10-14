@@ -21,6 +21,10 @@ for (const job of jobs) {
   const page = await browser.newPage({ colorScheme: 'light' });
   await page.goto(job.url, { waitUntil: 'networkidle' });
   await page.evaluate((t) => { document.title = t; return document.fonts.ready; }, job.title);
+  // print-only backgrounds (the header contours) load once print media applies: switch first, then wait
+  await page.emulateMedia({ media: 'print' });
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(300);
   await page.pdf({ path: path.join(root, job.out), preferCSSPageSize: true, printBackground: true });
   console.log('wrote', job.out);
   await page.close();

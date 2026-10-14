@@ -1453,13 +1453,17 @@ html.arrive-live .backdrop {
     display: none !important;
   }
 }
+/* place and date on the left, the signature line beside them on the right (one row: keeps the CV at two pages) */
 .cv-sign {
-  margin-top: 4mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 3mm;
   break-inside: avoid;
 }
 .cv-sign-line {
   width: 60mm;
-  margin-top: 12mm;
+  margin-top: 8mm;
   padding-top: 1.5mm;
   border-top: 0.5pt solid #4e5358;
   color: #4e5358;
@@ -1470,7 +1474,7 @@ html.arrive-live .backdrop {
 @media print {
   @page {
     size: A4;
-    margin: 15mm 16mm 16mm;
+    margin: 13mm 16mm 13mm;
     @bottom-right {
       content: counter(page) " / " counter(pages);
       color: #4e5358;
@@ -1480,9 +1484,9 @@ html.arrive-live .backdrop {
   /* Beats both dark-theme selectors (prefers-color-scheme and data-theme). */
   html:root:not(.never) {
     --paper: #fff;
-    --ink: #141719;
-    --muted: #4e5358;
-    --accent: #141719;
+    --ink: #24211d;   /* a warm near-black and warm grey on paper: friendlier than the screen's cool ink */
+    --muted: #5d5750;
+    --accent: #24211d;
     color-scheme: light;
   }
   html {
@@ -1519,13 +1523,26 @@ html.arrive-live .backdrop {
   }
 
   .print-head {
+    position: relative;
+    isolation: isolate; /* keeps the contour layer above the page's white */
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 5mm;
     margin-bottom: 7mm;
     padding-bottom: 5mm;
-    border-bottom: 0.5pt solid #c9cbc5;
+    border-bottom: 0.5pt solid #d6cfc5;
+  }
+  /* faint contours of the Black Forest edge behind the header, as on the website's hero map; fades out towards
+     the name (owner, 2026-10-14) */
+  .print-head::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 0 30%;
+    z-index: -1;
+    background: url("../topo/cv-contours.svg") center / cover no-repeat;
+    opacity: 0.22;
+    mask-image: linear-gradient(90deg, transparent, #000 45%);
   }
   /* QR code to the website beside the portrait (tools/cv/make_qr.py): scanned from the printed CV */
   .print-qr {
@@ -1536,6 +1553,9 @@ html.arrive-live .backdrop {
     display: block;
     width: 17mm;
     height: 17mm;
+    padding: 1mm;
+    box-sizing: content-box;
+    background: #fff; /* a clean quiet zone over the header contours, so scanners read it */
     fill: var(--ink);
   }
   .print-qr figcaption {
@@ -1553,10 +1573,11 @@ html.arrive-live .backdrop {
   }
   .print-name {
     margin-top: 3mm;
-    font-size: 20pt;
+    font-family: "IBM Plex Serif", Georgia, serif;
+    font-size: 21pt;
     font-weight: 500;
     line-height: 1.05;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
   }
   .print-title {
     margin-top: 1mm;
@@ -1569,23 +1590,33 @@ html.arrive-live .backdrop {
   }
 
   .cv-group + .cv-group {
-    margin-top: 5mm;
+    margin-top: 3mm;
   }
   .cv-group h3 {
-    font-size: 10.5pt;
+    font-family: "IBM Plex Serif", Georgia, serif;
+    font-size: 11pt;
+    letter-spacing: 0;
     break-after: avoid;
+  }
+  /* page 2 starts cleanly with Education (owner: no section split across the pages) */
+  .cv-edu {
+    break-before: page;
   }
   .cv-row {
     grid-template-columns: 34mm minmax(0, 1fr);
-    padding: 1.6mm 0;
+    padding: 1mm 0;
     break-inside: avoid;
   }
   dl.cv-list .cv-row {
-    padding: 0.6mm 0;
+    padding: 0.35mm 0;
   }
+  /* dates and labels in the text face (mono read as technical on paper), figures aligned */
   .cv-date,
   .cv-row dt {
-    font-size: 8pt;
+    font-family: var(--font-sans);
+    font-size: 8.5pt;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
   }
   .cv-entry h4 {
     font-size: 10pt;
@@ -1593,6 +1624,7 @@ html.arrive-live .backdrop {
   .cv-entry ul {
     max-width: none;
     font-size: 9pt;
+    line-height: 1.55;
   }
 }
 

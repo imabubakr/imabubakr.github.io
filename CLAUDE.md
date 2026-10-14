@@ -453,8 +453,15 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 - CV ends (print/PDF only, `.cv-sign`) with "Freiburg im Breisgau, <date>" (filled by site.js in the page's language,
   so the PDF carries its build date) and a blank signature line. No signature image online (owner's choice
   2026-10-10, after hearing that a published signature can be copied); he signs the copy he sends.
-- Print / PDF: a two-page A4 CV (print header with photo + full CV, always light). Check it after CV changes
-  (two pages), then rebuild the PDFs.
+- Print / PDF: a two-page A4 CV, always light (owner, 2026-10-14): no photo; QR code at the right of the header on a
+  white quiet zone; faint contours of the Black Forest edge behind the header (`assets/topo/cv-contours.svg`, a
+  label-free crop of the hero contours, 22 %, fading towards the name; make_cv_pdf.mjs switches to print media and
+  waits so this print-only background is in the PDF); name and section headings in IBM Plex Serif 500; text 9 pt
+  with 1.55 line height in a warm near-black (#24211d) and warm grey; dates in Plex Sans with tabular figures (mono
+  read as technical on paper); page 2 always starts with Education (`.cv-edu`, owner: no section split across
+  pages); place/date and the signature line share one row. Margins 13 mm top/bottom, tight spacing: the German PDF
+  fills page 2 almost exactly, so check it stays at two pages after any CV change (trim German lines first).
+  The CV follows German Lebenslauf conventions in both languages (signature line included in the English one too).
 - 404: "Off the map." on Null Island (0.0000°N 0.0000°E).
 - Contact = the end of the flight. Owner found a big centred orange email "too much in one face" and covering the
   Feldberg, so: desktop (≥ 900 px) a small, quiet, left-aligned block (title, invitation line, three key-value rows
