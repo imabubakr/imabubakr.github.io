@@ -33,7 +33,7 @@
     <meta property="og:locale" content="de_DE">
     <meta property="og:locale:alternate" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
-    <link rel="stylesheet" href="../assets/css/site.css?v=20261016c">
+    <link rel="stylesheet" href="../assets/css/site.css?v=20261016d">
     <script src="../assets/js/site.js?v=20261016a" defer></script>
     <script src="../assets/js/hero-map.js?v=20261016a" defer></script>
     <script src="../assets/js/backdrop.js?v=20261015o" defer></script>
@@ -111,7 +111,7 @@
               <li class="ds-ch" data-step="0">
                 <p class="ds-tag">01 · Satellit · ab 2016</p>
                 <h3 class="ds-title">Es begann im Orbit.</h3>
-                <p class="ds-text">Angefangen habe ich mit Satellitendaten von Landsat 7 und 8, Sentinel-1 und Sentinel-2, MODIS, ASTER und TRMM: optische, Radar- und Thermalaufnahmen der Erde aus mehreren hundert Kilometern Höhe. Bei 30 m pro Pixel ist ein ganzes Dorf nur eine Handvoll farbiger Quadrate.</p>
+                <p class="ds-text">Angefangen habe ich mit Satellitendaten von Landsat 7 und 8, Sentinel-1, -2, -3 und -5P, MODIS, ASTER, TRMM und Planet: optische, Radar-, Thermal- und Atmosphärenaufnahmen der Erde aus mehreren hundert Kilometern Höhe. Bei 30 m pro Pixel ist ein ganzes Dorf nur eine Handvoll farbiger Quadrate.</p>
                 <p class="ds-spec">~705 km · 30-m-Pixel</p>
               </li>
               <li class="ds-ch" data-step="1">
@@ -178,7 +178,7 @@
                   <div class="cv-entry">
                     <h4><span lang="en">GIS Specialist &amp; Data Engineer</span> <span class="cv-org"><a href="https://maptransfer.de/uber/">MapTransfer</a>, Deutschland</span></h4>
                     <ul>
-                      <li>Verantwortete den gesamten Geodaten-Workflow für ein Bauunternehmen: Georeferenzierung von Bauplänen und Orthofotos, Umwandlung in Cloud-optimierte GeoTIFFs, Upload auf AWS S3 und Einrichtung von QGIS mit PostgreSQL als gesichertes Kunden-Frontend.</li>
+                      <li>Verantwortete den gesamten Geodaten-Workflow eines Bauunternehmens: Georeferenzierung von Bauplänen und Orthofotos, Umwandlung in Cloud-optimierte GeoTIFFs, Upload auf AWS S3 und QGIS mit PostgreSQL als gesichertes Kunden-Frontend.</li>
                       <li>Konzipierte und erstellte mehrere GIS-Kurse für Studierende und Fachleute zu LiDAR-Verarbeitung, räumlicher Analyse, Spatial SQL, ALKIS und GeoServer.</li>
                       <li>Wandelte AutoCAD-Daten in QGIS in ALKIS-konforme GIS-Ebenen für Telekom-Projekte um.</li>
                       <li>Baute Web-GIS-Anwendungen mit OpenLayers, GeoServer (WMS) und PostgreSQL.</li>
@@ -243,16 +243,15 @@
             <div class="cv-group">
               <h3>Kenntnisse</h3>
               <dl class="cv-list">
-                <div class="cv-row"><dt>Machine Learning</dt><dd>Feinabgestimmte Foundation Models, Open-Source-LLMs und -VLMs (selbst gehostet, vLLM), Deep Feature Matching, CNNs, CatBoost; PyTorch, TensorFlow; Edge-Inferenz auf NVIDIA Jetson</dd></div>
-                <div class="cv-row"><dt>LiDAR</dt><dd>PDAL, CloudCompare, WhiteboxTools; PPK mit RTKLIB, Punktwolkenklassifikation, DGM und DOM</dd></div>
-                <div class="cv-row"><dt>Fernerkundung</dt><dd>Multispektral-, Hyperspektral- und SAR-Daten; ENVI, ERDAS Imagine, eCognition, ESA SNAP</dd></div>
-                <div class="cv-row"><dt>GIS</dt><dd>QGIS, ArcGIS Pro</dd></div>
-                <div class="cv-row"><dt>Programmierung</dt><dd>Python (GDAL, Rasterio, Fiona, scikit-learn, Cartopy), R, Spatial SQL, Bash</dd></div>
-                <div class="cv-row"><dt>Datenbanken</dt><dd>PostgreSQL/PostGIS, SpatiaLite, DuckDB</dd></div>
-                <div class="cv-row"><dt>Cloud und DevOps</dt><dd>Google Earth Engine, AWS (EC2, S3), Docker</dd></div>
-                <div class="cv-row"><dt>Web-Mapping</dt><dd>OpenLayers, Leaflet, GeoServer, TiTiler</dd></div>
+                <div class="cv-row"><dt>KI und Machine Learning</dt><dd>Feinabgestimmte Foundation Models, selbst gehostete Open-Source-LLMs und -VLMs, Deep Feature Matching, Gradient Boosting; PyTorch, scikit-learn<span class="cv-full">; Hugging Face Transformers, TensorFlow, SAM, XGBoost, LightGBM, CatBoost, vLLM</span></dd></div>
+                <div class="cv-row"><dt>Vektordaten</dt><dd>GeoPandas, Shapely, PostGIS; ALKIS, CAD-zu-GIS<span class="cv-full">; Puffer, Verschneidungen und räumliche Joins; GeoPackage, Shapefile, GeoJSON; Overpass API</span></dd></div>
+                <div class="cv-row"><dt>Raster und Fernerkundung</dt><dd>Rasterio, GDAL, Google Earth Engine; SAR-, Multispektral- und Hyperspektraldaten<span class="cv-full">; xarray, Cloud-optimierte GeoTIFFs; ENVI, ERDAS Imagine, eCognition, ESA SNAP</span></dd></div>
+                <div class="cv-row"><dt>LiDAR</dt><dd>PDAL, CloudCompare, WhiteboxTools; PPK, Punktwolkenklassifikation<span class="cv-full">; laspy, Open3D, RTKLIB</span></dd></div>
+                <div class="cv-row"><dt>GIS</dt><dd>QGIS, ArcGIS Pro<span class="cv-full">; Kartografie für Publikationen</span></dd></div>
+                <div class="cv-row"><dt>Daten und Cloud</dt><dd>PostgreSQL/PostGIS, DuckDB, AWS (S3, EC2), Docker<span class="cv-full">; SpatiaLite</span></dd></div>
+                <div class="cv-row"><dt>Web-Mapping</dt><dd>GeoServer, OpenLayers, TiTiler<span class="cv-full">; Leaflet</span></dd></div>
+                <div class="cv-row"><dt>Programmierung</dt><dd>Python, Spatial SQL, R, Bash<span class="cv-full">; Matplotlib, Seaborn, Cartopy; Git</span></dd></div>
                 <div class="cv-row"><dt>Geologie</dt><dd>Numerische Modellierung, Petrophysik</dd></div>
-                <div class="cv-row"><dt>Sonstiges</dt><dd>Git, LaTeX</dd></div>
               </dl>
             </div>
 
