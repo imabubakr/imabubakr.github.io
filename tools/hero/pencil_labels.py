@@ -49,20 +49,22 @@ SAY = [
     (4320, 2390, 150, 2200, -1.2, "pc-wide"),
     (3800, 2390, 150, 2400, -1.2, "pc-narrow"),
 ]
-NOTES = [
-    ({"en": "this is where I go hiking", "de": "hier gehe ich wandern"}, 5750, 1330, -2.5, (8975, 1675), "pc-wide",
-     "end"),
-    ({"en": "this is where I fly my kite", "de": "hier lasse ich meinen Drachen steigen"}, 3150, 3900, -2,
-     (4737, 4990), "pc-wide", "below"),                  # arrowhead just inside the bottom edge
-]
+NOTES = []   # the hiking and kite jokes were removed (owner, 2026-10-14: hero too busy)
 
 # The main border fault of the Upper Rhine Graben (owner's geology background, 2026-10-14), pencilled on as in a
-# geological mapping exercise: freehand line with ticks on the downthrown side (the Rhine plain, west), a gap
-# wherever it meets pencil text, and a two-line note beside it (start of the first baseline, line step, tilt).
-# Line: LGRB GÜK300 (tools/hero/build_faults.py).
+# geological mapping exercise: drawn with a ruler (straight segments along the mapped trace, simplified to
+# RULER_TOL m), ticks on the downthrown side (the Rhine plain, west), presumed faults dashed, a gap wherever a
+# line meets pencil text, a two-line note beside it (start of the first baseline, line step, tilt), and U / D on
+# the upthrown / downthrown side. Lines: LGRB GÜK300 (tools/hero/build_faults.py).
 FAULTS = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-faults.json"
 FAULT_NOTE = ({"en": ["Rhine Graben fault:", "the plain sank, the Black Forest rose"],
                "de": ["Rheingraben-Störung:", "die Ebene sank, der Schwarzwald hob sich"]}, 6720, 1790, 150, -2)
+RULER_TOL = 300   # GÜK300 is good to a few hundred metres: one ruled stroke per straight stretch
+UD = (2050, 170)          # U / D beside the main fault at this y (map m), this far either side of it
+# Rock units from the same map (LGRB GÜK300 units, layer ms:gu300af_m; each point checked to lie inside the unit):
+# text per language, start of the baseline, tilt. Würm gravels on the Rhine plain, paragneiss in the Black Forest.
+UNITS = [({"en": "Würm gravels", "de": "Würm-Schotter"}, 2650, 1360, -1),
+         ({"en": "paragneiss", "de": "Paragneis"}, 7480, 960, -1)]
 
 
 font = TTFont(FONT)
@@ -167,46 +169,67 @@ def build(lang, say):
 
     if FAULTS.exists():
         size = PLACES[0][3]
-        fl = [l for l in json.loads(FAULTS.read_text())["lines"]
-              if sum(math.dist(l[i], l[i + 1]) for i in range(len(l) - 1)) > 400]
+        fl = json.loads(FAULTS.read_text())["lines"]
         lines_, nx0, ny0, step_, nrot = FAULT_NOTE[0][lang], FAULT_NOTE[1], FAULT_NOTE[2], FAULT_NOTE[3], FAULT_NOTE[4]
         na = math.radians(nrot)
         note = "".join(words(t, nx0 - i * step_ * math.sin(na), ny0 + i * step_ * math.cos(na), nrot, size / UPM)[0]
                        for i, t in enumerate(lines_))
+        units = "".join(words(t[lang], x, y, r, size / UPM)[0] for t, x, y, r in UNITS)
         inbox = lambda x, y: any(b[0] <= x <= b[2] and b[1] <= y <= b[3] for b in boxes)
-        strokes, ticks = [], []
-        for l in fl:
-            pts = []                                       # densify every 40 m, with a slight freehand wobble
-            for i in range(len(l) - 1):
-                (x0, y0), (x1, y1) = l[i], l[i + 1]
-                n = max(1, int(math.dist(l[i], l[i + 1]) / 40))
-                pts += [(x0 + (x1 - x0) * k / n + rnd.uniform(-9, 9), y0 + (y1 - y0) * k / n + rnd.uniform(-9, 9))
-                        for k in range(n)]
-            pts.append(tuple(l[-1]))
-            run, along, next_tick = [], 0, 160
-            for i, (x, y) in enumerate(pts):
-                if i:
-                    along += math.dist(pts[i - 1], pts[i])
-                if inbox(x, y) or not (-50 <= x <= 10050 and -50 <= y <= 5050):
-                    if len(run) > 1:
-                        strokes.append(run)
-                    run = []
-                    continue
-                run.append((x, y))
-                if along >= next_tick and 0 < i < len(pts) - 1:   # a tick on the downthrown (west) side
-                    next_tick += 330
-                    tx_, ty_ = pts[i + 1][0] - pts[i - 1][0], pts[i + 1][1] - pts[i - 1][1]
-                    tl = math.hypot(tx_, ty_) or 1
-                    px, py = -ty_ / tl, tx_ / tl
-                    if px > 0:
-                        px, py = -px, -py
-                    if not inbox(x + px * 75, y + py * 75):
-                        ticks.append(f"M{x:.0f} {y:.0f} L{x + px * 75:.0f} {y + py * 75:.0f}")
-            if len(run) > 1:
-                strokes.append(run)
-        d = " ".join("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in r) for r in strokes)
-        labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="{d}"/>'
-                      f'<path class="pc-line pc-tick" d="{" ".join(ticks)}"/>{note}</g>')
+
+        def ruler(pts, tol=RULER_TOL):                     # Douglas-Peucker: the few straight strokes of a ruler
+            if len(pts) < 3:
+                return pts
+            (ax, ay), (bx, by) = pts[0], pts[-1]
+            L = math.hypot(bx - ax, by - ay) or 1
+            d = [abs((bx - ax) * (ay - y) - (ax - x) * (by - ay)) / L for x, y in pts[1:-1]]
+            k = max(range(len(d)), key=d.__getitem__)
+            if d[k] < tol:
+                return [pts[0], pts[-1]]
+            return ruler(pts[:k + 2], tol)[:-1] + ruler(pts[k + 1:], tol)
+
+        solid, dashed, ticks, main = [], [], [], []
+        for f in fl:
+            pts = ruler([tuple(p) for p in f["pts"]])
+            out = solid if f["type"] == "proven" else dashed
+            for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+                seg_len = math.dist((x0, y0), (x1, y1))
+                ux, uy = (x1 - x0) / seg_len, (y1 - y0) / seg_len
+                px, py = (-uy, ux) if -uy < 0 else (uy, -ux)   # unit normal pointing west (downthrown side)
+                tickable = f["type"] == "proven" and abs(uy) > abs(ux)   # the N-S border fault, not cross faults
+                if tickable:
+                    main.append(((x0, y0), (x1, y1)))
+                run, n = [], max(1, int(seg_len / 20))
+                for k in range(n + 1):                     # straight, but broken where pencil text sits
+                    x, y = x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n
+                    if inbox(x, y) or not (-50 <= x <= 10050 and -50 <= y <= 5050):
+                        if len(run) > 1:
+                            out.append(run)
+                        run = []
+                    else:
+                        run.append((x, y))
+                if len(run) > 1:
+                    out.append(run)
+                if tickable:
+                    t = 165
+                    while t < seg_len - 60:
+                        x, y = x0 + ux * t, y0 + uy * t
+                        if (-50 <= x <= 10050 and -50 <= y <= 5050 and not inbox(x, y)
+                                and not inbox(x + px * 75, y + py * 75)):
+                            ticks.append(f"M{x:.0f} {y:.0f} L{x + px * 75:.0f} {y + py * 75:.0f}")
+                        t += 330
+        ud = ""
+        uy_ = UD[0]                                        # U (up) east and D (down) west of the main fault
+        for (x0, y0), (x1, y1) in main:
+            if min(y0, y1) <= uy_ <= max(y0, y1):
+                x = x0 + (x1 - x0) * (uy_ - y0) / (y1 - y0)
+                ud = (words("D", x - UD[1] - 60, uy_ + 40, 0, size / UPM)[0]
+                      + words("U", x + UD[1] - 20, uy_ + 40, 0, size / UPM)[0])
+                break
+        path = lambda runs: " ".join("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in r) for r in runs)
+        labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="{path(solid)}"/>'
+                      f'<path class="pc-line pc-fault pc-presumed" d="{path(dashed)}"/>'
+                      f'<path class="pc-line pc-tick" d="{" ".join(ticks)}"/>{note}{ud}{units}</g>')
 
     defs = "".join(f'<path id="{gid}" d="{glyph_path(g)}"/>' for g, gid in used.items())
     return (

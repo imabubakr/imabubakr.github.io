@@ -227,18 +227,25 @@ Geology, Bahria; MSc Geology, Freiburg; contour-map exercises in class), "seriou
 behind URL switches; the owner took Claude's picks (2026-10-14), now default, switches removed:
 - Folds 3 x 2 on the wide sheet (was 4 x 2; 3 x 1 was the other option). Phones keep 2 x 3. make_paper.py seeds
   each format on its own, so changing one leaves the other as it is.
-- The Upper Rhine Graben main border fault pencilled on (freehand, ticks on the downthrown west side, gaps at
-  pencil text) + note "Rhine Graben fault: / the plain sank, the Black Forest rose" (DE "Rheingraben-Störung: /
-  die Ebene sank, der Schwarzwald hob sich"). Line from LGRB GÜK300 (WFS `lgrb_uek350_geologie`, layer
-  `ms:gu300tl_m`, proven faults) via `tools/hero/build_faults.py` -> `assets/topo/hero-faults.json`. Licence:
+- The Upper Rhine Graben main border fault pencilled on, **ruled** (owner, 2026-10-14: "sketched with a ruler"):
+  straight strokes along the mapped trace (Douglas-Peucker, `RULER_TOL` 300 m; GÜK300 is good to a few hundred
+  metres), ticks on the downthrown west side, **D** / **U** beside it, gaps at pencil text, presumed faults
+  (LGRB "Störung, vermutet") dashed (`.pc-presumed`); the gap under the Dreisam near Freiburg is not mapped by
+  LGRB and stays empty (do not invent a concealed fault). Note "Rhine Graben fault: / the plain sank, the Black
+  Forest rose" (DE "Rheingraben-Störung: / die Ebene sank, der Schwarzwald hob sich"). Rock units from the same
+  map (layer `ms:gu300af_m`, each label point checked inside its unit): "Würm gravels" on the plain, "paragneiss"
+  in the Black Forest (DE "Würm-Schotter", "Paragneis"; `UNITS`). Lines from LGRB GÜK300 (WFS
+  `lgrb_uek350_geologie`, layer `ms:gu300tl_m`, proven and presumed) via `tools/hero/build_faults.py` ->
+  `assets/topo/hero-faults.json`. Licence:
   the service lists no fees and LGRB geology data is offered under dl-de/by-2-0 with "Datenquelle:
   Regierungspräsidium Freiburg - LGRB, www.lgrb-bw.de" (checked on the GK50 metadata; the GÜK300 record itself
-  could not be loaded on 2026-10-14). Credited in the footer. The hero readout adds the ground's "dip 20° → 321°"
-  (DE "Fallen") on slopes (hero-map.js `dip()`).
+  could not be loaded on 2026-10-14). Credited in the footer ("Faults and rock units"). The hero readout adds the
+  ground's "dip 20° → 321°" (DE "Fallen") on slopes (hero-map.js `dip()`).
 - Removed again the same day (a colleague found the hero "dirty and weird"; owner's pick "calm pencil, no age
   stains" from four side-by-side versions): the contour exercises (slope A-B "Δh 190 m / 600 m ≈ 18°", spot height
   "663") and the rule of V's (one contour's V traced, "the V points upstream"). Code is in git history (2026-10-14).
-  The sheet keeps the sentence, the four place names, the two jokes and the fault with its note.
+  Later the same day the hiking and kite jokes went too (owner); the sheet keeps the sentence, the four place
+  names and the geology (ruled fault, presumed faults, D/U, two rock units, the note).
 - Decided against (2026-10-14, owner left it to Claude): a cross-section across the fault. It would have been 2D
   (not 3D); dropped because the sheet is full, the fault note already tells the story, and the owner could not
   vouch for the subsurface (rocks from GÜK300 would be sourced, but the fault's dip near Freiburg has no solid
@@ -344,12 +351,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 - Pencilled place names on the sheet (owner, 2026-10-10): only Freiburg, Lehen, Rieselfeld and Waldsee (the owner
   removed the others, incl. Stühlinger, Herdern, Wiehre, Betzenhausen), all the same size, Freiburg without
   underline; Reenie Beanie like the sentence; graphite grain filter, a quick hand-drawn circle with a dot at the OSM place node. Phones show only
-  Freiburg (`.pc-wide`). Edit `PLACES` in `tools/hero/pencil_labels.py` and rerun it. Owner's joke (2026-10-10):
-  a pencilled note "this is where I go hiking" / "hier gehe ich wandern" north-east of Freiburg with a long pencil
-  arrow to the 663 m summit (a DEM maximum; deliberately not named), and "this is where I fly my kite" / "hier
-  lasse ich meinen Drachen steigen" south-west of Freiburg with an arrow from below the middle of the note to the Lorettoberg (OSM peak, 385 m), which
-  lies 36 m beyond the bottom edge, so the arrow runs off the sheet at its longitude. `NOTES` in the same script,
-  text per page language, hidden on phones. Margin: labels in Plex Serif + sepia ink (see Typography); the
+  Freiburg (`.pc-wide`). Edit `PLACES` in `tools/hero/pencil_labels.py` and rerun it. The hiking / kite jokes (2026-10-10, `NOTES`)
+  were removed 2026-10-14 (hero too busy); `NOTES` is empty. Margin: labels in Plex Serif + sepia ink (see Typography); the
   piano-key minute bars of an old neatline were previewed and rejected, as were latitude labels on the side.
 - Map margin: no "Feldberg · 18 km" adjoining-sheet link (tried, owner removed it 2026-10-10). Easter egg: clicking `EPSG:4326` in the strip cycles through three in-jokes (UTM 32N is what the
   map is really drawn in; Web Mercator areas; lat/lon order) and back (`T.crs` in hero-map.js, EN/DE). No

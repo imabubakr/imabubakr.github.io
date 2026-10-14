@@ -2246,9 +2246,14 @@ html.hero-rising .pencil-box {
   stroke-width: 0.9px;
   opacity: 0.7;
 }
-/* the graben fault and the slope A-B, pencilled on like a mapping exercise (2026-10-14) */
+/* the graben fault, ruled like a mapping exercise (2026-10-14) */
 .pc-fault {
   stroke-width: 1.6px;
+}
+/* presumed faults (LGRB: "Störung, vermutet"): dashed, as on geological maps */
+.pc-presumed {
+  stroke-width: 1.2px;
+  stroke-dasharray: 7 5;
 }
 .pc-tick {
   stroke-width: 1.1px;
