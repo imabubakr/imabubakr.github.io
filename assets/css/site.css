@@ -2276,11 +2276,6 @@ html.hero-rising .pencil-corner {
 .pc-contact {
   stroke-width: 1px;
 }
-/* presumed faults (LGRB: "Störung, vermutet"): dashed, as on geological maps */
-.pc-presumed {
-  stroke-width: 1.2px;
-  stroke-dasharray: 7 5;
-}
 .pc-tick {
   stroke-width: 1.1px;
 }

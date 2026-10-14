@@ -229,15 +229,15 @@ behind URL switches; the owner took Claude's picks (2026-10-14), now default, sw
   each format on its own, so changing one leaves the other as it is.
 - The Upper Rhine Graben main border fault pencilled on, **ruled** (owner, 2026-10-14: "sketched with a ruler"):
   straight strokes along the mapped trace (Douglas-Peucker, `RULER_TOL` 90 m: 300 m read as "way too straight",
-  owner; plus a 3 m `WOBBLE`, the pencil does not follow the ruler perfectly), ticks on the downthrown west side, **D** / **U** beside it, gaps at pencil text, presumed faults
-  (LGRB "Störung, vermutet") dashed (`.pc-presumed`); the gap under the Dreisam near Freiburg is not mapped by
+  owner; plus a 3 m `WOBBLE`, the pencil does not follow the ruler perfectly), ticks on the downthrown west side, **D** / **U** beside it, gaps at pencil text; presumed faults
+  (LGRB "Störung, vermutet") were drawn dashed and removed the same day (owner: they make no sense here); the gap under the Dreisam near Freiburg is not mapped by
   LGRB and stays empty (do not invent a concealed fault). Note "Rhine Graben fault: / the plain sank, the Black
   Forest rose" (DE "Rheingraben-Störung: / die Ebene sank, der Schwarzwald hob sich"). Rock units from the same
   map (layer `ms:gu300af_m`, each label point checked inside its unit): "Würm gravels" on the plain, "paragneiss"
-  in the Black Forest (DE "Würm-Schotter", "Paragneis"; `UNITS`); and (owner, 2026-10-14) the two foothill blocks
-  caught at the graben's edge, outlined in pencil as geological contacts (`.pc-contact`, from
+  in the Black Forest (DE "Würm-Schotter", "Paragneis"; `UNITS`); and (owner, 2026-10-14) the foothill block caught
+  at the graben's edge, outlined in pencil as a geological contact (`.pc-contact`, from
   `tools/hero/build_units.py` -> `assets/topo/hero-units.json`) and labelled "Middle Jurassic" (against the fault
-  north of Freiburg) and "Triassic sandstone" (Lorettoberg; DE "Mitteljura", "Buntsandstein"). Contour reading
+  north of Freiburg; DE "Mitteljura"); the Lorettoberg's "Triassic sandstone" was tried and removed (owner). Contour reading
   is back at the owner's request: "lines close: steep" / "lines far apart: flat" (`READ`; DE "Linien eng: steil" /
   "Linien weit: flach"). Lines from LGRB GÜK300 (WFS
   `lgrb_uek350_geologie`, layer `ms:gu300tl_m`, proven and presumed) via `tools/hero/build_faults.py` ->

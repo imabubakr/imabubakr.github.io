@@ -8,7 +8,7 @@ Input: the units of the LGRB geological overview map GÜK300 (layer ms:gu300af_m
     https://services.lgrb-bw.de/index.phtml?SERVICE_NAME=lgrb_uek350_geologie&SERVICE=WFS&VERSION=1.1.0
         &REQUEST=GetFeature&TYPENAME=ms:gu300af_m&SRSNAME=EPSG:25832&BBOX=408000,5313500,419500,5320000,EPSG:25832
 Keeps the small foothill blocks caught at the graben's edge that the sheet outlines in pencil (owner, 2026-10-14):
-Middle Jurassic against the main fault north of Freiburg, and the Upper Bunter sandstone of the Lorettoberg.
+Middle Jurassic against the main fault north of Freiburg (the Lorettoberg's Triassic sandstone was dropped).
 Outlines in hero map metres (x east from the frame's west edge, y south from its north edge), clipped to the
 frame, simplified to 20 m. Data: Regierungspräsidium Freiburg - LGRB (GÜK300), dl-de/by-2-0 (footer credit).
 """
@@ -21,7 +21,7 @@ from shapely.geometry import box
 
 OUT = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-units.json"
 X0, Y0, X1, Y1 = 408660, 5314200, 418660, 5319200    # hero bbox (UTM 32N), hero-contours.json
-KEEP = {"Mitteljura, ungegliedert": "jurassic", "Oberer Buntsandstein": "triassic"}
+KEEP = {"Mitteljura, ungegliedert": "jurassic"}   # the Lorettoberg's Triassic sandstone was dropped (owner)
 MIN_KM2 = 0.1                                          # drop slivers at the frame edge
 
 g = gpd.read_file(sys.argv[1]).set_crs(25832, allow_override=True)

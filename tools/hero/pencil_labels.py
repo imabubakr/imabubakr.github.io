@@ -56,7 +56,7 @@ NOTES = []   # the hiking and kite jokes were removed (owner, 2026-10-14: hero t
 
 # The main border fault of the Upper Rhine Graben (owner's geology background, 2026-10-14), pencilled on as in a
 # geological mapping exercise: drawn with a ruler (straight segments along the mapped trace, simplified to
-# RULER_TOL m), ticks on the downthrown side (the Rhine plain, west), presumed faults dashed, a gap wherever a
+# RULER_TOL m), ticks on the downthrown side (the Rhine plain, west), presumed faults left out, a gap wherever a
 # line meets pencil text, a two-line note beside it (start of the first baseline, line step, tilt), and U / D on
 # the upthrown / downthrown side. Lines: LGRB GÜK300 (tools/hero/build_faults.py).
 FAULTS = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-faults.json"
@@ -75,9 +75,8 @@ UD = (2050, 170)          # U / D beside the main fault at this y (map m), this 
 # text per language, start of the baseline, tilt. Würm gravels on the Rhine plain, paragneiss in the Black Forest.
 UNITS = [({"en": "Würm gravels", "de": "Würm-Schotter"}, 2650, 1360, -1),
          ({"en": "paragneiss", "de": "Paragneis"}, 7480, 960, -1),
-         # the foothill blocks caught at the graben's edge, outlined from the same map (hero-units.json)
-         ({"en": "Middle Jurassic", "de": "Mitteljura"}, 5290, 520, -1),
-         ({"en": "Triassic sandstone", "de": "Buntsandstein"}, 3060, 4470, -1)]
+         # the foothill block caught at the graben's edge, outlined from the same map (hero-units.json)
+         ({"en": "Middle Jurassic", "de": "Mitteljura"}, 5290, 520, -1)]
 UNIT_OUTLINES = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-units.json"
 # reading the contour spacing (owner, 2026-10-14): text per language, start of the baseline, tilt
 READ = [({"en": "lines close: steep", "de": "Linien eng: steil"}, 7350, 4420, -3),
@@ -254,10 +253,12 @@ def build(lang, say):
                 return [pts[0], pts[-1]]
             return ruler(pts[:k + 2], tol)[:-1] + ruler(pts[k + 1:], tol)
 
-        solid, dashed, ticks, main = [], [], [], []
+        solid, ticks, main = [], [], []
         for f in fl:
+            if f["type"] != "proven":                   # presumed faults read as noise (owner): not drawn
+                continue
             pts = ruler([tuple(p) for p in f["pts"]])
-            out = solid if f["type"] == "proven" else dashed
+            out = solid
             for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
                 seg_len = math.dist((x0, y0), (x1, y1))
                 ux, uy = (x1 - x0) / seg_len, (y1 - y0) / seg_len
@@ -312,7 +313,6 @@ def build(lang, say):
                 if len(run) > 1:
                     contacts.append(run)
         labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="{path(solid)}"/>'
-                      f'<path class="pc-line pc-fault pc-presumed" d="{path(dashed)}"/>'
                       f'<path class="pc-line pc-tick" d="{" ".join(ticks)}"/>'
                       f'<path class="pc-line pc-contact" d="{path(contacts)}"/>{note}{ud}{units}</g>')
 
