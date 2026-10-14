@@ -103,8 +103,9 @@ user found those looked broken.
 Section [02] tells the owner's path: satellite data (from 2016) → aerial imagery (from 2021, MapTransfer) → drones
 (since 11/2025, Beagle Systems). Chapter texts (owner's brief, 2026-10-10): title, then the platforms / sensors worked
 with (from the CV, no project or employer names), then one sentence on what that resolution shows. The owner
-confirmed the sensor lists as complete (2026-10-10): satellite = Landsat 7/8, Sentinel-1/-2, MODIS, ASTER, TRMM;
-aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors. Three chapters (`.ds-ch`, EN/DE text in the HTML) scroll past on the left while the
+confirmed the sensor lists (2026-10-10; Planet, Sentinel-3 and -5P added 2026-10-14): satellite = Landsat 7/8,
+Sentinel-1/-2/-3/-5P, MODIS, ASTER, TRMM, Planet; aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors
+without the owner. Three chapters (`.ds-ch`, EN/DE text in the HTML) scroll past on the left while the
 **page background itself** (`backdrop.js`) does the descent on the right (owner's pick, 2026-10-09: "you nailed it"):
 
 - Satellite and aerial stops made livelier (owner, 2026-10-10: "boring there", the drone view is perfect):
@@ -374,6 +375,11 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   training) carries `.cv-full`: hidden on screen, shown in print and in the PDF. The "download full CV (PDF)" link
   points to `assets/cv/muhammad-abu-bakar-{cv,lebenslauf}.pdf`, built by `node tools/cv/make_cv_pdf.mjs` (instructions
   in the file). **Rebuild the PDFs after every CV change.**
+- CV points and skills (owner, 2026-10-14): every point verb-first, about two lines, one point per project, AI
+  visible, no model names or figures (he explains those in interviews); experience entries show all points on the
+  page. Skills = tools and techniques only (satellites/sensors belong to the Orbit section), AI row first; each
+  row shows its core on the page and the rest only in the PDF (`<span class="cv-full">` inside the `<dd>`).
+  The PDFs must stay at two pages (`.cv-sign` margin is 4 mm for that; trim German lines first).
 - CV layout: German Lebenslauf, **short and tight**: date column (mono, `MM/YYYY`) + entry; role and
   employer on one line (`.cv-org`); reverse chronological; key-value rows for skills and languages. No rules
   between rows. Projects belong in the CV (under the job or "Academic projects"), not in a separate section.
