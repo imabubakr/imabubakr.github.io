@@ -1663,9 +1663,17 @@ html.arrive-live .backdrop {
     color: #555;
     font-size: 8pt;
     line-height: 1.45;
-    list-style: "•  ";
+    list-style: none;
   }
-  .cv-entry li::marker {
+  /* the bullet drawn like the key-value lists' bullet: at the column start, text 4 mm in, so every bullet on the
+     page lines up (owner: personal data and experience points were not aligned) */
+  .cv-entry li {
+    position: relative;
+  }
+  .cv-entry li::before {
+    content: "•";
+    position: absolute;
+    left: -4mm;
     color: #666;
   }
   /* more air between jobs and degrees (owner: not so tight) */
