@@ -51,7 +51,6 @@
   /* hero paper sheet (experiment): ageing colour, relief strength */
   --sheet-relief: 0.9;
   --pencil: #54585b; /* graphite place names on the sheet */
-  --pencil-blue: #2d5a94; /* the hero sentence, in blue pencil */
   --water: #5d86ab; /* rivers and lakes in the orbit section's aerial survey */
 
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -77,7 +76,6 @@
     --tl-edu: #6c7f8c;
     --sheet-relief: 0.6;
     --pencil: #a2aaaf;
-    --pencil-blue: #86aee0;
     --water: #6f97bb;
     color-scheme: dark;
   }
@@ -93,7 +91,6 @@
   --tl-edu: #6c7f8c;
   --sheet-relief: 0.6;
   --pencil: #a2aaaf;
-  --pencil-blue: #86aee0;
   --water: #6f97bb;
   color-scheme: dark;
 }
@@ -2237,10 +2234,6 @@ html.hero-rising .pencil-box {
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
-/* the sentence in blue pencil (owner, 2026-10-10); everything else stays graphite */
-.pc-say {
-  fill: var(--pencil-blue);
-}
 /* arrows: a light, quick pencil stroke, no heavier than the handwriting */
 .pc-arrow {
   stroke-width: 0.9px;
@@ -2273,11 +2266,11 @@ html.hero-rising .pencil-corner {
   }
 }
 /* the owner's face doodled under the sentence (tools/hero/doodle.py), drawn with the same pencil as the
-   handwriting: the font's stroke is ~4.6 % of its 130 m em (6 m); 9 m because the graphite grain thins a
-   single line more than a filled letter; scales with the map like the text */
+   handwriting, a touch finer than the letters (the font's stroke is ~6 m at its 130 m em); scales with the map
+   like the text (9 m read as too heavy, owner) */
 .pc-doodle .pc-line {
   vector-effect: none;
-  stroke-width: 9px;
+  stroke-width: 5px;
 }
 /* rock-unit outlines (geological contacts), a lighter line than the fault */
 .pc-contact {

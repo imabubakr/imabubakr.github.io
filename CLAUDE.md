@@ -280,7 +280,6 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 | `--accent` | `#b8380c` | `#ff6a2b` | links and accent **text** |
 | `--accent-mark` | `#d2410f` | `#ff6a2b` | non-text: location marker, current-job marker, focus ring |
 | `--pencil` | `#54585b` | `#a2aaaf` | hero pencil: place names, notes, arrows (graphite) |
-| `--pencil-blue` | `#2d5a94` | `#86aee0` | hero sentence in blue pencil (owner, 2026-10-10) |
 | `--water` | `#5d86ab` | `#6f97bb` | rivers and lakes in the orbit section's aerial survey |
 
 - Light `--accent` is darkened from the spec's `#D2410F` (3.9:1) to `#B8380C` (4.8:1) for WCAG AA text contrast.
@@ -303,7 +302,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   scale, so they stay on screen however the map is cropped (tablets in portrait crop the map's west edge away);
   lowered below "Lehen" and the map hint. The doodle: hand-placed strokes over the portrait me.jpg in
   `tools/hero/doodle.py` (backlit photo: line extraction fails), smoothed into curves (jitter on the control points
-  only, no zigzag) and drawn with the handwriting's pencil: 9 m strokes that scale with the map (`.pc-doodle`). It is **drawn in pencil
+  only, no zigzag) and drawn with the handwriting's pencil: 5 m strokes that scale with the map (`.pc-doodle`;
+  9 m read as too heavy). It is **drawn in pencil
   exactly like the place names** (`SAY` in pencil_labels.py: text from the page's `<h1>`, wrapped; phones keep
   their own copy `.pc-narrow` above Freiburg inside their cropped view, no doodle); the real `<h1>` stays in the page, visually hidden, for
   search engines and screen readers. The pencil layer sits above the fold-wear layer (pencil is written after the
@@ -314,8 +314,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   As live text in a web font it rendered visibly thicker than the outlined place names; the owner wants them the
   same. It is **pencilled on the sheet**
   in Reenie Beanie, a pencil scrawl (owner: "perfect", 2026-10-10, picked from 7 hands; Caveat looked bold), in
-  blue pencil (`--pencil-blue`; owner picked it over red, purple and graphite; only the sentence is blue, the rest
-  stays graphite: two colours at most) at the place names' size (130 m on the map scale), tilted −1.2°, with the same graphite
+  graphite like everything else on the sheet (it was blue pencil from 2026-10-10; owner switched it to graphite
+  2026-10-14: "the blue doesn't look good"; `--pencil-blue` removed) at the place names' size (130 m on the map scale), tilted −1.2°, with the same graphite
   filter and fold wear. Light graphite: rendered contrast on the aged paper is low (~3:1); the owner chose the
   light pencil over a darker "pressed harder" version. It fades out with the paper as the map rises. Seen and rejected: Plex
   Serif, serif italic, letterpress, an embossed seal, Caveat, Kalam, Architects Daughter and other hands. It fades out and lifts as the map starts to rise
