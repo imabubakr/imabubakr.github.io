@@ -2272,9 +2272,16 @@ html.hero-rising .pencil-corner {
     display: none;
   }
 }
-/* the owner's face doodled under the sentence (tools/hero/doodle.py): a light, quick hand */
+/* the owner's face doodled under the sentence (tools/hero/doodle.py), drawn with the same pencil as the
+   handwriting: the font's stroke is ~4.6 % of its 130 m em (6 m); 9 m because the graphite grain thins a
+   single line more than a filled letter; scales with the map like the text */
 .pc-doodle .pc-line {
-  stroke-width: 1.1px;
+  vector-effect: none;
+  stroke-width: 9px;
+}
+/* rock-unit outlines (geological contacts), a lighter line than the fault */
+.pc-contact {
+  stroke-width: 1px;
 }
 /* presumed faults (LGRB: "Störung, vermutet"): dashed, as on geological maps */
 .pc-presumed {

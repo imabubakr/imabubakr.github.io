@@ -234,7 +234,12 @@ behind URL switches; the owner took Claude's picks (2026-10-14), now default, sw
   LGRB and stays empty (do not invent a concealed fault). Note "Rhine Graben fault: / the plain sank, the Black
   Forest rose" (DE "Rheingraben-Störung: / die Ebene sank, der Schwarzwald hob sich"). Rock units from the same
   map (layer `ms:gu300af_m`, each label point checked inside its unit): "Würm gravels" on the plain, "paragneiss"
-  in the Black Forest (DE "Würm-Schotter", "Paragneis"; `UNITS`). Lines from LGRB GÜK300 (WFS
+  in the Black Forest (DE "Würm-Schotter", "Paragneis"; `UNITS`); and (owner, 2026-10-14) the two foothill blocks
+  caught at the graben's edge, outlined in pencil as geological contacts (`.pc-contact`, from
+  `tools/hero/build_units.py` -> `assets/topo/hero-units.json`) and labelled "Middle Jurassic" (against the fault
+  north of Freiburg) and "Triassic sandstone" (Lorettoberg; DE "Mitteljura", "Buntsandstein"). Contour reading
+  is back at the owner's request: "lines close: steep" / "lines far apart: flat" (`READ`; DE "Linien eng: steil" /
+  "Linien weit: flach"). Lines from LGRB GÜK300 (WFS
   `lgrb_uek350_geologie`, layer `ms:gu300tl_m`, proven and presumed) via `tools/hero/build_faults.py` ->
   `assets/topo/hero-faults.json`. Licence:
   the service lists no fees and LGRB geology data is offered under dl-de/by-2-0 with "Datenquelle:
@@ -297,7 +302,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   above Freiburg). Both live in their own small SVG `.pencil-corner` pinned to the hero's corner, at the map's
   scale, so they stay on screen however the map is cropped (tablets in portrait crop the map's west edge away);
   lowered below "Lehen" and the map hint. The doodle: hand-placed strokes over the portrait me.jpg in
-  `tools/hero/doodle.py` (backlit photo: line extraction fails), smoothed into curves. It is **drawn in pencil
+  `tools/hero/doodle.py` (backlit photo: line extraction fails), smoothed into curves (jitter on the control points
+  only, no zigzag) and drawn with the handwriting's pencil: 9 m strokes that scale with the map (`.pc-doodle`). It is **drawn in pencil
   exactly like the place names** (`SAY` in pencil_labels.py: text from the page's `<h1>`, wrapped; phones keep
   their own copy `.pc-narrow` above Freiburg inside their cropped view, no doodle); the real `<h1>` stays in the page, visually hidden, for
   search engines and screen readers. The pencil layer sits above the fold-wear layer (pencil is written after the

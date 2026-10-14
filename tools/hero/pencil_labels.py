@@ -74,7 +74,14 @@ UD = (2050, 170)          # U / D beside the main fault at this y (map m), this 
 # Rock units from the same map (LGRB GÜK300 units, layer ms:gu300af_m; each point checked to lie inside the unit):
 # text per language, start of the baseline, tilt. Würm gravels on the Rhine plain, paragneiss in the Black Forest.
 UNITS = [({"en": "Würm gravels", "de": "Würm-Schotter"}, 2650, 1360, -1),
-         ({"en": "paragneiss", "de": "Paragneis"}, 7480, 960, -1)]
+         ({"en": "paragneiss", "de": "Paragneis"}, 7480, 960, -1),
+         # the foothill blocks caught at the graben's edge, outlined from the same map (hero-units.json)
+         ({"en": "Middle Jurassic", "de": "Mitteljura"}, 5290, 520, -1),
+         ({"en": "Triassic sandstone", "de": "Buntsandstein"}, 3060, 4470, -1)]
+UNIT_OUTLINES = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-units.json"
+# reading the contour spacing (owner, 2026-10-14): text per language, start of the baseline, tilt
+READ = [({"en": "lines close: steep", "de": "Linien eng: steil"}, 7350, 4420, -3),
+        ({"en": "lines far apart: flat", "de": "Linien weit: flach"}, 1100, 3550, 2)]
 
 
 font = TTFont(FONT)
@@ -158,7 +165,8 @@ def build(lang, say):
     tr = lambda x, y: (ox + (x * ca - y * sa) * ms, oy + (x * sa + y * ca) * ms)
     strokes = []
     for pts in STROKES.values():
-        q = [tr(x + rnd.uniform(-4, 4), y + rnd.uniform(-4, 4)) for x, y in smooth(pts)]
+        jit = [(x + rnd.uniform(-5, 5), y + rnd.uniform(-5, 5)) for x, y in pts]   # a hand, not a zigzag:
+        q = [tr(x, y) for x, y in smooth(jit)]                                      # shake the control points only
         strokes.append("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in q))
     for x, y, a in STUBBLE:
         r = math.radians(a)
@@ -198,6 +206,7 @@ def build(lang, say):
         note = "".join(words(t, nx0 - i * step_ * math.sin(na), ny0 + i * step_ * math.cos(na), nrot, size / UPM)[0]
                        for i, t in enumerate(lines_))
         units = "".join(words(t[lang], x, y, r, size / UPM)[0] for t, x, y, r in UNITS)
+        units += "".join(words(t[lang], x, y, r, size / UPM)[0] for t, x, y, r in READ)
         inbox = lambda x, y: any(b[0] <= x <= b[2] and b[1] <= y <= b[3] for b in boxes)
 
         def ruler(pts, tol=RULER_TOL):                     # Douglas-Peucker: the few straight strokes of a ruler
@@ -252,9 +261,26 @@ def build(lang, say):
                       + words("U", x + UD[1] - 20, uy_ + 40, 0, size / UPM)[0])
                 break
         path = lambda runs: " ".join("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in r) for r in runs)
+        contacts = []                                      # unit outlines, freehand; not along the frame edge
+        if UNIT_OUTLINES.exists():
+            for u in json.loads(UNIT_OUTLINES.read_text())["units"]:
+                run = []
+                for (x0, y0), (x1, y1) in zip(u["pts"], u["pts"][1:]):
+                    edge = (y0 <= 2 and y1 <= 2) or (y0 >= 4998 and y1 >= 4998)
+                    if edge:
+                        if len(run) > 1:
+                            contacts.append(run)
+                        run = []
+                        continue
+                    n = max(1, int(math.dist((x0, y0), (x1, y1)) / 30))
+                    run += [(x0 + (x1 - x0) * k / n + rnd.uniform(-4, 4), y0 + (y1 - y0) * k / n + rnd.uniform(-4, 4))
+                            for k in range(n)]
+                if len(run) > 1:
+                    contacts.append(run)
         labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="{path(solid)}"/>'
                       f'<path class="pc-line pc-fault pc-presumed" d="{path(dashed)}"/>'
-                      f'<path class="pc-line pc-tick" d="{" ".join(ticks)}"/>{note}{ud}{units}</g>')
+                      f'<path class="pc-line pc-tick" d="{" ".join(ticks)}"/>'
+                      f'<path class="pc-line pc-contact" d="{path(contacts)}"/>{note}{ud}{units}</g>')
 
     defs = "".join(f'<path id="{gid}" d="{glyph_path(g)}"/>' for g, gid in used.items())
     return (
