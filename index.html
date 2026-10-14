@@ -158,7 +158,7 @@
                       <li>Developed an open-source drone LiDAR pipeline that georeferences point clouds with PPK and classifies them into ground, vegetation, buildings, conductors and towers. It rebuilds conductors where the scan has gaps by modeling their sag, rates vegetation near the wires by risk category, and is now being extended to tree-fall risk analysis.</li>
                       <li>Built an AI-driven right-of-way and construction-site monitoring pipeline that georeferences drone images through deep feature matching and flags objects of different categories along pipelines. A fine-tuned foundation model detects the objects, an open-source VLM verifies each one, and an NVIDIA Jetson runs detection in real time.</li>
                       <li>Fine-tuned a foundation model for building segmentation, using training labels created in-house with colleagues from 10&nbsp;cm orthophotos. Scaled it to city level across the Cologne area, mapping buildings directly from the raw imagery.</li>
-                      <li>Built PostGIS and TiTiler services that serve large GeoTIFFs to the Beagle Systems frontend, ran pre-flight primary and duplicate checks, and helped expand the flight-planning geodatabase.</li>
+                      <li>Built a geospatial backend with PostGIS and TiTiler that serves large GeoTIFFs to the Beagle Systems frontend as dynamic map tiles. Supported flight operations with pre-flight primary and duplicate checks, and helped expand the flight-planning geodatabase with new data sources.</li>
                     </ul>
                   </div>
                 </li>
