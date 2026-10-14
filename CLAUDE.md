@@ -235,7 +235,11 @@ behind URL switches; the owner took Claude's picks (2026-10-14), now default, sw
   (DE "Fallen") on slopes (hero-map.js `dip()`).
 - Contour exercises in pencil (pencil_labels.py `SLOPE`, `SPOT`): slope A-B with "Δh 190 m / 600 m ≈ 18°" (from
   the DEM) and the spot height "663" on the hiking summit. Dropped: "lines close: steep / far apart: flat".
-- Ideas not built: rule of V's at a valley, a cross-section A-A' across the fault (opening the profile).
+- Rule of V's (owner, 2026-10-14; `VEE`): one contour's V traced over in pencil in the valley between the fault
+  note and B (the sharpest V's on the sheet, checked against the DEM to be valleys, not spurs), note "rule of V's: /
+  the V points upstream" (DE "V-Regel: / das V zeigt talaufwärts") just below the tip.
+- Not built yet: a cross-section A-A' across the fault. Owner and Claude agree it should be 2D (the classic
+  geology section: a line on the map, the profile with the fault beneath), not 3D.
 
 ## Legal notice (Impressum)
 
