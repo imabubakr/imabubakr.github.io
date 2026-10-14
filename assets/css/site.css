@@ -2133,16 +2133,6 @@ html.hero-risen .hero-strip .ticks {
   background: var(--accent-mark);
   animation: hero-cue 1.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
-/* a small chevron under the line, so it reads as "down" at a glance (owner: make it visible, 2026-10-14) */
-.hero-cue::after {
-  content: "";
-  width: 7px;
-  height: 7px;
-  margin-top: -10px;
-  border-right: 2px solid var(--accent-mark);
-  border-bottom: 2px solid var(--accent-mark);
-  transform: rotate(45deg);
-}
 @keyframes hero-cue {
   from { top: -12px; }
   to { top: 32px; }
