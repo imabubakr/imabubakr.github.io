@@ -155,10 +155,10 @@
                     <h4><span lang="en">Geospatial Data Specialist</span> <span class="cv-org"><a href="https://beaglesystems.com/">Beagle Systems</a>, Hamburg</span></h4>
                     <p class="cv-about">Beagle Systems überwacht mit Langstreckendrohnen außerhalb der Sichtweite (BVLOS) Pipelines, Versorgungsnetze und andere Infrastruktur.</p>
                     <ul>
-                      <li>Entwickelte eine Open-Source-Pipeline für Drohnen-LiDAR, die Punktwolken per PPK georeferenziert und in Boden, Vegetation, Gebäude, Leiterseile und Masten klassifiziert. Sie rekonstruiert Leiterseile an Datenlücken über ein Modell ihres Durchhangs, bewertet nahe Vegetation nach Risikokategorien und wird derzeit um eine Baumsturzanalyse erweitert.</li>
-                      <li>Entwickelte eine KI-gestützte Pipeline zur Trassen- und Baustellenüberwachung, die Drohnenbilder per Deep Feature Matching georeferenziert und verschiedene Objektkategorien an Pipelines markiert. Ein nachtrainiertes Foundation Model erkennt die Objekte, ein Open-Source-VLM prüft jede Detektion, und ein NVIDIA Jetson erkennt in Echtzeit.</li>
-                      <li>Trainierte ein Foundation Model zur Gebäudesegmentierung nach, mit Trainingsdaten, die gemeinsam mit Kollegen intern aus 10-cm-Orthofotos entstanden. Setzte es stadtweit im Raum Köln ein und kartierte Gebäude direkt aus den Rohbildern.</li>
-                      <li>Baute ein Geodaten-Backend mit PostGIS und TiTiler auf, das große GeoTIFFs als dynamische Kartenkacheln an das Frontend von Beagle Systems liefert. Unterstützte den Flugbetrieb mit Vorab- und Duplikatprüfungen vor den Flügen und half, die Flugplanungs-Geodatenbank um neue Datenquellen zu erweitern.</li>
+                      <li>Entwickelte eine Open-Source-Pipeline für Drohnen-LiDAR, die Punktwolken per PPK georeferenziert, Freileitungsszenen klassifiziert, fehlende Leiterseile über ihren Durchhang rekonstruiert und nahe Vegetation nach Risiko bewertet; Baumsturzanalyse in Arbeit.</li>
+                      <li>Entwickelte eine KI-gestützte Pipeline zur Trassen- und Baustellenüberwachung: Georeferenzierung per Deep Feature Matching, ein nachtrainiertes Foundation Model zur Objekterkennung, ein Open-Source-VLM zur Prüfung und Echtzeit-Inferenz auf einem NVIDIA&nbsp;Jetson.</li>
+                      <li>Trainierte ein Foundation Model zur Gebäudesegmentierung mit intern erstellten Labels aus 10-cm-Orthofotos nach und setzte es im gesamten Raum Köln ein.</li>
+                      <li>Baute ein Backend mit PostGIS und TiTiler auf, das große GeoTIFFs als Kartenkacheln ans Frontend liefert, und unterstützte die Flugplanung mit Vorabprüfungen und neuen Daten für die Geodatenbank.</li>
                     </ul>
                   </div>
                 </li>

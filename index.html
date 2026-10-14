@@ -155,10 +155,10 @@
                     <h4>Geospatial Data Specialist <span class="cv-org"><a href="https://beaglesystems.com/">Beagle Systems</a>, Hamburg</span></h4>
                     <p class="cv-about">Beagle Systems flies long-range drones beyond visual line of sight (BVLOS) to monitor pipelines, utilities and other infrastructure.</p>
                     <ul>
-                      <li>Developed an open-source drone LiDAR pipeline that georeferences point clouds with PPK and classifies them into ground, vegetation, buildings, conductors and towers. It rebuilds conductors where the scan has gaps by modeling their sag, rates vegetation near the wires by risk category, and is now being extended to tree-fall risk analysis.</li>
-                      <li>Built an AI-driven right-of-way and construction-site monitoring pipeline that georeferences drone images through deep feature matching and flags objects of different categories along pipelines. A fine-tuned foundation model detects the objects, an open-source VLM verifies each one, and an NVIDIA Jetson runs detection in real time.</li>
-                      <li>Fine-tuned a foundation model for building segmentation, using training labels created in-house with colleagues from 10&nbsp;cm orthophotos. Scaled it to city level across the Cologne area, mapping buildings directly from the raw imagery.</li>
-                      <li>Built a geospatial backend with PostGIS and TiTiler that serves large GeoTIFFs to the Beagle Systems frontend as dynamic map tiles. Supported flight operations with pre-flight primary and duplicate checks, and helped expand the flight-planning geodatabase with new data sources.</li>
+                      <li>Developed an open-source drone LiDAR pipeline that georeferences point clouds with PPK, classifies power-line scenes, rebuilds missing conductors from their sag and rates nearby vegetation by risk; tree-fall analysis in progress.</li>
+                      <li>Built an AI-driven right-of-way and construction-site monitoring pipeline: deep-feature-matching georeferencing, a fine-tuned foundation model for detection, an open-source VLM to verify it, and real-time inference on an NVIDIA&nbsp;Jetson.</li>
+                      <li>Fine-tuned a building-segmentation foundation model on in-house labels created from 10&nbsp;cm orthophotos and scaled it across the Cologne area.</li>
+                      <li>Built a PostGIS and TiTiler backend that serves large GeoTIFFs to the frontend as map tiles, and supported flight planning with pre-flight checks and new geodatabase data.</li>
                     </ul>
                   </div>
                 </li>
