@@ -1683,7 +1683,11 @@ html.arrive-live .backdrop {
   /* key-value lists (personal information, skills, languages): label, a bullet, the value */
   dl.cv-list .cv-row {
     align-items: baseline;
-    padding: 0.25mm 0;
+    padding: 0;
+  }
+  dl.cv-list dt,
+  dl.cv-list dd {
+    line-height: 1.4; /* the screen's 1.6 was too airy on paper (owner: make it tight) */
   }
   dl.cv-list dd {
     position: relative;
