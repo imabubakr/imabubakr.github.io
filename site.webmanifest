@@ -1,0 +1,13 @@
+{
+  "name": "Muhammad Abu Bakar · Geospatial Data Specialist",
+  "short_name": "Bakar",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#e9eae6",
+  "theme_color": "#e9eae6",
+  "icons": [
+    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1522,7 +1522,7 @@ html.arrive-live .backdrop {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 8mm;
+    gap: 5mm;
     margin-bottom: 7mm;
     padding-bottom: 5mm;
     border-bottom: 0.5pt solid #c9cbc5;
@@ -1530,6 +1530,24 @@ html.arrive-live .backdrop {
   .print-head img {
     width: 26mm;
     height: auto;
+  }
+  /* QR code to the website beside the portrait (tools/cv/make_qr.py): scanned from the printed CV */
+  .print-qr {
+    margin: 0 0 0 auto;
+    text-align: center;
+  }
+  .print-qr svg {
+    display: block;
+    width: 17mm;
+    height: 17mm;
+    fill: var(--ink);
+  }
+  .print-qr figcaption {
+    margin-top: 1.2mm;
+    color: var(--muted);
+    font: 400 6.5pt/1 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
   .print-label {
     color: var(--muted);
