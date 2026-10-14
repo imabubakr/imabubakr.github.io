@@ -88,17 +88,6 @@
         box.showModal();
       });
     });
-    if (/[?&]geo=1/.test(location.search)) document.documentElement.classList.add("geo-on");   // PREVIEW: the fault
-    ((location.search.match(/[?&]ex=([0-9,]+)/) || [])[1] || "").split(",").forEach(function (n) {   // PREVIEW: exercises
-      if (n) document.documentElement.classList.add("ex-" + n);
-    });
-    // PREVIEW (2026-10-13): ?folds=3x2 | 3x1 swaps the hero sheet's fold textures (wide screens)
-    var folds = (location.search.match(/[?&]folds=(3x2|3x1)/) || [])[1], heroEl = document.querySelector(".hero");
-    if (folds && heroEl && window.innerWidth >= 720) {
-      ["age", "relief", "wear"].forEach(function (k) {
-        heroEl.style.setProperty("--paper-" + k, 'url("/assets/img/preview/paper-wide-' + folds + "-" + k + '.webp")');
-      });
-    }
     // Plate contact sheet: folded to the first plates, "show all" unfolds the rest (without JS all show)
     var pidx = document.querySelector(".pidx"), more = pidx && pidx.querySelector(".pidx-more");
     if (more) {

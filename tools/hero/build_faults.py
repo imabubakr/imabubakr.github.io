@@ -10,7 +10,8 @@ fetched 2026-10-13 from the LGRB WFS:
 Keeps the proven faults ("Störung, nachgewiesen") that cross the hero frame: along the foot of the Black Forest
 that is the main border fault of the Upper Rhine Graben. Writes them in hero map metres (x east from the
 frame's west edge, y south from its north edge, as the hero SVG's viewBox), clipped to the frame.
-Data: LGRB-BW (GÜK300). Scale 1 : 300 000, so the line is good to a few hundred metres.
+Data: Regierungspräsidium Freiburg - LGRB (GÜK300), dl-de/by-2-0, credited in the footer. Scale 1 : 300 000,
+so the line is good to a few hundred metres.
 """
 import json
 import re

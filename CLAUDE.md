@@ -218,25 +218,24 @@ own summit labels (`flightFinaleOn`). Data from `tools/finale/build_feldberg.py`
 – Namensnennung – Version 2.0, www.lgl-bw.de" (holder + year of retrieval required). Reduced motion / no WebGL: no
 finale.
 
-## Work in progress: hero geology and folds (previews, 2026-10-13)
+## Hero geology (decided 2026-10-14)
 
 A friend of the owner found the hero's folds "weird" and suggested using the owner's geology background (BSc
-Geology, Bahria; MSc Geology, Freiburg; contour-map exercises in class), "serious but fun". Built as previews,
-all off unless switched on by URL, nothing decided yet:
-- `?folds=3x2` / `?folds=3x1`: other fold textures for the wide sheet (`make_paper.py --preview` writes
-  `assets/img/preview/paper-wide-*`; site.js swaps them). Claude's advice: 3 x 2 (real sheets fold both ways).
-- `?geo=1`: the Upper Rhine Graben main border fault pencilled on (freehand, ticks on the downthrown west side,
-  gaps at pencil text) + note "Rhine Graben fault: / the plain sank, the Black Forest rose" (DE "Rheingraben-
-  Störung: / die Ebene sank, der Schwarzwald hob sich"); owner likes it. Line from LGRB GÜK300 (WFS
-  `lgrb_uek350_geologie`, layer `ms:gu300tl_m`, proven faults) via `tools/hero/build_faults.py` ->
-  `assets/topo/hero-faults.json`. **Licence not yet confirmed** (the service points to the LGRB terms; some
-  services are paid): confirm and add a footer credit before making it default. Also adds "dip 20° → 321°"
-  (DE "Fallen") to the hero readout on slopes (hero-map.js `dip()`).
-- `?ex=1,2,4`: contour exercises in pencil (pencil_labels.py `SLOPE`, `READ`, `SPOT`): 1 slope A-B with
-  "Δh 190 m / 600 m ≈ 18°" (from the DEM), 2 "lines close: steep" / "lines far apart: flat" (owner may prefer
-  "gentle", DE "sanft"), 4 spot height "663" on the hiking summit. Claude's advice: keep 1 + 4.
-- Ideas not built yet: rule of V's at a valley, a cross-section A-A' across the fault (opening the profile).
-When decided: make the chosen ones default, drop the switches and unused variants, rerun pencil_labels.py.
+Geology, Bahria; MSc Geology, Freiburg; contour-map exercises in class), "serious but fun". Previews were built
+behind URL switches; the owner took Claude's picks (2026-10-14), now default, switches removed:
+- Folds 3 x 2 on the wide sheet (was 4 x 2; 3 x 1 was the other option). Phones keep 2 x 3. make_paper.py seeds
+  each format on its own, so changing one leaves the other as it is.
+- The Upper Rhine Graben main border fault pencilled on (freehand, ticks on the downthrown west side, gaps at
+  pencil text) + note "Rhine Graben fault: / the plain sank, the Black Forest rose" (DE "Rheingraben-Störung: /
+  die Ebene sank, der Schwarzwald hob sich"). Line from LGRB GÜK300 (WFS `lgrb_uek350_geologie`, layer
+  `ms:gu300tl_m`, proven faults) via `tools/hero/build_faults.py` -> `assets/topo/hero-faults.json`. Licence:
+  the service lists no fees and LGRB geology data is offered under dl-de/by-2-0 with "Datenquelle:
+  Regierungspräsidium Freiburg - LGRB, www.lgrb-bw.de" (checked on the GK50 metadata; the GÜK300 record itself
+  could not be loaded on 2026-10-14). Credited in the footer. The hero readout adds the ground's "dip 20° → 321°"
+  (DE "Fallen") on slopes (hero-map.js `dip()`).
+- Contour exercises in pencil (pencil_labels.py `SLOPE`, `SPOT`): slope A-B with "Δh 190 m / 600 m ≈ 18°" (from
+  the DEM) and the spot height "663" on the hiking summit. Dropped: "lines close: steep / far apart: flat".
+- Ideas not built: rule of V's at a valley, a cross-section A-A' across the fault (opening the profile).
 
 ## Legal notice (Impressum)
 
@@ -326,7 +325,7 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   removed "Freiburg im Breisgau", 2026-10-12; build_hero.py still computes it, no `build:hero-place` marker).
 - Hero paper sheet (owner, 2026-10-10: "make it more old school", "real creases"): on landing the hero is an old
   survey sheet that was folded and opened again. `tools/hero/make_paper.py` models the sheet as a height field
-  (accordion folds 4 × 2 on desktop, 2 × 3 on phones, slightly wavy and uneven, panels bending into the folds, a few
+  (accordion folds 3 × 2 on desktop, 2 × 3 on phones, slightly wavy and uneven, panels bending into the folds, a few
   handling wrinkles), lights it like a hillshade (sun top left) and writes a relief image (laid on with soft-light,
   `--sheet-relief`), an age mask (yellowing, browned edges, foxing, one faint tide mark, grime in valley folds, in
   `--sheet-age`) and a wear mask (contour ink rubbed off along the folds, `--paper` over the map only). All of it fades

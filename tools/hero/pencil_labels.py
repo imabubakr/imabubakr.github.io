@@ -57,7 +57,7 @@ NOTES = [
      (4737, 4990), "pc-wide", "below"),                  # arrowhead just inside the bottom edge
 ]
 
-# PREVIEW (2026-10-13, shown with ?geo=1): the main border fault of the Upper Rhine Graben, pencilled on as in a
+# The main border fault of the Upper Rhine Graben (owner's geology background, 2026-10-14), pencilled on as in a
 # geological mapping exercise: freehand line with ticks on the downthrown side (the Rhine plain, west), a gap
 # wherever it meets pencil text, and a two-line note beside it (start of the first baseline, line step, tilt).
 # Line: LGRB GÜK300 (tools/hero/build_faults.py).
@@ -65,13 +65,11 @@ FAULTS = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-faults.
 FAULT_NOTE = ({"en": ["Rhine Graben fault:", "the plain sank, the Black Forest rose"],
                "de": ["Rheingraben-Störung:", "die Ebene sank, der Schwarzwald hob sich"]}, 6720, 1790, 150, -2)
 
-# PREVIEW (2026-10-13, ?ex=1,2,4): contour-reading exercises, as a geology student pencils them onto a sheet.
-# 1: a slope worked out between A and B (straight uphill on the Black Forest edge; numbers from the DEM),
-# 2: "lines close: steep" / "lines far apart: flat", 4: a spot height on the hiking summit (the DEM maximum).
+# Contour-reading exercises, as a geology student pencils them onto a sheet (2026-10-14): a slope worked out
+# between A and B (straight uphill on the Black Forest edge; numbers from the DEM) and a spot height on the hiking
+# summit (the DEM maximum).
 DEM = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-contours-dem.bin"   # 200 x 100, 50 m
 SLOPE = ((7950, 3000), (7702, 2454), (8090, 2800), -2)   # A, B, start of the working, its tilt
-READ = [({"en": "lines close: steep", "de": "Linien eng: steil"}, 7350, 4420, -3),
-        ({"en": "lines far apart: flat", "de": "Linien weit: flach"}, 1100, 3550, 2)]
 SPOT = (8975, 1675)
 
 font = TTFont(FONT)
@@ -214,7 +212,7 @@ def build(lang, say):
             if len(run) > 1:
                 strokes.append(run)
         d = " ".join("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in r) for r in strokes)
-        labels.append(f'<g class="pc pc-wide pc-geo"><path class="pc-line pc-fault" d="{d}"/>'
+        labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="{d}"/>'
                       f'<path class="pc-line pc-tick" d="{" ".join(ticks)}"/>{note}</g>')
 
     if DEM.exists():
@@ -237,7 +235,7 @@ def build(lang, say):
             out.append(pts[-1])
             return "M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in out)
 
-        # 1: the slope, A (low) to B (high), the working from the rounded readings so the sum adds up
+        # the slope, A (low) to B (high), the working from the rounded readings so the sum adds up
         (ax, ay), (bx, by), (wx, wy), wrot = SLOPE
         dh = round((elev(bx, by) - elev(ax, ay)) / 10) * 10
         run = round(math.dist((ax, ay), (bx, by)) / 10) * 10
@@ -247,17 +245,14 @@ def build(lang, say):
         la, _ = words("A", ax - ux * 140 - 40, ay - uy * 140 + 40, 0, size / UPM)
         lb, _ = words("B", bx + ux * 90 - 30, by + uy * 90, 0, size / UPM)
         wk, _ = words(f"Δh {dh} m / {run} m ≈ {deg}°", wx, wy, wrot, size / UPM)
-        labels.append(f'<g class="pc pc-wide pc-ex pc-ex1"><path class="pc-line pc-fault" d="{stroke([(ax, ay), (bx, by)])} {ends}"/>'
+        labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="{stroke([(ax, ay), (bx, by)])} {ends}"/>'
                       f"{la}{lb}{wk}</g>")
-        # 2: reading the spacing
-        rd = "".join(words(t[lang], x, y, r, size / UPM)[0] for t, x, y, r in READ)
-        labels.append(f'<g class="pc pc-wide pc-ex pc-ex2">{rd}</g>')
-        # 4: the spot height (a pencilled cross and the reading)
+        # the spot height (a pencilled cross and the reading)
         sx, sy = SPOT
         h = round(elev(sx, sy))
         cross = stroke([(sx - 45, sy - 45), (sx + 45, sy + 45)]) + " " + stroke([(sx - 45, sy + 45), (sx + 45, sy - 45)])
         sp, _ = words(str(h), sx + 90, sy + 150, -2, size * 0.9 / UPM)
-        labels.append(f'<g class="pc pc-wide pc-ex pc-ex4"><path class="pc-line" d="{cross}"/>{sp}</g>')
+        labels.append(f'<g class="pc pc-wide"><path class="pc-line" d="{cross}"/>{sp}</g>')
 
     defs = "".join(f'<path id="{gid}" d="{glyph_path(g)}"/>' for g, gid in used.items())
     return (

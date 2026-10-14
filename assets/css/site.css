@@ -2172,15 +2172,15 @@ html.hero-risen .hero-strip .ticks {
    these large masked layers on every frame of the scroll).
    Remove this block, the --sheet-* tokens and assets/img/paper-* to drop it. */
 .hero {
-  --paper-age: url("../img/paper-wide-age.webp");
-  --paper-relief: url("../img/paper-wide-relief.webp");
-  --paper-wear: url("../img/paper-wide-wear.webp");
+  --paper-age: url("../img/paper-wide-age.webp?v=20261016a");
+  --paper-relief: url("../img/paper-wide-relief.webp?v=20261016a");
+  --paper-wear: url("../img/paper-wide-wear.webp?v=20261016a");
 }
 @media (max-width: 719px) {
   .hero {
-    --paper-age: url("../img/paper-tall-age.webp");
-    --paper-relief: url("../img/paper-tall-relief.webp");
-    --paper-wear: url("../img/paper-tall-wear.webp");
+    --paper-age: url("../img/paper-tall-age.webp?v=20261016a");
+    --paper-relief: url("../img/paper-tall-relief.webp?v=20261016a");
+    --paper-wear: url("../img/paper-tall-wear.webp?v=20261016a");
   }
 }
 .hero::before,
@@ -2266,23 +2266,9 @@ html.hero-rising .pencil-box {
   stroke-width: 0.9px;
   opacity: 0.7;
 }
-/* PREVIEW (2026-10-13, ?geo=1): the graben fault pencilled on like a mapping exercise */
-.pc-geo {
-  display: none;
-}
-html.geo-on .pc-geo {
-  display: inline;
-}
+/* the graben fault and the slope A-B, pencilled on like a mapping exercise (2026-10-14) */
 .pc-fault {
   stroke-width: 1.6px;
-}
-.pc-ex {
-  display: none;
-}
-html.ex-1 .pc-ex1,
-html.ex-2 .pc-ex2,
-html.ex-4 .pc-ex4 {
-  display: inline;
 }
 .pc-tick {
   stroke-width: 1.1px;

@@ -97,9 +97,8 @@
     return Math.abs(v).toFixed(digits).replace(".", T.dec);
   }
 
-  // PREVIEW (2026-10-13, ?geo=1): the ground's dip and dip direction under the cursor, as a geologist reads
-  // a bedding plane (here the terrain surface, from the 50 m grid over +-50 m); nothing on (near) flat ground
-  var GEO = /[?&]geo=1/.test(location.search);
+  // the ground's dip and dip direction under the cursor, as a geologist reads a bedding plane (here the terrain
+  // surface, from the 50 m grid over +-50 m); nothing on (near) flat ground
   function dip(ds, x, y) {
     var d = ds.meta.grid.cell_m[0];
     var gx = (elevation(ds, x + d, y) - elevation(ds, x - d, y)) / (2 * d);   // up towards the east
@@ -112,7 +111,7 @@
   function readout(ds, p) {
     var ll = lonLat(ds, p.x, p.y);
     return num(ll[1], 4) + "°" + (ll[1] >= 0 ? "N" : "S") + " " + num(ll[0], 4) + "°" +
-      (ll[0] >= 0 ? T.E : T.W) + " · " + Math.round(elevation(ds, p.x, p.y)) + " m" + (GEO ? dip(ds, p.x, p.y) : "");
+      (ll[0] >= 0 ? T.E : T.W) + " · " + Math.round(elevation(ds, p.x, p.y)) + " m" + dip(ds, p.x, p.y);
   }
 
   function el(name, attrs, parent) {

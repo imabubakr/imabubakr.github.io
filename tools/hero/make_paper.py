@@ -16,11 +16,9 @@ images per format to assets/img/:
                            faint tide mark, grime in the valley folds
 
 Colours stay in CSS (--paper, --sheet-age); the images carry only shape.
-<fmt> is "wide" (desktop, 4 x 2 panels) or "tall" (phones, 2 x 3 panels).
+<fmt> is "wide" (desktop, 3 x 2 panels) or "tall" (phones, 2 x 3 panels).
 """
 from pathlib import Path
-
-import sys
 
 import numpy as np
 from PIL import Image
@@ -28,7 +26,7 @@ from PIL import Image
 OUT = Path(__file__).resolve().parents[2] / "assets" / "img"
 FORMATS = {
     # name: (width, height, vertical folds [(x fraction, +1 mountain / -1 valley)], horizontal folds)
-    "wide": (2000, 1000, [(0.25, 1), (0.5, -1), (0.75, 1)], [(0.5, -1)]),
+    "wide": (2000, 1000, [(1 / 3, 1), (2 / 3, -1)], [(0.5, -1)]),   # 3 x 2 (2026-10-14; was 4 x 2)
     "tall": (800, 1300, [(0.5, 1)], [(1 / 3, -1), (2 / 3, 1)]),
 }
 rng = np.random.default_rng(20261010)
@@ -150,13 +148,6 @@ def make(name, W, H, vfolds, hfolds):
         print(f"{p.relative_to(OUT.parents[1])}: {p.stat().st_size / 1024:.0f} KB")
 
 
-# PREVIEW (2026-10-13): python3 tools/hero/make_paper.py --preview writes fold variants for the wide sheet to
-# assets/img/preview/ (committed while the choice is open): 3x2 (folds at the thirds and the middle) and 3x1 (two folds at the thirds)
-if "--preview" in sys.argv:
-    OUT = OUT / "preview"
-    for tag, v, hz in [("3x2", [(1 / 3, 1), (2 / 3, -1)], [(0.5, -1)]), ("3x1", [(1 / 3, 1), (2 / 3, -1)], [])]:
-        rng = np.random.default_rng(20261010)
-        make(f"wide-{tag}", 2000, 1000, v, hz)
-else:
-    for name, (W, H, v, hz) in FORMATS.items():
-        make(name, W, H, v, hz)
+for name, (W, H, v, hz) in FORMATS.items():
+    rng = np.random.default_rng(20261010)  # per sheet, so changing one format leaves the other as it is
+    make(name, W, H, v, hz)
