@@ -16,7 +16,7 @@ from pathlib import Path
 import segno
 
 SITE = "https://imabubakr.github.io/"
-LABEL = {"en": "Website", "de": "Website"}
+LABEL = {"en": "Visit my website", "de": "Zu meiner Website"}   # warmer than "Website" (owner)
 
 for page in sys.argv[1:]:
     p = Path(page)

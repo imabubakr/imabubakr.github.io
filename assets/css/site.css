@@ -1533,18 +1533,18 @@ html.arrive-live .backdrop {
     padding-bottom: 5mm;
     border-bottom: 0.5pt solid #d6cfc5;
   }
-  /* faint contours of the Black Forest edge behind the header, as on the website's hero map; fades out towards
-     the name (owner, 2026-10-14) */
+  /* ridge lines across the whole header, as in the hero's ridge view (tools/cv/make_cv_ridges.py): flat over the
+     Rhine plain behind the name, rising into the Black Forest behind the QR code (owner, 2026-10-14) */
   .print-head::before {
     content: "";
     position: absolute;
-    inset: 0 0 0 30%;
+    inset: 0;
     z-index: -1;
-    background: url("../topo/cv-contours.svg") center / cover no-repeat;
-    opacity: 0.22;
-    mask-image: linear-gradient(90deg, transparent, #000 45%);
+    background: url("../topo/cv-ridges.svg") center bottom / 100% 100% no-repeat;
+    opacity: 0.32;
+    mask-image: linear-gradient(90deg, transparent 22%, #000 62%); /* the text area stays clean */
   }
-  /* QR code to the website beside the portrait (tools/cv/make_qr.py): scanned from the printed CV */
+  /* QR code to the website at the right of the header (tools/cv/make_qr.py): scanned from the printed CV */
   .print-qr {
     margin: 0 0 0 auto;
     text-align: center;
@@ -1560,10 +1560,10 @@ html.arrive-live .backdrop {
   }
   .print-qr figcaption {
     margin-top: 1.2mm;
-    color: var(--muted);
-    font: 400 6.5pt/1 var(--font-mono);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    padding: 0.4mm 1mm;
+    background: #fff;
+    color: var(--ink);
+    font: 400 7pt/1.2 var(--font-sans);
   }
   .print-label {
     color: var(--muted);

@@ -454,9 +454,11 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   so the PDF carries its build date) and a blank signature line. No signature image online (owner's choice
   2026-10-10, after hearing that a published signature can be copied); he signs the copy he sends.
 - Print / PDF: a two-page A4 CV, always light (owner, 2026-10-14): no photo; QR code at the right of the header on a
-  white quiet zone; faint contours of the Black Forest edge behind the header (`assets/topo/cv-contours.svg`, a
-  label-free crop of the hero contours, 22 %, fading towards the name; make_cv_pdf.mjs switches to print media and
-  waits so this print-only background is in the PDF); name and section headings in IBM Plex Serif 500; text 9 pt
+  white quiet zone; **ridge lines** across the header (owner's pick over a contour crop): `tools/cv/make_cv_ridges.py`
+  draws 17 ridges from the hero DEM (`assets/topo/cv-ridges.svg`), flat over the plain, rising into the Black Forest
+  behind the QR code, fading in from the left so the name and contacts stay clean, 32 %; make_cv_pdf.mjs switches to
+  print media and waits so this print-only background is in the PDF; the QR caption reads "Visit my website" /
+  "Zu meiner Website" (warmer than "Website"); name and section headings in IBM Plex Serif 500; text 9 pt
   with 1.55 line height in a warm near-black (#24211d) and warm grey; dates in Plex Sans with tabular figures (mono
   read as technical on paper); page 2 always starts with Education (`.cv-edu`, owner: no section split across
   pages); place/date and the signature line share one row. Margins 13 mm top/bottom, tight spacing: the German PDF
