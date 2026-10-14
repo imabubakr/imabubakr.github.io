@@ -1453,48 +1453,79 @@ html.arrive-live .backdrop {
     display: none !important;
   }
 }
-/* place and date on the left, the signature line beside them on the right (one row: keeps the CV at two pages) */
+/* key phrases, blue in the printed CV only (the owner's earlier CV style); plain text on screen */
+.kw {
+  font: inherit;
+}
+/* the signature line, then place and date below it, left (as in the owner's earlier CV) */
 .cv-sign {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-top: 3mm;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 1.5mm;
+  margin-top: 6mm;
   break-inside: avoid;
 }
 .cv-sign-line {
-  width: 60mm;
-  margin-top: 8mm;
-  padding-top: 1.5mm;
-  border-top: 0.5pt solid #4e5358;
-  color: #4e5358;
-  font-size: 7.5pt;
+  width: 55mm;
+  margin-top: 10mm;
+  padding-top: 1.2mm;
+  border-top: 0.5pt solid #b4b4b4;
+  color: #999;
+  font-size: 7pt;
+}
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/open-sans-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/open-sans-latin-600-normal.woff2") format("woff2");
 }
 
-/* Printing (or "Save as PDF") gives an A4 Lebenslauf: print header + CV only. */
+/* Printing (or "Save as PDF") gives an A4 Lebenslauf: print header + CV only, in the style of the owner's earlier
+   CV (2026-10-14: "copy the style from head to toe"): Open Sans (loaded only for print), a large light
+   "CURRICULUM VITAE", grey section headings with a hairline running to the right, dates centred in an indented
+   left column, job title above the organisation, round bullets, key phrases in blue, a very light grey page. */
 @media print {
   @page {
     size: A4;
-    margin: 13mm 16mm 13mm;
+    margin: 13mm 15mm 14mm;
+    background: #f7f7f7;
+    @bottom-center {
+      content: "© 2026 Muhammad Abu Bakar";
+      color: #999;
+      font: 6.5pt "Open Sans", sans-serif;
+    }
     @bottom-right {
       content: counter(page) " / " counter(pages);
-      color: #4e5358;
-      font: 7.5pt "IBM Plex Mono", monospace;
+      color: #999;
+      font: 6.5pt "Open Sans", sans-serif;
     }
   }
   /* Beats both dark-theme selectors (prefers-color-scheme and data-theme). */
   html:root:not(.never) {
-    --paper: #fff;
-    --ink: #24211d;   /* a warm near-black and warm grey on paper: friendlier than the screen's cool ink */
-    --muted: #5d5750;
-    --accent: #24211d;
+    --paper: #f7f7f7;
+    --ink: #4a4a4a;
+    --muted: #666;
+    --accent: #1e90ff;
+    --font-sans: "Open Sans", "Helvetica Neue", Arial, sans-serif;
     color-scheme: light;
   }
   html {
-    background: #fff;
-    font-size: 9.5pt;
+    background: #f7f7f7;
+    font-size: 9pt;
   }
   body {
-    background: #fff;
+    background: #f7f7f7;
+    color: var(--ink);
+    font-family: var(--font-sans);
   }
   .skip-link,
   .site-nav,
@@ -1521,110 +1552,144 @@ html.arrive-live .backdrop {
     color: inherit;
     text-decoration: none;
   }
+  .kw {
+    color: var(--accent);
+  }
 
+  /* header: the big light title, then personal information like any other section, the QR code beside it */
   .print-head {
-    position: relative;
-    isolation: isolate; /* keeps the contour layer above the page's white */
+    display: block;
+    margin-bottom: 2mm;
+  }
+  .print-label {
+    margin: 0 0 3mm;
+    color: #e6e6e6;
+    font: 600 30pt/1 var(--font-sans);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .print-personal-body {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
-    gap: 5mm;
-    margin-bottom: 7mm;
-    padding-bottom: 5mm;
-    border-bottom: 0.5pt solid #d6cfc5;
+    justify-content: space-between;
+    gap: 6mm;
   }
-  /* faint contours of the Black Forest edge across the header (tools/cv/make_cv_contours.py), fading in from the
-     left: the name stays clean, the hills sit behind the QR code (owner, 2026-10-14) */
-  .print-head::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: url("../topo/cv-contours.svg") center / cover no-repeat;
-    opacity: 0.24;
-    mask-image: linear-gradient(90deg, transparent 25%, #000 65%);
+  .print-personal-body .cv-list {
+    flex: 1;
   }
-  /* QR code to the website at the right of the header (tools/cv/make_qr.py): scanned from the printed CV */
   .print-qr {
-    margin: 0 0 0 auto;
+    margin: 1mm 0 0;
     text-align: center;
   }
   .print-qr svg {
     display: block;
-    width: 17mm;
-    height: 17mm;
+    width: 18mm;
+    height: 18mm;
     padding: 1mm;
     box-sizing: content-box;
-    background: #fff; /* a clean quiet zone over the header contours, so scanners read it */
-    fill: var(--ink);
+    background: #fff;
+    fill: #333;
   }
   .print-qr figcaption {
-    margin-top: 1.2mm;
-    padding: 0.4mm 1mm;
-    background: #fff;
-    color: var(--ink);
+    margin-top: 1mm;
+    color: var(--accent);
     font: 400 7pt/1.2 var(--font-sans);
   }
-  .print-label {
-    color: var(--muted);
-    font: 400 7.5pt/1 var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .print-name {
-    margin-top: 3mm;
-    font-family: "IBM Plex Serif", Georgia, serif;
-    font-size: 21pt;
-    font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: -0.015em;
-  }
-  .print-title {
-    margin-top: 1mm;
-    font-size: 11pt;
-  }
-  .print-contact {
-    margin-top: 3mm;
-    color: var(--muted);
-    font: 400 8pt/1.5 var(--font-mono);
-  }
 
+  /* sections: a grey heading with a hairline running to the right edge */
+  .cv-group {
+    margin: 0;
+  }
   .cv-group + .cv-group {
-    margin-top: 3mm;
+    margin-top: 2.5mm;
   }
   .cv-group h3 {
-    font-family: "IBM Plex Serif", Georgia, serif;
-    font-size: 11pt;
+    display: flex;
+    align-items: baseline;
+    gap: 2mm;
+    margin: 0 0 1.5mm;
+    color: #666;
+    font: 400 14pt/1.2 var(--font-sans);
     letter-spacing: 0;
     break-after: avoid;
+  }
+  .cv-group h3::after {
+    content: "";
+    flex: 1;
+    border-bottom: 0.6pt solid #b4b4b4;
   }
   /* page 2 starts cleanly with Education (owner: no section split across the pages) */
   .cv-edu {
     break-before: page;
   }
+
+  /* entries: dates centred in an indented left column, the title above the organisation */
   .cv-row {
-    grid-template-columns: 34mm minmax(0, 1fr);
-    padding: 1mm 0;
+    grid-template-columns: 38mm minmax(0, 1fr);
+    align-items: center;
+    padding: 1.2mm 0;
     break-inside: avoid;
   }
-  dl.cv-list .cv-row {
-    padding: 0.35mm 0;
-  }
-  /* dates and labels in the text face (mono read as technical on paper), figures aligned */
   .cv-date,
   .cv-row dt {
-    font-family: var(--font-sans);
-    font-size: 8.5pt;
-    font-variant-numeric: tabular-nums;
+    padding-left: 3.5mm;
+    color: #666;
+    font: 400 8pt/1.4 var(--font-sans);
+    font-variant-numeric: normal;
     letter-spacing: 0;
+    text-transform: none;
   }
   .cv-entry h4 {
-    font-size: 10pt;
+    color: #555;
+    font: 400 10.5pt/1.35 var(--font-sans);
+  }
+  .cv-org {
+    display: block;
+    color: #666;
+    font-size: 8.5pt;
+  }
+  .cv-org::before {
+    content: none;
+  }
+  .cv-about {
+    margin-top: 0.5mm;
+    color: #777;
+    font-size: 8pt;
   }
   .cv-entry ul {
     max-width: none;
-    font-size: 9pt;
-    line-height: 1.55;
+    margin-top: 1mm;
+    padding-left: 4mm;
+    color: #555;
+    font-size: 8.5pt;
+    line-height: 1.45;
+    list-style: "•  ";
+  }
+  .cv-entry li::marker {
+    color: #666;
+  }
+  /* key-value lists (personal information, skills, languages): label, a bullet, the value */
+  dl.cv-list .cv-row {
+    align-items: baseline;
+    padding: 0.25mm 0;
+  }
+  dl.cv-list dd {
+    position: relative;
+    padding-left: 4mm;
+    color: #555;
+    font-size: 8.5pt;
+  }
+  dl.cv-list dd::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #666;
+  }
+  dl.cv-list .cv-row dt:empty + dd {
+    padding-left: 0;
+  }
+  dl.cv-list .cv-row dt:empty + dd::before {
+    content: none;
   }
 }
 

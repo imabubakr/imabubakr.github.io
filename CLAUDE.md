@@ -309,7 +309,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 - IBM Plex Sans (text, headings) and IBM Plex Mono (numbers, dates, coordinates, labels, metadata).
   Self-hosted latin-subset woff2 in `assets/fonts/`. **Only weights 400 and 500.** No other fonts. One exception:
   Reenie Beanie (SIL OFL) for all pencil in the hero (sentence, place names, notes), as SVG outlines built by
-  pencil_labels.py, so no font file is loaded for it. Second exception: IBM Plex Serif 500 for the hero sheet's
+  pencil_labels.py, so no font file is loaded for it. Third exception: Open Sans 400/600 for the printed / PDF CV only (owner's earlier CV style).
+  Second exception: IBM Plex Serif 500 for the hero sheet's
   margin labels only (sheet number, longitudes, CRS), the old engraved style, in sepia map ink (owner, 2026-10-10).
 - Hero `h1`: the owner's sentence "Hello, I am Bakar, a geospatial professional with a passion for all things
   spatial." (DE: "Hallo, ich bin Bakar, Geoexperte mit Leidenschaft für alles Räumliche."; owner dropped "data",
@@ -455,17 +456,17 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 - CV ends (print/PDF only, `.cv-sign`) with "Freiburg im Breisgau, <date>" (filled by site.js in the page's language,
   so the PDF carries its build date) and a blank signature line. No signature image online (owner's choice
   2026-10-10, after hearing that a published signature can be copied); he signs the copy he sends.
-- Print / PDF: a two-page A4 CV, always light (owner, 2026-10-14): no photo; QR code at the right of the header on a
-  white quiet zone; faint **contours of the Black Forest edge across the whole header** (`tools/cv/make_cv_contours.py` ->
-  `assets/topo/cv-contours.svg`, 24 %), fading in from the left so the name stays clean and the hills sit behind
-  the QR code (ridge lines were tried and looked weird, owner); make_cv_pdf.mjs switches to
-  print media and waits so this print-only background is in the PDF; the QR caption reads "Visit my website" /
-  "Zu meiner Website" (warmer than "Website"); name and section headings in IBM Plex Serif 500; text 9 pt
-  with 1.55 line height in a warm near-black (#24211d) and warm grey; dates in Plex Sans with tabular figures (mono
-  read as technical on paper); page 2 always starts with Education (`.cv-edu`, owner: no section split across
-  pages); place/date and the signature line share one row. Margins 13 mm top/bottom, tight spacing: the German PDF
-  fills page 2 almost exactly, so check it stays at two pages after any CV change (trim German lines first).
-  The CV follows German Lebenslauf conventions in both languages (signature line included in the English one too).
+- Print / PDF: a two-page A4 CV in the **style of the owner's earlier CV** (2026-10-14: "copy the style from head to
+  toe", text stays ours): Open Sans 400/600 (self-hosted, `assets/fonts/open-sans-*`, declared in site.css but used
+  only by the print styles, so the website never loads it), a very light grey page (#f7f7f7), a large light
+  "CURRICULUM VITAE" / "LEBENSLAUF", then "Personal information" / "Persönliche Daten" (name, position, location,
+  email, website, LinkedIn, GitHub) with the QR code beside it; grey section headings with a hairline running to
+  the right; dates centred in an indented left column; job title above the organisation; round bullets; one key
+  phrase per point in blue (`<span class="kw">`, plain on screen); key-value lists with a bullet column; signature
+  line, then place and date below it; "© 2026 Muhammad Abu Bakar" and page numbers in the footer. No photo. Page 2
+  always starts with Education (`.cv-edu`). Check that both PDFs stay at two pages after any CV change. The CV
+  follows German Lebenslauf conventions in both languages. Tried and replaced the same day: Plex Serif headings,
+  warm ink, faint contours / ridge lines behind the header.
 - 404: "Off the map." on Null Island (0.0000°N 0.0000°E).
 - Contact = the end of the flight. Owner found a big centred orange email "too much in one face" and covering the
   Feldberg, so: desktop (≥ 900 px) a small, quiet, left-aligned block (title, invitation line, three key-value rows
