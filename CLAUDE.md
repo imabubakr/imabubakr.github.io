@@ -249,6 +249,7 @@ behind URL switches; the owner took Claude's picks (2026-10-14), now default, sw
 - Removed again the same day (a colleague found the hero "dirty and weird"; owner's pick "calm pencil, no age
   stains" from four side-by-side versions): the contour exercises (slope A-B "Δh 190 m / 600 m ≈ 18°", spot height
   "663") and the rule of V's (one contour's V traced, "the V points upstream"). Code is in git history (2026-10-14).
+  The rule of V's came back later the same day at the owner's request (`VEE`, same place and note).
   Later the same day the hiking and kite jokes went too (owner); the sheet keeps the sentence, the four place
   names and the geology (ruled fault, presumed faults, D/U, two rock units, the note).
 - Decided against (2026-10-14, owner left it to Claude): a cross-section across the fault. It would have been 2D

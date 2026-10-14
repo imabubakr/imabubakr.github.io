@@ -82,12 +82,46 @@ UNIT_OUTLINES = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-
 # reading the contour spacing (owner, 2026-10-14): text per language, start of the baseline, tilt
 READ = [({"en": "lines close: steep", "de": "Linien eng: steil"}, 7350, 4420, -3),
         ({"en": "lines far apart: flat", "de": "Linien weit: flach"}, 1100, 3550, 2)]
+# Rule of V's (2026-10-14; removed and brought back the same day at the owner's request): one contour's V traced over in pencil, in the valley between the fault note and B, where
+# the contours make the sharpest V's on the sheet (38-59 degrees; the DEM rises beyond each apex, so they are
+# valleys, not spurs), and a note just below the tip: apex (on the drawn contour), arm length along the contour,
+# note (start of the first baseline, line step, tilt).
+CONTOURS = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-contours.svg"
+VEE = ((7219, 2472), 300, {"en": ["rule of V's:", "the V points upstream"],
+                           "de": ["V-Regel:", "das V zeigt talaufwärts"]}, 6650, 2700, 150, -2)
 
 
 font = TTFont(FONT)
 gs, cmap, hmtx = font.getGlyphSet(), font.getBestCmap(), font["hmtx"]
 UPM = font["head"].unitsPerEm
 to_utm = Transformer.from_crs(4326, 32632, always_xy=True)
+
+
+def contour_lines():
+    """The hero's drawn contours (hero-contours.svg) as polylines in map metres."""
+    lines = []
+    for d in re.findall(r'<path d="([^"]+)"', CONTOURS.read_text()):
+        x = y = 0
+        for cmd, args in re.findall(r"([mMlLhHvV])([^mMlLhHvV]*)", d):
+            v = [float(t) for t in re.findall(r"-?\d*\.?\d+", args)]
+            rel = cmd.islower()
+            if cmd in "mM":
+                x, y = (x + v[0], y + v[1]) if rel else (v[0], v[1])
+                lines.append([(x, y)])
+                v, cmd = v[2:], "l" if rel else "L"
+            if cmd in "lL":
+                for i in range(0, len(v), 2):
+                    x, y = (x + v[i], y + v[i + 1]) if rel else (v[i], v[i + 1])
+                    lines[-1].append((x, y))
+            elif cmd in "hH":
+                for t in v:
+                    x = x + t if rel else t
+                    lines[-1].append((x, y))
+            elif cmd in "vV":
+                for t in v:
+                    y = y + t if rel else t
+                    lines[-1].append((x, y))
+    return lines
 
 
 def glyph_path(name):
@@ -281,6 +315,28 @@ def build(lang, say):
                       f'<path class="pc-line pc-fault pc-presumed" d="{path(dashed)}"/>'
                       f'<path class="pc-line pc-tick" d="{" ".join(ticks)}"/>'
                       f'<path class="pc-line pc-contact" d="{path(contacts)}"/>{note}{ud}{units}</g>')
+
+    # rule of V's: one contour's V traced over in pencil, the contour followed both ways from the apex for the arm
+    size = PLACES[0][3]
+    (vx, vy), arm, vnote, vnx, vny, vstep, vrot = VEE
+    line = min(contour_lines(), key=lambda l: min(math.dist(q, (vx, vy)) for q in l))
+    k = min(range(len(line)), key=lambda i: math.dist(line[i], (vx, vy)))
+    vee = [line[k]]
+    for dirn in (-1, 1):
+        i, along = k, 0
+        while 0 <= i + dirn < len(line) and along < arm:
+            along += math.dist(line[i], line[i + dirn])
+            i += dirn
+            vee.insert(0, line[i]) if dirn < 0 else vee.append(line[i])
+    vpts = []                                              # a freehand pencil line over the contour
+    for (x0, y0), (x1, y1) in zip(vee, vee[1:]):
+        n = max(1, int(math.dist((x0, y0), (x1, y1)) / 40))
+        vpts += [(x0 + (x1 - x0) * t / n + rnd.uniform(-7, 7), y0 + (y1 - y0) * t / n + rnd.uniform(-7, 7)) for t in range(n)]
+    vpts.append(vee[-1])
+    va = math.radians(vrot)
+    vn = "".join(words(t, vnx - i * vstep * math.sin(va), vny + i * vstep * math.cos(va), vrot, size / UPM)[0]
+                 for i, t in enumerate(vnote[lang]))
+    labels.append(f'<g class="pc pc-wide"><path class="pc-line pc-fault" d="M{" L".join(f"{x:.0f} {y:.0f}" for x, y in vpts)}"/>{vn}</g>')
 
     defs = "".join(f'<path id="{gid}" d="{glyph_path(g)}"/>' for g, gid in used.items())
     return (
