@@ -1697,12 +1697,6 @@ html.arrive-live .backdrop {
     left: 0;
     color: #666;
   }
-  dl.cv-list .cv-row dt:empty + dd {
-    padding-left: 0;
-  }
-  dl.cv-list .cv-row dt:empty + dd::before {
-    content: none;
-  }
 }
 
 /* ------------------------------------------------------- hero map tools -- */
