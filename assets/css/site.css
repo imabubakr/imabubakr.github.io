@@ -2160,15 +2160,14 @@ html.hero-risen .hero-strip .ticks {
    transition on layers of their own: a per-frame fade value made the browser re-paint
    these large masked layers on every frame of the scroll).
    Remove this block, the --sheet-* tokens and assets/img/paper-* to drop it. */
+/* the folds belong to the map, not the screen: one texture for the map frame plus 600 m above it (the margin
+   strip), 10 000 x 5 600 m, laid over the map like the pencil layer, so it crops with the map */
 .hero {
-  --paper-relief: url("../img/paper-wide-relief.webp?v=20261016a");
-  --paper-wear: url("../img/paper-wide-wear.webp?v=20261016a");
-}
-@media (max-width: 719px) {
-  .hero {
-    --paper-relief: url("../img/paper-tall-relief.webp?v=20261016a");
-    --paper-wear: url("../img/paper-tall-wear.webp?v=20261016a");
-  }
+  --paper-relief: url("../img/paper-map-relief.webp?v=20261016b");
+  --paper-wear: url("../img/paper-map-wear.webp?v=20261016b");
+  --paper-w: var(--mw);
+  --paper-h: calc(var(--mw) * 0.56);
+  --paper-top: calc(var(--mw) * -0.06);   /* the texture starts 600 m above the map's top edge */
 }
 .hero::after,
 .hero-map::after,
@@ -2192,16 +2191,16 @@ html.hero-rising .pencil-box {
   z-index: 4; /* over the strip and map controls too: all on the same sheet */
 }
 .hero::after {
-  background: var(--paper-relief) center / 100% 100% no-repeat;
+  background: var(--paper-relief) 50% calc(var(--strip-h) + var(--paper-top)) / var(--paper-w) var(--paper-h) no-repeat;
   mix-blend-mode: soft-light;
   opacity: var(--sheet-relief);
 }
-/* the map sits below the strip: shift the wear mask so it lines up with the sheet */
+/* the wear mask lies on the map frame (the box starts below the strip) */
 .hero-map::after {
   background: var(--paper);
   mask-image: var(--paper-wear);
-  mask-size: 100cqw 100cqh;
-  mask-position: 0 calc(-1 * var(--strip-h));
+  mask-size: var(--paper-w) var(--paper-h);
+  mask-position: 50% var(--paper-top);
   mask-repeat: no-repeat;
 }
 /* place names pencilled on the sheet (tools/hero/pencil_labels.py), same frame as

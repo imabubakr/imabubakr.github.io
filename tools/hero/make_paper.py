@@ -7,16 +7,18 @@ Models the opened sheet as a height field: accordion folds that are not quite
 straight or even (a few px of wobble, a slight tilt, strength varying along the
 fold), panels that no longer lie flat, a handful of short handling wrinkles and
 a faint crumple. It is lit like a hillshade (sun top left) and written as two
-images per format to assets/img/:
+images to assets/img/:
 
-  paper-<fmt>-relief.webp  grey, 128 = flat; laid over the hero with soft-light
-  paper-<fmt>-wear.webp    alpha mask: ink rubbed off along the folds (mountain
-                           folds more, worn spots where folds cross)
+  paper-map-relief.webp  grey, 128 = flat; laid over the hero with soft-light
+  paper-map-wear.webp    alpha mask: ink rubbed off along the folds (mountain
+                         folds more, worn spots where folds cross)
 
-The ageing (yellowing, browned edges, foxing, tide mark, grime) is still computed, so the random
-draws and with them the folds stay the same, but no longer written: the owner found the stained
-sheet "dirty" and dropped it (2026-10-14). Colours stay in CSS (--paper); the images carry only shape.
-<fmt> is "wide" (desktop, 3 x 2 panels) or "tall" (phones, 2 x 3 panels).
+The folds belong to the map, not the screen (owner, 2026-10-14: folds tied to the screen looked unnatural): the
+texture covers the hero map frame (10 x 5 km) plus TOP_M above it (the sheet's margin strip), and CSS lays it
+over the map exactly like the pencil layer, so it crops with the map. The hero shows only a window of a larger
+sheet folded to pocket size: a panel ~12 x 24 cm at 1:25,000 is ~3 x 6 km, so three uneven vertical creases and
+one off-centre horizontal one. The ageing (yellowing, foxing, ...) is still computed but not written: the owner
+found the stained sheet "dirty" (2026-10-14). Colours stay in CSS (--paper); the images carry only shape.
 """
 from pathlib import Path
 
@@ -24,10 +26,14 @@ import numpy as np
 from PIL import Image
 
 OUT = Path(__file__).resolve().parents[2] / "assets" / "img"
+MAP_W, MAP_H, TOP_M = 10000, 5000, 600     # map frame (m) and the strip above it
+PX = 5                                      # metres per texture pixel
+V_CREASES = [(1150, 1), (4230, -1), (7080, 1)]   # x (m) of the accordion folds, mountain / valley
+H_CREASES = [(3550, -1)]                         # y (m) of the cross fold
 FORMATS = {
     # name: (width, height, vertical folds [(x fraction, +1 mountain / -1 valley)], horizontal folds)
-    "wide": (2000, 1000, [(1 / 3, 1), (2 / 3, -1)], [(0.5, -1)]),   # 3 x 2 (2026-10-14; was 4 x 2)
-    "tall": (800, 1300, [(0.5, 1)], [(1 / 3, -1), (2 / 3, 1)]),
+    "map": (MAP_W // PX, (MAP_H + TOP_M) // PX,
+            [(x / MAP_W, sg) for x, sg in V_CREASES], [((y + TOP_M) / (MAP_H + TOP_M), sg) for y, sg in H_CREASES]),
 }
 rng = np.random.default_rng(20261010)
 
@@ -100,7 +106,7 @@ def make(name, W, H, vfolds, hfolds):
         for dh in lines[len(vfolds):]:
             r = np.hypot(dv, dh)
             h += 0.5 * np.exp(-r / 9) * (rng.random() - 0.5)
-            wear[:] = np.maximum(wear, 0.85 * np.exp(-(r / 13) ** 2))
+            wear[:] = np.maximum(wear, 1.0 * np.exp(-(r / 16) ** 2))   # worn through first
             age[:] += 0.18 * np.exp(-(r / 30) ** 2)
 
     # short handling wrinkles

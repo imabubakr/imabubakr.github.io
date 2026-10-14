@@ -225,8 +225,13 @@ finale.
 A friend of the owner found the hero's folds "weird" and suggested using the owner's geology background (BSc
 Geology, Bahria; MSc Geology, Freiburg; contour-map exercises in class), "serious but fun". Previews were built
 behind URL switches; the owner took Claude's picks (2026-10-14), now default, switches removed:
-- Folds 3 x 2 on the wide sheet (was 4 x 2; 3 x 1 was the other option). Phones keep 2 x 3. make_paper.py seeds
-  each format on its own, so changing one leaves the other as it is.
+- Folds belong to the **map, not the screen** (owner, 2026-10-14: screen-tied 3 x 2 folds looked unnatural; the
+  hero is only a window of a bigger sheet). One texture `paper-map-{relief,wear}.webp` covers the map frame plus
+  600 m above it (the margin strip) and is laid over the map like the pencil layer (`--paper-w/-h/-top`), so it
+  crops with the map on every screen. Pocket-fold panels (~12 x 24 cm at 1:25,000 = ~3 x 6 km): three uneven
+  vertical creases at x 1150 / 4230 / 7080 m (mountain, valley, mountain) and one cross fold at y 3550 m
+  (`V_CREASES`, `H_CREASES` in make_paper.py), a stronger worn spot where they cross. The wide/tall textures
+  are gone.
 - The Upper Rhine Graben main border fault pencilled on, **ruled** (owner, 2026-10-14: "sketched with a ruler"):
   straight strokes along the mapped trace (Douglas-Peucker, `RULER_TOL` 90 m: 300 m read as "way too straight",
   owner; plus a 3 m `WOBBLE`, the pencil does not follow the ruler perfectly), ticks on the downthrown west side, **D** / **U** beside it, gaps at pencil text; presumed faults
@@ -352,7 +357,7 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   removed "Freiburg im Breisgau", 2026-10-12; build_hero.py still computes it, no `build:hero-place` marker).
 - Hero paper sheet (owner, 2026-10-10: "make it more old school", "real creases"): on landing the hero is an old
   survey sheet that was folded and opened again. `tools/hero/make_paper.py` models the sheet as a height field
-  (accordion folds 3 × 2 on desktop, 2 × 3 on phones, slightly wavy and uneven, panels bending into the folds, a few
+  (accordion folds tied to the map, see "Hero geology" above; slightly wavy and uneven, panels bending into the folds, a few
   handling wrinkles), lights it like a hillshade (sun top left) and writes a relief image (laid on with soft-light,
   `--sheet-relief`) and a wear mask (contour ink rubbed off along the folds, `--paper` over the map only). All of it fades
   out as soon as the map starts to rise (`html.hero-rising`, a 0.45 s CSS transition on layers of their own,
