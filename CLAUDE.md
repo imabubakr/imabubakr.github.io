@@ -448,8 +448,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 - Semantic landmarks, one `h1`, skip link, visible `:focus-visible` outline, touch targets ≥ 24 px,
   decorative SVG `aria-hidden`, real `alt` text, WCAG AA contrast in both themes.
 - No third-party requests (fonts, scripts, analytics). Images as WebP with `width`/`height`, `loading="lazy"` below the fold.
-- Last Lighthouse run (2026-10): accessibility, best practices, SEO 100; performance 99–100 (EN and DE, mobile and desktop).
-  Local check 2026-10-10 (python http.server, no compression, so lower than on Pages): before the paper sheet mobile
-  81–82 / desktop 99, after it mobile 79 / desktop 99 (LCP is now the hero's paper relief, +0.5 s simulated).
-  Accessibility 96–97 locally because of the dimmed orbit chapters (`.ds-*` contrast), which predates the paper.
-  Recheck on the live site after deploying.
+- Last Lighthouse run (live site, 2026-10-14, after the redesign went live): accessibility, best practices, SEO 100;
+  performance desktop 100, mobile 98-100 (EN and DE). The LCP is the hero's paper relief; the paper textures are
+  preloaded per screen size in the page head (the two masks need `crossorigin`: masks are fetched in CORS mode, else
+  the preload goes unused). The rest of the mobile LCP (~2.3 s simulated) is the large page (inline hero SVGs) on
+  throttled 4G. Local runs (python http.server, no compression) score lower; check on the live site after deploying.
