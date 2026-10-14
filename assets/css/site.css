@@ -897,24 +897,14 @@ html.ds-on #orbit .ds-ch {
   justify-content: center;
   min-height: 100vh;
   margin: 0;
-  opacity: 0.35;
 }
 html.ds-on #orbit .ds-ch:first-child {
   min-height: 80vh;
-}
-html.ds-on #orbit .ds-ch.is-active {
-  opacity: 1;
-}
-@media (prefers-reduced-motion: no-preference) {
-  html.ds-on #orbit .ds-ch {
-    transition: opacity 0.4s ease;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   html.ds-on #orbit .ds-ch {
     min-height: 0;
     margin-top: 36px;
-    opacity: 1;
   }
 }
 /* inside [02] the background is the picture: stronger, kept off the text */

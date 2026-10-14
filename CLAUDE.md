@@ -161,7 +161,8 @@ aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors. Three chapt
   draw takes > 7 ms; a full-quality frame when the camera rests). Benchmark with Playwright + CDP CPU throttling and
   `--enable-gpu-rasterization` (without it headless Chromium rasterises in software and every page looks slow).
 - Altimeter (`.ds-alti`, ≥ 900 px): log scale 1000 km → 50 m near the right edge, platforms ticked, accent diamond
-  + value follows the camera; the active chapter (`.is-active`) and its platform tick are emphasised.
+  + value follows the camera; the active platform tick is emphasised. The chapters are not dimmed (they were at
+  35 %, which failed WCAG contrast; each fills its own screen anyway, 2026-10-14).
 - `html.ds-on` (set by backdrop.js unless reduced motion) gives each chapter a screen; `html.orbit-live` while the
   section is on screen (stronger background, mask keeps it off the text column). Phones: the scene centre moves
   below the text. Reduced motion / no JS: the chapters as a plain list.
