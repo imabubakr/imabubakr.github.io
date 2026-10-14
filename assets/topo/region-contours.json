@@ -1,0 +1,91 @@
+{
+  "lat": 48.0,
+  "lon": 7.81,
+  "elevation_m": 253,
+  "crs": "WGS 84 / UTM zone 32N",
+  "epsg": 32632,
+  "bbox": [
+    391230,
+    5298990,
+    431230,
+    5334990
+  ],
+  "width_m": 40000,
+  "height_m": 36000,
+  "contour_interval_m": 20,
+  "index_every": 5,
+  "dem": "Copernicus DEM GLO-30",
+  "grid": {
+    "file": "region-contours-dem.bin",
+    "cols": 400,
+    "rows": 360,
+    "cell_m": [
+      100.0,
+      100.0
+    ]
+  },
+  "lonlat": {
+    "terms": "1 x y x\u00b2 xy y\u00b2",
+    "lon": [
+      7.537357876463237,
+      1.3442669623008861e-05,
+      2.552991467991048e-07,
+      5.059224006891245e-14,
+      -2.328900819500465e-12,
+      -5.0590067886751175e-14
+    ],
+    "lat": [
+      48.15884752288731,
+      1.7091412621828825e-07,
+      -8.99406995919357e-06,
+      -7.817095270652201e-13,
+      -4.355022608145119e-14,
+      -7.420902998086468e-15
+    ],
+    "max_error_m": 0.149
+  },
+  "places": [
+    {
+      "en": "Kaiserstuhl",
+      "de": "Kaiserstuhl",
+      "kind": "summit",
+      "x": 9750,
+      "y": 8850,
+      "elev": 554
+    },
+    {
+      "en": "Schauinsland",
+      "de": "Schauinsland",
+      "kind": "summit",
+      "x": 26450,
+      "y": 27850,
+      "elev": 1276
+    },
+    {
+      "en": "Feldberg",
+      "de": "Feldberg",
+      "kind": "summit",
+      "x": 34350,
+      "y": 32250,
+      "elev": 1491
+    },
+    {
+      "en": "Freiburg",
+      "de": "Freiburg",
+      "kind": "town",
+      "x": 23143,
+      "y": 18541,
+      "elev": null
+    }
+  ],
+  "hero_frame": [
+    17430,
+    15790,
+    27430,
+    20790
+  ],
+  "hero_marker": [
+    22431,
+    18287
+  ]
+}

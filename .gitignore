@@ -1,0 +1,11 @@
+# Contour tooling (dev only)
+tools/contours/node_modules/
+tools/contours/work/
+.DS_Store
+tools/og/node_modules/
+tools/layers/work/
+tools/contours/work-region/
+tools/cv/node_modules/
+tools/media/work/
+tools/media/node_modules/
+__pycache__/

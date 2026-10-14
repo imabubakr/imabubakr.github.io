@@ -1,0 +1,2328 @@
+/* Technical survey sheet. Design rules live in CLAUDE.md. */
+
+/* ---------------------------------------------------------------- fonts -- */
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2");
+}
+/* IBM Plex Serif: only for the hero sheet's margin labels, the old engraved style (owner, 2026-10-10) */
+@font-face {
+  font-family: "IBM Plex Serif";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/ibm-plex-serif-latin-500-normal.woff2") format("woff2");
+}
+
+/* --------------------------------------------------------------- tokens -- */
+:root {
+  --paper: #e9eae6;
+  --ink: #141719;
+  --muted: #4e5358;
+  --contour: #8a6a4a;
+  --grid: #c9cbc5;
+  --accent: #b8380c; /* survey orange, darkened from #D2410F for AA text contrast */
+  --accent-mark: #d2410f; /* non-text: location marker, focus ring */
+  --tl-edu: #587082; /* timeline: education markers (slate blue, as in dark mode) */
+  /* hero paper sheet (experiment): ageing colour, relief strength */
+  --sheet-age: rgb(150 106 40 / 0.4);
+  --sheet-relief: 0.9;
+  --pencil: #54585b; /* graphite place names on the sheet */
+  --pencil-blue: #2d5a94; /* the hero sentence, in blue pencil */
+  --water: #5d86ab; /* rivers and lakes in the orbit section's aerial survey */
+
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --gap: 10px; /* skip-link offset */
+  --pad: 16px; /* page edge to content */
+  --nav-h: 84px; /* phones: two rows */
+  --strip-h: 32px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1215;
+    --ink: #e4e6e7;
+    --muted: #8d979e;
+    --contour: #6c7f8c;
+    --grid: #232c33;
+    --accent: #ff6a2b;
+    --accent-mark: #ff6a2b;
+    --tl-edu: #6c7f8c;
+    --sheet-age: rgb(170 135 80 / 0.14);
+    --sheet-relief: 0.6;
+    --pencil: #a2aaaf;
+    --pencil-blue: #86aee0;
+    --water: #6f97bb;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e1215;
+  --ink: #e4e6e7;
+  --muted: #8d979e;
+  --contour: #6c7f8c;
+  --grid: #232c33;
+  --accent: #ff6a2b;
+  --accent-mark: #ff6a2b;
+  --tl-edu: #6c7f8c;
+  --sheet-age: rgb(170 135 80 / 0.14);
+  --sheet-relief: 0.6;
+  --pencil: #a2aaaf;
+  --pencil-blue: #86aee0;
+  --water: #6f97bb;
+  color-scheme: dark;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gap: 20px;
+    --pad: 32px;
+  }
+}
+@media (min-width: 1200px) {
+  :root {
+    --pad: 40px;
+  }
+}
+
+/* ----------------------------------------------------------------- base -- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--nav-h) + 16px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 0.9375rem/1.6 var(--font-sans);
+  font-kerning: normal;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+/* No hyphens: auto. Browser dictionaries split German compounds badly
+   ("Bauma-schinen"); long headings use &shy; instead. */
+p,
+li,
+dd,
+td,
+th {
+  overflow-wrap: break-word;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-mark);
+  outline-offset: 2px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--gap);
+  left: var(--gap);
+  z-index: 20;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 400 0.8125rem/1 var(--font-mono);
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+/* ---------------------------------------------------------------- sheet -- */
+.sheet {
+  /* --map-aspect and --map-width-m are set inline by tools/contours/build_hero.py.
+     The hero fills the first screen below the nav (owner, 2026-10-10); where that
+     is taller than map-aspect allows, the map (--mw) is cropped at the sides and
+     the strip's ticks follow it. */
+  --hero-h: max(520px, calc(100svh - var(--nav-h)));
+  container-type: inline-size;
+}
+
+/* ------------------------------------------------------------------ nav -- */
+/* A light bar: name left, sections in the middle, language and theme right.
+   Translucent paper with a blur, so the page shows faintly through it. The
+   current section is darker and gets a short accent bar on the bar's edge.
+   Phones: two rows (name + tools, then the sections, scrollable sideways). */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "brand tools" "nav nav";
+  align-items: center;
+  column-gap: 16px;
+  min-height: var(--nav-h);
+  padding: 0 var(--pad);
+  background: var(--paper);
+  border-bottom: 1px solid var(--grid);
+  font: 400 0.8125rem/1.4 var(--font-sans);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .site-nav {
+    background: color-mix(in srgb, var(--paper) 80%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    backdrop-filter: blur(14px) saturate(1.3);
+  }
+}
+
+.brand {
+  grid-area: brand;
+  justify-self: start;
+  padding: 12px 0;
+  color: var(--ink);
+  font: 500 0.9375rem/1.2 var(--font-sans);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav nav {
+  grid-area: nav;
+  margin: 0 calc(-1 * var(--pad));
+  padding: 0 var(--pad);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-list {
+  display: flex;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+.nav-list a {
+  position: relative;
+  display: inline-block;
+  padding: 8px 0 11px; /* touch target >= 24px */
+  color: var(--muted);
+  text-decoration: none;
+}
+.nav-list a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent-mark);
+  transform: scaleX(0);
+}
+.nav-list a:hover,
+.nav-list a[aria-current] {
+  color: var(--ink);
+}
+.nav-list a[aria-current]::after {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nav-list a {
+    transition: color 0.15s ease;
+  }
+  .nav-list a::after {
+    transition: transform 0.2s ease;
+  }
+}
+
+/* Language and theme look like the section links: same type, muted, the
+   active option in ink with the accent bar on the bar's bottom edge. A short
+   hairline separates the two groups. Phones: theme as icons only. */
+.nav-tools {
+  grid-area: tools;
+  justify-self: end;
+  align-self: stretch;
+  display: flex;
+  align-items: stretch;
+}
+.lang,
+.theme-switch {
+  display: flex;
+  gap: 2px;
+}
+.theme-switch {
+  position: relative;
+  margin-left: 13px;
+  padding-left: 12px;
+}
+.theme-switch::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: 16px;
+  margin-top: -8px;
+  background: var(--grid);
+}
+.lang a,
+.theme-switch button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 32px;
+  min-height: 32px; /* WCAG 2.5.8: touch targets >= 24px */
+  padding: 0 5px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.lang a::after,
+.theme-switch button::after {
+  content: "";
+  position: absolute;
+  right: 5px;
+  bottom: 6px;
+  left: 5px;
+  height: 2px;
+  background: var(--accent-mark);
+  transform: scaleX(0);
+}
+.lang a:hover,
+.theme-switch button:hover,
+.lang a[aria-current],
+.theme-switch button[aria-pressed="true"] {
+  color: var(--ink);
+}
+.lang a[aria-current]::after,
+.theme-switch button[aria-pressed="true"]::after {
+  transform: scaleX(1);
+}
+.theme-switch svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 599px) {
+  .theme-switch .opt-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lang a,
+  .theme-switch button {
+    transition: color 0.15s ease;
+  }
+  .lang a::after,
+  .theme-switch button::after {
+    transition: transform 0.2s ease;
+  }
+}
+
+@media (min-width: 900px) {
+  :root {
+    --nav-h: 57px;
+  }
+  .site-nav {
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas: "brand nav tools";
+    column-gap: 32px;
+    font-size: 0.875rem;
+  }
+  .site-nav nav {
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .nav-list {
+    gap: 30px;
+  }
+  .nav-list a {
+    padding: 17px 0 18px;
+  }
+  .lang a::after,
+  .theme-switch button::after {
+    bottom: 0;
+  }
+}
+
+/* ----------------------------------------------------------------- hero -- */
+.hero {
+  --mw: max(100cqw, calc(var(--map-aspect) * (100cqh - var(--strip-h))));
+  container-type: size;
+  position: relative;
+  height: var(--hero-h);
+  overflow: hidden;
+}
+
+.hero-strip {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--strip-h);
+  padding: 0 var(--pad);
+  border-bottom: 1px solid var(--grid);
+  background: var(--paper);
+  color: var(--muted);
+  font: 400 0.6875rem/1 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.hero-strip > span {
+  position: relative;
+  z-index: 1;
+  padding: 0 6px;
+  background: var(--paper);
+}
+.hero-strip > span:first-child {
+  margin-left: -6px;
+}
+.hero-strip > span:last-child {
+  margin-right: -6px;
+}
+
+.ticks {
+  position: absolute;
+  inset: 0;
+}
+.tick {
+  position: absolute;
+  bottom: 0;
+  left: calc(50cqw + (var(--fx) - 0.5) * var(--mw));
+  width: 1px;
+  height: 4px;
+  background: var(--muted);
+}
+.tick--major {
+  height: 9px;
+}
+.tick--major span {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+/* Phones: the map is cropped sideways, keep only the sheet number and CRS. */
+@media (max-width: 599px) {
+  .ticks {
+    display: none;
+  }
+}
+
+.hero-map {
+  position: absolute;
+  inset: var(--strip-h) 0 0;
+  overflow: hidden;
+}
+.map-box {
+  position: absolute;
+  top: 0;
+  left: calc(50% - var(--mw) / 2);
+  width: var(--mw);
+  aspect-ratio: var(--map-aspect);
+}
+.map-box svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.topo-c,
+.topo-i {
+  fill: none;
+  stroke: var(--contour);
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.topo-c {
+  stroke-width: 0.6px;
+  opacity: 0.5;
+}
+.topo-i {
+  stroke-width: 1.2px;
+  opacity: 0.7;
+}
+.topo-l {
+  fill: var(--contour);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  text-anchor: middle;
+  dominant-baseline: central;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-linejoin: round;
+}
+
+.grat-m {
+  fill: none;
+  stroke: var(--grid);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+/* holds the (visually hidden) <h1>; the sentence is drawn on the map with the pencil notes */
+.hero-text {
+  position: absolute;
+}
+
+.hero-loc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-bottom: 20px;
+  color: var(--accent);
+  font: 400 0.8125rem/1.4 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.hero-loc .sep {
+  display: inline-block;
+  width: 1.5ch;
+}
+
+.marker {
+  position: relative;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--accent-mark);
+  transform: rotate(45deg);
+}
+.marker::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: var(--accent-mark);
+}
+
+.hero h1 {
+  max-width: 24ch;
+  font-size: clamp(1.375rem, 1rem + 1.6cqw, 2.125rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+/* ------------------------------------------------------------- sections -- */
+.section {
+  padding: clamp(40px, 5cqw, 80px) var(--pad);
+}
+
+/* Every section opens the same way on the page's centre axis: a large sans
+   title and, where useful, one short line saying what the section holds.
+   Content sits in a centred column; longer text inside it stays left-aligned
+   for readability. */
+.section-head {
+  margin-bottom: 40px;
+  text-align: center;
+}
+.section-title {
+  font-size: clamp(1.625rem, 1.25rem + 1.4cqw, 2.375rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+.section-no { /* 404 page only */
+  display: block;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font: 400 0.75rem/1 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.section-sub {
+  max-width: 48ch;
+  margin: 14px auto 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  text-wrap: balance;
+}
+.section-body {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* -------------------------------------------------------------- plates -- */
+/* Visualizations: a contact sheet (owner's pick, 2026-10-13: the long list beside a large color preview took
+   over the page). Small thumbnails in the page's tones (grey, a touch of sepia) until hovered or focused, number
+   and title below; a click opens the viewer (dialog.lightbox), where animations play. site.js folds it to the
+   first 6 plates (.can-fold) with a "show all" button; without JS all show. */
+.pidx-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pidx-list .plate-link {
+  display: block;
+  color: var(--muted);
+  line-height: 1.4;
+  text-decoration: none;
+}
+.pidx-list img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 8px;
+  object-fit: cover;
+  background: var(--grid);
+  filter: grayscale(1) sepia(0.18) contrast(0.92);
+  opacity: 0.82;
+}
+.pidx-list .plate-link:hover,
+.pidx-list .plate-link:focus-visible {
+  color: var(--ink);
+}
+.pidx-list .plate-link:hover img,
+.pidx-list .plate-link:focus-visible img {
+  filter: none;
+  opacity: 1;
+}
+.pidx-list .plate-no {
+  margin-right: 6px;
+  font: 400 0.75rem/1 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.pidx-list .plate-title {
+  font-size: 0.8125rem;
+}
+.pidx-list .plate-tag {
+  display: none;
+}
+.pidx-more-li {
+  display: none;
+  grid-column: 1 / -1;
+  padding-top: 4px;
+  text-align: center;
+}
+.can-fold .pidx-more-li {
+  display: block;
+}
+.can-fold:not(.is-open) .pidx-list > .plate:nth-child(n + 7) {
+  display: none;
+}
+.pidx-more {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-decoration-color: var(--grid);
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.pidx-more:hover {
+  text-decoration-color: currentColor;
+}
+@media (min-width: 900px) {
+  .pidx-list {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pidx-list img {
+    transition: filter 0.3s ease, opacity 0.3s ease;
+  }
+  .pidx-list .plate-link {
+    transition: color 0.15s ease;
+  }
+}
+
+/* Certificates (CV): a small grid of still thumbnails, same viewer. */
+.certs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.certs .plate-link {
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
+}
+.certs .plate-link img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--grid);
+}
+.certs .plate-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--muted);
+  font: 400 0.6875rem/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.certs .plate-title {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.certs .plate-link:hover .plate-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (min-width: 900px) {
+  .certs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 40px 24px;
+  }
+}
+
+.lightbox {
+  width: min(1100px, 100vw - 32px);
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  padding: 16px;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+.lightbox::backdrop {
+  background: rgb(14 18 21 / 0.82);
+}
+.lb-media {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100dvh - 160px);
+  margin: 0 auto;
+  object-fit: contain;
+}
+.lb-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-top: 12px;
+}
+.lb-no {
+  color: var(--muted);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.lb-caption {
+  flex: 1 1 24rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.lb-nav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+.lb-nav button {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 2px 6px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 400 0.8125rem/1.5 var(--font-mono);
+  cursor: pointer;
+}
+.lb-nav button:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* --------------------------------------------------------------- about -- */
+/* About: a short introduction (background, earlier work, current job), then
+   the timeline. Text left-aligned in a centred column. */
+.about-body {
+  text-align: center;
+}
+#about .section-head {
+  margin-bottom: 32px;
+}
+.intro-text {
+  max-width: 62ch;
+  margin: 0 auto;
+  text-align: left;
+}
+.intro-text p {
+  line-height: 1.7;
+}
+.intro-text p + p {
+  margin-top: 0.8em;
+}
+
+/* ------------------------------------------------- from orbit to drone -- */
+/* Career story: three chapters scroll past on the left while the page
+   background (assets/js/backdrop.js) climbs to orbit and descends to drone
+   height on the right, showing what each platform covers. backdrop.js adds
+   html.ds-on (chapters get a screen each, the active one is emphasised),
+   html.orbit-live while the section is on screen, and the altimeter.
+   Without JS or under reduced motion: the chapters as a plain list. */
+.ds-chapters {
+  max-width: 60ch;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+.ds-ch + .ds-ch {
+  margin-top: 36px;
+}
+.ds-tag {
+  color: var(--muted);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ds-title {
+  margin: 4px 0 8px;
+  font-size: clamp(1.125rem, 1rem + 0.6cqw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.ds-text {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+.ds-spec {
+  margin-top: 8px;
+  color: var(--accent);
+  font: 400 0.75rem/1.5 var(--font-mono);
+}
+html.ds-on #orbit .descent {
+  max-width: 1100px;
+}
+html.ds-on #orbit .ds-chapters {
+  max-width: 400px;
+  margin: 0;
+}
+html.ds-on #orbit .ds-ch {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  opacity: 0.35;
+}
+html.ds-on #orbit .ds-ch:first-child {
+  min-height: 80vh;
+}
+html.ds-on #orbit .ds-ch.is-active {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html.ds-on #orbit .ds-ch {
+    transition: opacity 0.4s ease;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.ds-on #orbit .ds-ch {
+    min-height: 0;
+    margin-top: 36px;
+    opacity: 1;
+  }
+}
+/* inside [02] the background is the picture: stronger, kept off the text */
+html.orbit-live .backdrop {
+  --bg-op: 0.85;
+  -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 0.18) 0%, rgb(0 0 0 / 0.18) 34%, #000 52%);
+  mask-image: linear-gradient(to right, rgb(0 0 0 / 0.18) 0%, rgb(0 0 0 / 0.18) 34%, #000 52%);
+}
+@media (max-width: 719px) {
+  html.orbit-live .backdrop {
+    --bg-op: 0.4;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* Altimeter: a log scale of height above ground (1000 km at the top, 50 m at
+   the bottom) near the right edge; labels on the left, the three platforms
+   ticked; the marker (accent diamond + value on the right) follows the camera. Only while [02] is on screen, from 900px. */
+.ds-alti {
+  display: none;
+}
+@media (min-width: 900px) {
+  .ds-alti {
+    position: fixed;
+    top: calc(var(--nav-h) + 12vh);
+    right: 84px;
+    bottom: 14vh;
+    z-index: 1;
+    display: block;
+    width: 1px;
+    background: var(--grid);
+    color: var(--muted);
+    font: 400 0.625rem/1 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    pointer-events: none;
+    opacity: 0;
+  }
+  html.orbit-live .ds-alti {
+    opacity: 1;
+  }
+}
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .ds-alti {
+    transition: opacity 0.4s ease;
+  }
+}
+.ds-alti-tick,
+.ds-alti-mark {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+.ds-alti-tick::after {
+  content: "";
+  width: 5px;
+  height: 1px;
+  background: var(--muted);
+}
+.ds-alti-tick.is-platform {
+  color: var(--ink);
+}
+.ds-alti-tick.is-platform::after {
+  width: 9px;
+  background: var(--ink);
+}
+.ds-alti-tick.is-active {
+  color: var(--accent);
+}
+.ds-alti-mark {
+  right: auto;
+  left: -4px;
+  flex-direction: row-reverse;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.ds-alti-mark::after {
+  content: "";
+  width: 9px;
+  height: 9px;
+  background: var(--accent-mark);
+  transform: rotate(45deg);
+}
+.ds-alti-mark span {
+  margin-left: 4px;
+  padding: 2px 4px;
+  background: var(--paper);
+}
+@media print {
+  .ds-alti {
+    display: none !important;
+  }
+}
+
+/* ------------------------------------------------------------ timeline -- */
+/* A hairline runs down the centre. Phase labels (education / career) sit
+   on the line like contour labels. Phones: entries stacked on the line.
+   From 720px: entries alternate sides (.tl-l / .tl-r), each tied to its
+   diamond marker by a short connector. The current job's marker uses the
+   accent ("you are here"); a small tick closes the line. */
+.timeline {
+  margin: 56px auto 0;
+}
+.tl-items {
+  position: relative;
+  margin: 32px 0 0;
+  padding: 0 0 24px;
+  list-style: none;
+}
+.tl-items::before,
+.tl-items::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  background: var(--muted);
+}
+.tl-items::before {
+  top: 0.7em; /* starts at the first phase label */
+  bottom: 0;
+  width: 1px;
+  opacity: 0.45;
+}
+.tl-items::after {
+  bottom: 0;
+  width: 13px;
+  height: 1px;
+  margin-left: -6px;
+  opacity: 0.6;
+}
+.tl-phase {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 3px 10px;
+  background: var(--paper);
+  color: var(--muted);
+  font: 400 0.6875rem/1.4 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tl-phase:not(:first-child) {
+  margin-top: 20px;
+}
+.tl-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 18px;
+}
+.tl-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(50% - 4.5px);
+  width: 9px;
+  height: 9px;
+  background: var(--ink);
+  transform: rotate(45deg);
+}
+.tl-edu::before {
+  background: var(--tl-edu);
+}
+.tl-now::before {
+  background: var(--accent-mark);
+  outline: 1px solid var(--accent-mark);
+  outline-offset: 3px;
+}
+/* Phones: text sits on paper so the line passes behind it. */
+.tl-date,
+.tl-body {
+  position: relative;
+  padding: 0 8px;
+  background: var(--paper);
+}
+.tl-date {
+  color: var(--muted);
+  font: 400 0.75rem/1.6 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.tl-body {
+  display: flex;
+  flex-direction: column;
+}
+.tl-what {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.tl-where {
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 720px) {
+  .timeline {
+    max-width: 720px;
+  }
+  .tl-items {
+    margin-top: 40px;
+  }
+  .tl-item {
+    width: 50%;
+    margin-top: -14px; /* sides alternate, so entries may overlap vertically */
+    padding: 0 40px 0 0;
+    align-items: flex-end;
+    text-align: right;
+  }
+  .tl-phase + .tl-item {
+    margin-top: 12px;
+  }
+  .tl-phase:not(:first-child) {
+    margin-top: 14px;
+  }
+  .tl-r {
+    margin-left: 50%;
+    padding: 0 0 0 40px;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .tl-date,
+  .tl-body {
+    padding: 0;
+    background: none;
+  }
+  .tl-date {
+    font-size: 0.8125rem;
+  }
+  .tl-what {
+    font-size: 1rem;
+  }
+  /* Marker on the line, level with the date; connector from marker to text. */
+  .tl-item::before {
+    top: 6px;
+    left: auto;
+    right: -4.5px;
+  }
+  .tl-r::before {
+    right: auto;
+    left: -4.5px;
+  }
+  .tl-item::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 18px;
+    height: 1px;
+    background: var(--muted);
+    opacity: 0.45;
+  }
+  .tl-r::after {
+    right: auto;
+    left: 12px;
+  }
+}
+
+/* ------------------------------------------------------------------ cv -- */
+.cv-group + .cv-group {
+  margin-top: 32px;
+}
+.cv-group h3 {
+  margin-bottom: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.cv-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cv-row {
+  display: grid;
+  gap: 0 24px;
+  padding: 8px 0;
+}
+/* Key-value rows (personal details, skills, languages) sit tighter than entries. */
+dl.cv-list .cv-row {
+  padding: 3px 0;
+}
+.cv-date,
+.cv-row dt {
+  color: var(--muted);
+  font: 400 0.8125rem/1.7 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.cv-row dd {
+  margin: 0;
+}
+.cv-entry h4 {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+.cv-org {
+  color: var(--muted);
+  font-weight: 400;
+}
+.cv-org::before {
+  content: "· ";
+}
+.cv-entry ul {
+  max-width: 72ch;
+  margin: 4px 0 0;
+  padding-left: 1.1em;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.cv-about {
+  max-width: 72ch;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.cv-more {
+  margin-top: 6px;
+  font: 400 0.8125rem/1.5 var(--font-mono);
+}
+/* Certificates fold away behind one line until opened. */
+.cv-certs summary {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+.cv-certs summary::-webkit-details-marker {
+  display: none;
+}
+.certs-toggle {
+  color: var(--accent);
+  font: 400 0.8125rem/1.5 var(--font-mono);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.cv-certs summary:hover .certs-toggle {
+  text-decoration-thickness: 2px;
+}
+.cv-certs[open] .when-closed,
+.cv-certs:not([open]) .when-open {
+  display: none;
+}
+.cv-certs .plates {
+  margin-top: 16px;
+}
+.cv-entry li + li {
+  margin-top: 2px;
+}
+.cv-entry li::marker {
+  color: var(--muted);
+}
+@media (min-width: 720px) {
+  .cv-row {
+    grid-template-columns: 10rem minmax(0, 1fr);
+  }
+}
+
+/* ------------------------------------------------------------- contact -- */
+/* The end of the flight. Desktop: a small, quiet block on the left (like the
+   orbit chapters) while the Feldberg stands on the right; backdrop.js adds
+   html.arrive-live and turns the camera so the summit sits right of centre.
+   Phones: the block sits low, the summit above it. Text in ink, normal size. */
+#contact {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 92vh;
+  padding-top: 70vh; /* the summit above the rows, and the finale's stage */
+  padding-bottom: clamp(64px, 8cqw, 120px);
+}
+#contact .section-head {
+  margin-bottom: 20px;
+}
+#contact .section-sub {
+  max-width: 36ch;
+}
+.contact-list {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+.contact-row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 3px 0;
+}
+.contact-row dt {
+  color: var(--muted);
+  font: 400 0.6875rem/1.5 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.contact-row dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.contact-row a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--grid);
+  text-underline-offset: 4px;
+}
+.contact-row a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+.contact-row a span {
+  color: var(--muted);
+}
+.contact-copy {
+  margin-left: 10px;
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: 400 0.6875rem/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.contact-copy:hover {
+  color: var(--ink);
+}
+.contact-copy.is-done {
+  color: var(--accent);
+}
+@media (min-width: 900px) {
+  #contact {
+    justify-content: flex-end;
+    min-height: 100vh;
+    padding-top: 80vh; /* an empty stretch of landscape: the finale's stage, after the plates have gone */
+  }
+  #contact .section-head,
+  #contact .contact-body {
+    width: min(1100px, 100%);
+    max-width: none;
+    margin-inline: auto;
+    text-align: left;
+  }
+  #contact .section-sub {
+    margin-left: 0;
+    text-wrap: pretty;
+  }
+  .contact-list {
+    margin: 0;
+  }
+}
+html.arrive-live .backdrop {
+  --bg-op: 0.8;
+}
+@media (min-width: 900px) {
+  html.arrive-live .backdrop {
+    -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.15) 30%, #000 48%);
+    mask-image: linear-gradient(to right, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.15) 30%, #000 48%);
+  }
+}
+@media (max-width: 899px) {
+  html.arrive-live .backdrop {
+    --bg-op: 0.4;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* ----------------------------------------------------------------- 404 -- */
+.null-island {
+  justify-content: center;
+  margin: 20px 0 0;
+}
+
+/* ---------------------------------------------------------- footer -- */
+/* One calm centred block: name and place, the privacy line, the data credits
+   (required by the DEM licence) in small type, and a way back to the top. */
+.collar {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 40px var(--pad) 36px;
+  border-top: 1px solid var(--grid);
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+}
+.collar-name {
+  color: var(--ink);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.06em;
+}
+.collar-credit {
+  max-width: 72ch;
+  margin-top: 6px;
+  font-size: 0.6875rem;
+  text-wrap: balance;
+}
+.collar-credit a {
+  color: inherit;
+}
+.collar-top {
+  margin-top: 14px;
+  padding: 4px 6px; /* touch target */
+  color: var(--muted);
+  font: 400 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+.collar-top:hover {
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------- print / pdf cv -- */
+.print-head {
+  display: none;
+}
+.print-cv-row {
+  margin-top: 18px;
+  color: var(--muted);
+  font: 400 0.8125rem/1.5 var(--font-mono);
+}
+.print-cv {
+  display: inline-block;
+  padding: 4px 6px;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: 400 0.8125rem/1.5 var(--font-mono);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.print-cv:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* The page shows a short CV (.cv-full parts hidden); the PDF and printing show
+   all of it, ending German-style with place, date and a blank signature line
+   (.cv-sign; no signature image online, the owner signs the copy he sends). */
+@media screen {
+  .cv-full,
+  .cv-sign {
+    display: none !important;
+  }
+}
+.cv-sign {
+  margin-top: 10mm;
+  break-inside: avoid;
+}
+.cv-sign-line {
+  width: 60mm;
+  margin-top: 12mm;
+  padding-top: 1.5mm;
+  border-top: 0.5pt solid #4e5358;
+  color: #4e5358;
+  font-size: 7.5pt;
+}
+
+/* Printing (or "Save as PDF") gives an A4 Lebenslauf: print header + CV only. */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm 16mm 16mm;
+    @bottom-right {
+      content: counter(page) " / " counter(pages);
+      color: #4e5358;
+      font: 7.5pt "IBM Plex Mono", monospace;
+    }
+  }
+  /* Beats both dark-theme selectors (prefers-color-scheme and data-theme). */
+  html:root:not(.never) {
+    --paper: #fff;
+    --ink: #141719;
+    --muted: #4e5358;
+    --accent: #141719;
+    color-scheme: light;
+  }
+  html {
+    background: #fff;
+    font-size: 9.5pt;
+  }
+  body {
+    background: #fff;
+  }
+  .skip-link,
+  .site-nav,
+  .hero,
+  #about,
+  #orbit,
+  #plates,
+  .cv-certs,
+  .cv-more,
+  .print-cv-row,
+  #contact,
+  .lightbox,
+  .collar,
+  #cv .section-head {
+    display: none !important;
+  }
+  .section {
+    padding: 0;
+  }
+  .section-body {
+    max-width: none;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .print-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8mm;
+    margin-bottom: 7mm;
+    padding-bottom: 5mm;
+    border-bottom: 0.5pt solid #c9cbc5;
+  }
+  .print-head img {
+    width: 26mm;
+    height: auto;
+  }
+  .print-label {
+    color: var(--muted);
+    font: 400 7.5pt/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .print-name {
+    margin-top: 3mm;
+    font-size: 20pt;
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .print-title {
+    margin-top: 1mm;
+    font-size: 11pt;
+  }
+  .print-contact {
+    margin-top: 3mm;
+    color: var(--muted);
+    font: 400 8pt/1.5 var(--font-mono);
+  }
+
+  .cv-group + .cv-group {
+    margin-top: 5mm;
+  }
+  .cv-group h3 {
+    font-size: 10.5pt;
+    break-after: avoid;
+  }
+  .cv-row {
+    grid-template-columns: 34mm minmax(0, 1fr);
+    padding: 1.6mm 0;
+    break-inside: avoid;
+  }
+  dl.cv-list .cv-row {
+    padding: 0.6mm 0;
+  }
+  .cv-date,
+  .cv-row dt {
+    font-size: 8pt;
+  }
+  .cv-entry h4 {
+    font-size: 10pt;
+  }
+  .cv-entry ul {
+    max-width: none;
+    font-size: 9pt;
+  }
+}
+
+/* ------------------------------------------------------- hero map tools -- */
+/* Live coordinates in the strip, a survey line between two clicks and an
+   elevation profile panel (assets/js/hero-map.js). */
+.hero-map {
+  cursor: crosshair;
+}
+.hero-text {
+  pointer-events: none; /* clicks reach the map underneath */
+}
+.strip-crs.is-live {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.map-tools {
+  pointer-events: none;
+}
+.mt-line {
+  stroke: var(--accent-mark);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.mt-line.is-pending {
+  stroke-dasharray: 5 4;
+}
+.mt-hover {
+  fill: var(--accent-mark);
+}
+.mt-line {
+  fill: none;
+}
+.mt-pt {
+  fill: var(--paper);
+  stroke: var(--accent-mark);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-hint {
+  position: absolute;
+  top: calc(var(--strip-h) + 10px);
+  right: var(--pad);
+  z-index: 1;
+  margin: 0;
+  padding: 2px 6px;
+  background: var(--paper);
+  color: var(--muted);
+  font: 400 0.6875rem/1.5 var(--font-mono);
+}
+.hint-touch {
+  display: none;
+}
+@media (hover: none) {
+  .hint-hover {
+    display: none;
+  }
+  .hint-touch {
+    display: inline;
+  }
+}
+@media (min-width: 900px) {
+  .map-hint {
+    top: auto;
+    bottom: 14px;
+  }
+}
+
+.map-profile {
+  position: absolute;
+  top: calc(var(--strip-h) + 12px);
+  right: var(--pad);
+  left: var(--pad);
+  z-index: 3;
+  padding: 10px 14px 12px;
+  background: var(--paper);
+  font: 400 0.75rem/1.4 var(--font-mono);
+}
+.mp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.mp-close {
+  min-width: 28px;
+  min-height: 28px;
+  margin: -6px -8px -6px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.mp-chart {
+  position: relative;
+  height: 90px;
+  margin: 6px 0 8px 44px;
+}
+.mp-chart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.mp-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.25px;
+  vector-effect: non-scaling-stroke;
+}
+.mp-fill {
+  fill: var(--contour);
+  opacity: 0.2;
+}
+.mp-max,
+.mp-min {
+  position: absolute;
+  right: calc(100% + 8px);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.mp-max {
+  top: 0;
+}
+.mp-min {
+  bottom: 0;
+}
+.mp-stats {
+  color: var(--ink);
+}
+@media (min-width: 720px) {
+  .map-profile {
+    left: auto;
+    width: 360px;
+  }
+}
+
+/* ----------------------------------------------------- page background -- */
+/* A low flight over the Black Forest (assets/js/backdrop.js): ridge lines on a
+   fixed canvas behind everything below the hero, in --contour. A horizontal mask
+   keeps them in the margins and very faint behind the text column; on phones,
+   where text fills the width, they are faint everywhere. backdrop.js sets
+   --fade while section [02] (its own descent) is on screen. */
+.backdrop {
+  --bg-op: 0.55;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: calc(var(--bg-op) * var(--fade, 1));
+  transition: opacity 0.5s ease;
+  -webkit-mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.2) 30%, rgb(0 0 0 / 0.2) 70%, #000 96%);
+  mask-image: linear-gradient(to right, #000 4%, rgb(0 0 0 / 0.2) 30%, rgb(0 0 0 / 0.2) 70%, #000 96%);
+}
+/* The finale (finale.js): the Feldberg as a 3D digital twin over the flight, kept off the Contact
+   text on the left like the flight itself (html.arrive-live mask) */
+.finale {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+@media (min-width: 900px) {
+  .finale {
+    -webkit-mask-image: linear-gradient(to right, transparent 30%, #000 46%);
+    mask-image: linear-gradient(to right, transparent 30%, #000 46%);
+  }
+}
+@media print {
+  .finale {
+    display: none;
+  }
+}
+/* Flight readout: says what the background is (route, position, altitude).
+   Wide screens only (the margin must hold it); hidden over the hero and [02]. */
+.flight-hud {
+  display: none;
+}
+@media (min-width: 1360px) {
+  .flight-hud {
+    position: fixed;
+    bottom: 20px;
+    left: 24px;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--muted);
+    font: 400 0.6875rem/1.3 var(--font-mono);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .flight-hud.is-on {
+    opacity: 1;
+  }
+  .fh-title {
+    color: var(--ink);
+  }
+}
+@media (min-width: 1360px) and (prefers-reduced-motion: no-preference) {
+  .flight-hud {
+    transition: opacity 0.4s ease;
+  }
+}
+@media (max-width: 719px) {
+  .backdrop {
+    -webkit-mask-image: none;
+    mask-image: none;
+    --bg-op: 0.2;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .backdrop {
+    --bg-op: 0.6;
+  }
+}
+:root[data-theme="dark"] .backdrop {
+  --bg-op: 0.6;
+}
+@media (max-width: 719px) {
+  :root[data-theme="dark"] .backdrop {
+    --bg-op: 0.24;
+  }
+}
+@media (max-width: 719px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .backdrop {
+    --bg-op: 0.24;
+  }
+}
+.hero {
+  background: var(--paper); /* the hero has its own map */
+}
+@media print {
+  .flight-hud,
+  .backdrop {
+    display: none !important;
+  }
+}
+
+/* ------------------------------------------------- ridges, map controls -- */
+/* Ridge view: contours hide, ridge lines (drawn by hero-map.js) show. */
+.show-ridges .topo-c,
+.show-ridges .topo-i,
+.show-ridges .topo-l {
+  display: none;
+}
+.ridges path {
+  fill: var(--paper);
+  stroke: var(--contour);
+  stroke-width: 0.9px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-controls {
+  position: absolute;
+  right: var(--pad);
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 400 0.6875rem/1.5 var(--font-mono);
+}
+.map-mode {
+  display: inline-flex;
+  background: var(--paper);
+}
+.map-mode button,
+.map-full,
+.mv-zoom button,
+.mv-close {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 2px 8px;
+  border: 0;
+  background: var(--paper);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+.map-mode button[aria-pressed="true"] {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.map-mode button:hover,
+.map-full:hover,
+.mv-zoom button:hover,
+.mv-close:hover {
+  color: var(--ink);
+}
+.map-full {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+}
+.map-full svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+/* the hint moves left of the controls on wide screens */
+@media (min-width: 900px) {
+  .map-hint {
+    right: auto;
+    left: var(--pad);
+  }
+}
+@media (max-width: 599px) {
+  .map-controls {
+    bottom: 8px;
+  }
+}
+
+/* Fullscreen map viewer */
+.map-viewer {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+.map-viewer[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.map-viewer::backdrop {
+  background: var(--paper);
+}
+.mv-top,
+.mv-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  padding: 8px var(--pad);
+  font: 400 0.75rem/1.5 var(--font-mono);
+}
+.mv-top {
+  border-bottom: 1px solid var(--grid);
+}
+.mv-bottom {
+  border-top: 1px solid var(--grid);
+  color: var(--muted);
+}
+.mv-title {
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.mv-tools,
+.mv-zoom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mv-tools {
+  gap: 16px;
+}
+.mv-zoom button {
+  font-size: 1rem;
+  color: var(--ink);
+}
+.mv-close {
+  color: var(--ink);
+  font-size: 1.25rem;
+}
+.mv-stage {
+  position: relative;
+  overflow: hidden;
+}
+.mv-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+/* contours read a little stronger in the viewer than behind the hero text */
+.mv-svg .topo-c {
+  opacity: 0.75;
+}
+.mv-svg .topo-i {
+  opacity: 0.95;
+}
+.mv-frame {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1px;
+  stroke-dasharray: 6 5;
+  opacity: 0.55;
+  vector-effect: non-scaling-stroke;
+}
+.mv-place text {
+  fill: var(--ink);
+  font-family: var(--font-mono);
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-linejoin: round;
+}
+.mv-sym {
+  fill: var(--ink);
+}
+.mv-marker {
+  fill: var(--paper);
+  stroke: var(--accent-mark);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.map-full.is-loading {
+  opacity: 0.6;
+  cursor: progress;
+}
+.mv-svg.is-panning {
+  cursor: grabbing;
+}
+.mv-readout.is-live {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.mv-scale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+}
+.mv-bar {
+  display: block;
+  height: 5px;
+  border: 1px solid var(--ink);
+  border-top: 0;
+}
+@media print {
+  .map-controls,
+  .map-viewer {
+    display: none !important;
+  }
+}
+
+/* ---------------------------------------------------- hero: rise in 3D -- */
+/* assets/js/hero-3d.js: the hero sticks under the nav inside a taller wrapper while
+   the scroll lifts the map into paper terraces (canvas), then blows them away like
+   sand into the flight background. Only with JS and without reduced motion. */
+.hero-pin {
+  height: calc(var(--hero-h) + 90vh);
+}
+.hero-pin .hero {
+  position: sticky;
+  top: var(--nav-h);
+  /* the hero's paper turns transparent at the handoff so the flight shows through */
+  background: color-mix(in srgb, var(--paper) calc(var(--hero-bg, 1) * 100%), transparent);
+}
+@media (max-width: 719px) {
+  .hero-pin {
+    height: calc(var(--hero-h) + 60vh);
+  }
+}
+.hero-3d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+html.hero-rising .hero-3d {
+  opacity: 1;
+}
+/* the flat SVG steps back while the canvas shows the risen map */
+html.hero-rising svg.topo .topo-c,
+html.hero-rising svg.topo .topo-i,
+html.hero-rising svg.topo .topo-l,
+html.hero-rising .grat,
+html.hero-rising .ridges {
+  opacity: 0;
+  transition: opacity 0.6s ease 0.7s;
+}
+/* while risen: map tools, controls, hint and strip ticks step back */
+html.hero-risen .hero-map {
+  pointer-events: none;
+}
+.map-controls,
+.map-hint,
+.strip-crs,
+.hero-strip .ticks {
+  transition: opacity 0.4s ease;
+}
+html.hero-risen .map-controls,
+html.hero-risen .map-hint,
+html.hero-risen .strip-crs,
+html.hero-risen .hero-strip .ticks {
+  opacity: 0;
+  pointer-events: none;
+}
+/* scroll cue: a mono "scroll" with a falling accent tick, gone once scrolling starts */
+.hero-cue {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font: 400 0.6875rem/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.hero-cue.is-gone {
+  opacity: 0;
+}
+.hero-cue i {
+  position: relative;
+  width: 1px;
+  height: 26px;
+  overflow: hidden;
+  background: var(--grid);
+}
+.hero-cue i::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 10px;
+  background: var(--accent-mark);
+  animation: hero-cue 1.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+@keyframes hero-cue {
+  from { top: -10px; }
+  to { top: 26px; }
+}
+@media print {
+  .hero-pin {
+    height: auto;
+  }
+  .hero-3d,
+  .hero-cue {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------- hero: paper sheet (try) -- */
+/* Experiment: on landing the hero reads as an old survey sheet that has been
+   folded and opened again. The textures come from tools/hero/make_paper.py (a lit
+   height field of the folded sheet, plus masks for ageing and worn ink); colours
+   stay here. Layers: yellowing, browned edges, foxing and grain in --sheet-age;
+   the relief (soft-light, 128 = flat); and the contour ink rubbed off along the
+   folds (--paper through the wear mask, map only, the sentence stays crisp).
+   It fades out as soon as the map starts to rise (html.hero-rising, a short CSS
+   transition on layers of their own: a per-frame fade value made the browser re-paint
+   these large masked layers on every frame of the scroll).
+   Remove this block, the --sheet-* tokens and assets/img/paper-* to drop it. */
+.hero {
+  --paper-age: url("../img/paper-wide-age.webp?v=20261016a");
+  --paper-relief: url("../img/paper-wide-relief.webp?v=20261016a");
+  --paper-wear: url("../img/paper-wide-wear.webp?v=20261016a");
+}
+@media (max-width: 719px) {
+  .hero {
+    --paper-age: url("../img/paper-tall-age.webp?v=20261016a");
+    --paper-relief: url("../img/paper-tall-relief.webp?v=20261016a");
+    --paper-wear: url("../img/paper-tall-wear.webp?v=20261016a");
+  }
+}
+.hero::before,
+.hero::after,
+.hero-map::after,
+.pencil-box {
+  transition: opacity 0.45s ease;
+  will-change: opacity;
+}
+html.hero-rising .hero::before,
+html.hero-rising .hero::after,
+html.hero-rising .hero-map::after,
+html.hero-rising .pencil-box {
+  opacity: 0;
+}
+.hero::before,
+.hero::after,
+.hero-map::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero::before,
+.hero::after {
+  z-index: 4; /* over the strip and map controls too: all on the same sheet */
+}
+.hero::before {
+  background: var(--sheet-age);
+  mask-image: var(--paper-age), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.3 -.66'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask-size: 100% 100%, 240px 240px;
+  mask-repeat: no-repeat, repeat;
+}
+.hero::after {
+  background: var(--paper-relief) center / 100% 100% no-repeat;
+  mix-blend-mode: soft-light;
+  opacity: var(--sheet-relief);
+}
+/* the map sits below the strip: shift the wear mask so it lines up with the sheet */
+.hero-map::after {
+  background: var(--paper);
+  mask-image: var(--paper-wear);
+  mask-size: 100cqw 100cqh;
+  mask-position: 0 calc(-1 * var(--strip-h));
+  mask-repeat: no-repeat;
+}
+/* place names pencilled on the sheet (tools/hero/pencil_labels.py), same frame as
+   the map; they go with the paper. Phones show only the ones in the centre. */
+.pencil-box {
+  position: absolute;
+  z-index: 1; /* above the wear layer: pencil is written after the folds, the creases do not rub it off */
+  top: 0;
+  left: calc(50% - var(--mw) / 2);
+  width: var(--mw);
+  aspect-ratio: var(--map-aspect);
+  pointer-events: none;
+}
+.pencil {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: var(--pencil);
+  /* graphite grain: paper shows through the strokes. A static noise mask, drawn once;
+     a live SVG filter here cost ~20 ms per frame while the map rose */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2 1.68'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask-size: 240px 240px;
+}
+.pc-line {
+  fill: none;
+  stroke: var(--pencil);
+  stroke-width: 1.3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+/* the sentence in blue pencil (owner, 2026-10-10); everything else stays graphite */
+.pc-say {
+  fill: var(--pencil-blue);
+}
+/* arrows: a light, quick pencil stroke, no heavier than the handwriting */
+.pc-arrow {
+  stroke-width: 0.9px;
+  opacity: 0.7;
+}
+/* the graben fault and the slope A-B, pencilled on like a mapping exercise (2026-10-14) */
+.pc-fault {
+  stroke-width: 1.6px;
+}
+.pc-tick {
+  stroke-width: 1.1px;
+}
+@media (max-width: 719px) {
+  .pc-wide {
+    display: none;
+  }
+}
+@media (min-width: 720px) {
+  .pc-narrow {
+    display: none;
+  }
+}
+/* the sentence is drawn in the pencil SVG exactly like the place names
+   (tools/hero/pencil_labels.py, SAY); the real <h1> stays for search engines and screen
+   readers, visually hidden */
+.hero h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* easter egg: the CRS label cycles through a few in-jokes on click (hero-map.js) */
+@media (hover: hover) {
+  .strip-crs:not(.is-live) {
+    cursor: pointer;
+  }
+}
+/* the sheet's margin (sheet number, longitudes, CRS) in the old engraved style, printed
+   in the map's sepia ink (owner's pick "M3", 2026-10-10; no piano-key bars) */
+.hero-strip {
+  font: 500 0.75rem/1 "IBM Plex Serif", Georgia, serif;
+  letter-spacing: 0.06em;
+}
+html:not(.hero-rising) .hero-strip {
+  color: color-mix(in srgb, var(--contour) 40%, var(--ink));
+}
+/* on the aged paper the small labels are printed in ink (muted grey fell below AA) */
+html:not(.hero-rising) .map-hint,
+html:not(.hero-rising) .hero-cue,
+html:not(.hero-rising) .map-mode button {
+  color: var(--ink);
+}
+html:not(.hero-rising) .map-full {
+  color: color-mix(in srgb, var(--accent) 70%, var(--ink));
+}
+@media print {
+  .hero::before,
+  .hero::after,
+  .hero-map::after,
+  .pencil-box {
+    display: none;
+  }
+}
