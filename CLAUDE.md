@@ -407,6 +407,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   training) carries `.cv-full`: hidden on screen, shown in print and in the PDF. The "download full CV (PDF)" link
   points to `assets/cv/muhammad-abu-bakar-{cv,lebenslauf}.pdf`, built by `node tools/cv/make_cv_pdf.mjs` (instructions
   in the file). **Rebuild the PDFs after every CV change.**
+- CV sections (owner, 2026-10-14): no "Further training" / "Weiterbildung" (removed; the courses stay as certificates
+  on the page); "Academic projects" is one paragraph (projects with their sensors in brackets).
 - CV points and skills (owner, 2026-10-14): every point verb-first, about two lines, one point per project, AI
   visible, no model names or figures (he explains those in interviews); experience entries show all points on the
   page. Skills = tools and techniques only (satellites/sensors belong to the Orbit section), AI row first; each
@@ -454,9 +456,9 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   so the PDF carries its build date) and a blank signature line. No signature image online (owner's choice
   2026-10-10, after hearing that a published signature can be copied); he signs the copy he sends.
 - Print / PDF: a two-page A4 CV, always light (owner, 2026-10-14): no photo; QR code at the right of the header on a
-  white quiet zone; **ridge lines** across the header (owner's pick over a contour crop): `tools/cv/make_cv_ridges.py`
-  draws 17 ridges from the hero DEM (`assets/topo/cv-ridges.svg`), flat over the plain, rising into the Black Forest
-  behind the QR code, fading in from the left so the name and contacts stay clean, 32 %; make_cv_pdf.mjs switches to
+  white quiet zone; faint **contours of the Black Forest edge across the whole header** (`tools/cv/make_cv_contours.py` ->
+  `assets/topo/cv-contours.svg`, 24 %), fading in from the left so the name stays clean and the hills sit behind
+  the QR code (ridge lines were tried and looked weird, owner); make_cv_pdf.mjs switches to
   print media and waits so this print-only background is in the PDF; the QR caption reads "Visit my website" /
   "Zu meiner Website" (warmer than "Website"); name and section headings in IBM Plex Serif 500; text 9 pt
   with 1.55 line height in a warm near-black (#24211d) and warm grey; dates in Plex Sans with tabular figures (mono

@@ -1533,16 +1533,16 @@ html.arrive-live .backdrop {
     padding-bottom: 5mm;
     border-bottom: 0.5pt solid #d6cfc5;
   }
-  /* ridge lines across the whole header, as in the hero's ridge view (tools/cv/make_cv_ridges.py): flat over the
-     Rhine plain behind the name, rising into the Black Forest behind the QR code (owner, 2026-10-14) */
+  /* faint contours of the Black Forest edge across the header (tools/cv/make_cv_contours.py), fading in from the
+     left: the name stays clean, the hills sit behind the QR code (owner, 2026-10-14) */
   .print-head::before {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: url("../topo/cv-ridges.svg") center bottom / 100% 100% no-repeat;
-    opacity: 0.32;
-    mask-image: linear-gradient(90deg, transparent 22%, #000 62%); /* the text area stays clean */
+    background: url("../topo/cv-contours.svg") center / cover no-repeat;
+    opacity: 0.24;
+    mask-image: linear-gradient(90deg, transparent 25%, #000 65%);
   }
   /* QR code to the website at the right of the header (tools/cv/make_qr.py): scanned from the printed CV */
   .print-qr {
