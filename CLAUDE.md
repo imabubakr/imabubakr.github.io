@@ -461,7 +461,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   only by the print styles, so the website never loads it), a very light grey page (#f7f7f7), a large light
   "CURRICULUM VITAE" / "LEBENSLAUF", then "Personal information" / "Persönliche Daten" (name, position, location,
   email, website, LinkedIn, GitHub) with the QR code beside it; grey section headings with a hairline running to
-  the right; dates centred in an indented left column; job title above the organisation; round bullets; one key
+  the right; dates centred in an indented left column; job title above the organisation; round bullets; text 8 pt, job titles 10 pt, headings 13 pt
+  (owner: 8.5 pt felt big), 2.5 mm between jobs and degrees; one key
   phrase per point in blue (`<span class="kw">`, plain on screen); key-value lists with a bullet column; signature
   line, then place and date below it; "© 2026 Muhammad Abu Bakar" and page numbers in the footer. No photo. Page 2
   always starts with Education (`.cv-edu`). Check that both PDFs stay at two pages after any CV change. The CV

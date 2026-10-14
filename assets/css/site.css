@@ -1609,7 +1609,7 @@ html.arrive-live .backdrop {
     gap: 2mm;
     margin: 0 0 1.5mm;
     color: #666;
-    font: 400 14pt/1.2 var(--font-sans);
+    font: 400 13pt/1.2 var(--font-sans);
     letter-spacing: 0;
     break-after: avoid;
   }
@@ -1634,19 +1634,19 @@ html.arrive-live .backdrop {
   .cv-row dt {
     padding-left: 3.5mm;
     color: #666;
-    font: 400 8pt/1.4 var(--font-sans);
+    font: 400 7.5pt/1.4 var(--font-sans);
     font-variant-numeric: normal;
     letter-spacing: 0;
     text-transform: none;
   }
   .cv-entry h4 {
     color: #555;
-    font: 400 10.5pt/1.35 var(--font-sans);
+    font: 400 10pt/1.35 var(--font-sans);
   }
   .cv-org {
     display: block;
     color: #666;
-    font-size: 8.5pt;
+    font-size: 8pt;
   }
   .cv-org::before {
     content: none;
@@ -1661,12 +1661,16 @@ html.arrive-live .backdrop {
     margin-top: 1mm;
     padding-left: 4mm;
     color: #555;
-    font-size: 8.5pt;
+    font-size: 8pt;
     line-height: 1.45;
     list-style: "•  ";
   }
   .cv-entry li::marker {
     color: #666;
+  }
+  /* more air between jobs and degrees (owner: not so tight) */
+  ol.cv-list .cv-row + .cv-row {
+    margin-top: 2.5mm;
   }
   /* key-value lists (personal information, skills, languages): label, a bullet, the value */
   dl.cv-list .cv-row {
@@ -1677,7 +1681,7 @@ html.arrive-live .backdrop {
     position: relative;
     padding-left: 4mm;
     color: #555;
-    font-size: 8.5pt;
+    font-size: 8pt;
   }
   dl.cv-list dd::before {
     content: "•";
