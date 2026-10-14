@@ -1264,10 +1264,6 @@ dl.cv-list .cv-row {
 .cv-entry li::marker {
   color: var(--muted);
 }
-/* project label at the start of a point ("Power-line LiDAR: …"); 500, the only bold weight */
-.cv-entry li strong {
-  font-weight: 500;
-}
 @media (min-width: 720px) {
   .cv-row {
     grid-template-columns: 10rem minmax(0, 1fr);
