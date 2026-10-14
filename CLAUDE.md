@@ -395,7 +395,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   none of it (no pin). Sand grains are batched into 8 alpha levels (single fillRects dropped ~8 % of frames).
   Rejected along the way (don't bring back): draw-in, underline accent, mouse light, real-time sun shadows, loupes
   (pointer and automatic "glass"), intro, plain rise, drone flight paths (looked odd over the paper model), the
-  "Freiburg im Breisgau" label.
+  "Freiburg im Breisgau" label; a new hero "one place, three resolutions" (Freudenberg as satellite / orthophoto / LiDAR bands,
+  previewed 2026-10-14: "doesn't look interesting"; the paper map stays).
 - Hero map tools (`assets/js/hero-map.js`, one engine for hero and fullscreen viewer): hovering shows lat/lon +
   elevation in the strip (replacing `EPSG:4326`); two clicks/taps draw an accent survey line and open the elevation
   profile panel (paper background, no border). Never block page scrolling on touch in the hero (no drag gestures).
