@@ -2270,7 +2270,11 @@ html.hero-rising .pencil-corner {
    like the text (9 m read as too heavy, owner) */
 .pc-doodle .pc-line {
   vector-effect: none;
-  stroke-width: 5px;
+  stroke-width: 3.5px;
+  opacity: 0.6; /* light pressure: drawn on the map, the contours show through (owner: too dark) */
+}
+.pc-doodle .pc-faint {
+  opacity: 0.3;
 }
 /* rock-unit outlines (geological contacts), a lighter line than the fault */
 .pc-contact {

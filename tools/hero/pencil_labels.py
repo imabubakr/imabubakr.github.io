@@ -27,7 +27,7 @@ from fontTools.ttLib import TTFont
 from pyproj import Transformer
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from doodle import STROKES, STUBBLE, smooth   # noqa: E402  (the owner's face, tools/hero/doodle.py)
+from doodle import CARICATURE, CARICATURE_STUBBLE, smooth   # noqa: E402  (the owner's face, tools/hero/doodle.py)
 
 FONT = Path(__file__).with_name("fonts") / "ReenieBeanie.ttf"
 X0, Y1 = 408660, 5319200          # hero bbox west / north (UTM 32N), see hero-contours.json
@@ -67,6 +67,12 @@ WOBBLE = 3        # m: the pencil does not follow the ruler perfectly
 # the owner's face as a pencil doodle under the sentence: top left of the photo frame (map m), metres per
 # photo pixel (the photo is 1280 px square), tilt
 DOODLE = (300, 560, 0.68, -2)
+FACE = True               # the caricature under the sentence
+# a surveyor's title block in pencil (owner, 2026-10-14): two lines per language, top left of the box
+# (corner frame), tilt; FACE and TITLE decide what sits under the sentence
+TITLE = ({"en": ["Mapped by M. A. Bakar", "Freiburg im Breisgau, 2026"],
+          "de": ["Kartiert von M. A. Bakar", "Freiburg im Breisgau, 2026"]}, 1360, 880, -1)
+TITLE_ON = False   # previewed 2026-10-14; the owner chose the caricature alone
 # the sentence and the doodle live in their own small SVG pinned to the hero's top left corner (owner,
 # 2026-10-14), so they stay on screen however the map is cropped; same scale as the map (viewBox in map metres)
 CORNER = (2600, 1600)
@@ -196,16 +202,46 @@ def build(lang, say):
     ox, oy, ms, rot = DOODLE                              # the face, quick pencil strokes with a slight wobble
     ca, sa = math.cos(math.radians(rot)), math.sin(math.radians(rot))
     tr = lambda x, y: (ox + (x * ca - y * sa) * ms, oy + (x * sa + y * ca) * ms)
-    strokes = []
-    for pts in STROKES.values():
+    strokes, faint = [], []
+    for name, pts in (CARICATURE.items() if FACE else []):
         jit = [(x + rnd.uniform(-5, 5), y + rnd.uniform(-5, 5)) for x, y in pts]   # a hand, not a zigzag:
         q = [tr(x, y) for x, y in smooth(jit)]                                      # shake the control points only
-        strokes.append("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in q))
-    for x, y, a in STUBBLE:
+        # a quick sketch: long strokes are drawn in a few pieces, the pencil lifted (a small gap) or restarted with
+        # a little overlap; the head outline gets a second, lighter pass slightly off the first
+        pieces, i = [], 0
+        while i < len(q) - 1:
+            j = min(len(q) - 1, i + rnd.randint(9, 16))
+            pieces.append(q[i:j + 1])
+            i = j + rnd.choice((1, 1, -1))                 # skip one sample (gap) or step back one (overlap)
+        for pc in pieces:
+            if len(pc) > 1:
+                strokes.append("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in pc))
+        if name == "head":
+            off = [(x + 4 * math.sin(k / 5), y + 4 * math.cos(k / 7)) for k, (x, y) in enumerate(q)]
+            n0, n1 = int(len(off) * 0.15), int(len(off) * 0.55)
+            faint.append("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in off[n0:n1]))
+    for x, y, a in (CARICATURE_STUBBLE if FACE else []):
         r = math.radians(a)
         (x0, y0), (x1, y1) = tr(x, y), tr(x + 16 * math.cos(r), y + 16 * math.sin(r))
         strokes.append(f"M{x0:.0f} {y0:.0f} L{x1:.0f} {y1:.0f}")
-    corner.append(f'<g class="pc pc-doodle"><path class="pc-line" d="{" ".join(strokes)}"/></g>')
+    corner.append(f'<g class="pc pc-doodle"><path class="pc-line" d="{" ".join(strokes)}"/>'
+                  f'<path class="pc-line pc-faint" d="{" ".join(faint)}"/></g>')
+    if TITLE_ON:                                           # the title block: two lines in a ruled box
+        tl, tx0, ty0, trot = TITLE[0][lang], TITLE[1], TITLE[2], TITLE[3]
+        ts = size * 0.85 / UPM; pad = size * 0.55; step_t = size * 1.05
+        tg, tw = [], 0
+        for i, ln in enumerate(tl):
+            g, w = words(ln, tx0 + pad, ty0 + pad + size * 0.75 + i * step_t, 0, ts); tg.append(g); tw = max(tw, w)
+        bw, bh = tw + 2 * pad, size * 0.75 + step_t * (len(tl) - 1) + 2 * pad - size * 0.1
+        box = []
+        for (x0, y0), (x1, y1) in (((0, 0), (bw, 0)), ((bw, 0), (bw, bh)), ((bw, bh), (0, bh)), ((0, bh), (0, 0))):
+            ext = 18                                       # ruled lines overshoot the corners a little, by hand
+            ux, uy = (x1 - x0), (y1 - y0); L = math.hypot(ux, uy); ux, uy = ux / L, uy / L
+            box.append(f"M{x0 - ux * ext + rnd.uniform(-3, 3):.0f} {y0 - uy * ext + rnd.uniform(-3, 3):.0f} "
+                       f"L{x1 + ux * ext + rnd.uniform(-3, 3):.0f} {y1 + uy * ext + rnd.uniform(-3, 3):.0f}")
+        corner.append(f'<g class="pc pc-title" transform="rotate({trot} {tx0:.0f} {ty0:.0f}) translate({tx0:.0f} {ty0:.0f})">'
+                      f'<path class="pc-line" d="{" ".join(box)}"/>'
+                      f'<g transform="translate({-tx0:.0f} {-ty0:.0f})">{"".join(tg)}</g></g>')
     for text, tx, ty, rot, (ex, ey), cls, start in NOTES:
         g, width = words(text[lang], tx, ty, rot, size / UPM)
         a = math.radians(rot)                              # the (tilted) line's direction

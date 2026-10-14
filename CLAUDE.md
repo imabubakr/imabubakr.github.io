@@ -301,10 +301,12 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   hero's **top left corner** with a **pencil doodle of the owner's face** beneath it (owner's idea; earlier it sat
   above Freiburg). Both live in their own small SVG `.pencil-corner` pinned to the hero's corner, at the map's
   scale, so they stay on screen however the map is cropped (tablets in portrait crop the map's west edge away);
-  lowered below "Lehen" and the map hint. The doodle: hand-placed strokes over the portrait me.jpg in
-  `tools/hero/doodle.py` (backlit photo: line extraction fails), smoothed into curves (jitter on the control points
-  only, no zigzag) and drawn with the handwriting's pencil: 5 m strokes that scale with the map (`.pc-doodle`;
-  9 m read as too heavy). It is **drawn in pencil
+  lowered below "Lehen" and the map hint. The doodle is a **quick caricature** (`CARICATURE` in
+  `tools/hero/doodle.py`: a few loose lines over the portrait me.jpg, grin and squint exaggerated, hatched crew cut;
+  owner, 2026-10-14). Seen and rejected the same day: a traced portrait (`STROKES`, "feels kinda fake"), a
+  surveyor's title block "Mapped by M. A. Bakar" (`TITLE_ON` False), title block + face. Drawn light, as if on the
+  map: 3.5 m strokes at 60 % (the contours show through; 5-9 m read as too dark), long strokes in a few pieces
+  with small gaps or overlaps, a faint second pass on the head (`.pc-doodle`, `.pc-faint`). It is **drawn in pencil
   exactly like the place names** (`SAY` in pencil_labels.py: text from the page's `<h1>`, wrapped; phones keep
   their own copy `.pc-narrow` above Freiburg inside their cropped view, no doodle); the real `<h1>` stays in the page, visually hidden, for
   search engines and screen readers. The pencil layer sits above the fold-wear layer (pencil is written after the
