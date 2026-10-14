@@ -2250,6 +2250,32 @@ html.hero-rising .pencil-box {
 .pc-fault {
   stroke-width: 1.6px;
 }
+/* the sentence and the doodle sit in their own SVG pinned to the hero's top left corner, so they stay on screen
+   however the map is cropped; drawn at the map's scale (viewBox 2600 x 1600 map metres of a 10 km wide map) */
+.pencil-corner {
+  position: absolute;
+  inset: auto;
+  z-index: 1;
+  top: clamp(64px, 10cqh, 120px);
+  left: clamp(16px, 3cqw, 56px);
+  width: calc(var(--mw) * 0.26);
+  height: auto;
+  aspect-ratio: 2600 / 1600;
+  transition: opacity 0.45s ease;
+  will-change: opacity;
+}
+html.hero-rising .pencil-corner {
+  opacity: 0;
+}
+@media (max-width: 719px) {
+  .pencil-corner {
+    display: none;
+  }
+}
+/* the owner's face doodled under the sentence (tools/hero/doodle.py): a light, quick hand */
+.pc-doodle .pc-line {
+  stroke-width: 1.1px;
+}
 /* presumed faults (LGRB: "Störung, vermutet"): dashed, as on geological maps */
 .pc-presumed {
   stroke-width: 1.2px;
@@ -2306,7 +2332,8 @@ html:not(.hero-rising) .map-full {
 @media print {
   .hero::after,
   .hero-map::after,
-  .pencil-box {
+  .pencil-box,
+  .pencil-corner {
     display: none;
   }
 }

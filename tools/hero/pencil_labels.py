@@ -26,6 +26,9 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 from pyproj import Transformer
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from doodle import STROKES, STUBBLE, smooth   # noqa: E402  (the owner's face, tools/hero/doodle.py)
+
 FONT = Path(__file__).with_name("fonts") / "ReenieBeanie.ttf"
 X0, Y1 = 408660, 5319200          # hero bbox west / north (UTM 32N), see hero-contours.json
 # name, lat, lon (OSM place node), size in m (em; the hero sentence uses the same, 0.013 x --mw), side, class
@@ -46,7 +49,7 @@ PLACES = [
 # step, wrap width (map metres), tilt, class. Centred just above Freiburg; phones crop the map to x ~3660-6340,
 # so they get their own copy inside that window.
 SAY = [
-    (4320, 2390, 150, 2200, -1.2, "pc-wide"),
+    (180, 330, 150, 2200, -1.2, "pc-corner"),      # upper left (corner frame, see CORNER), the doodle below it
     (3800, 2390, 150, 2400, -1.2, "pc-narrow"),
 ]
 NOTES = []   # the hiking and kite jokes were removed (owner, 2026-10-14: hero too busy)
@@ -59,7 +62,14 @@ NOTES = []   # the hiking and kite jokes were removed (owner, 2026-10-14: hero t
 FAULTS = Path(__file__).resolve().parents[2] / "assets" / "topo" / "hero-faults.json"
 FAULT_NOTE = ({"en": ["Rhine Graben fault:", "the plain sank, the Black Forest rose"],
                "de": ["Rheingraben-Störung:", "die Ebene sank, der Schwarzwald hob sich"]}, 6720, 1790, 150, -2)
-RULER_TOL = 300   # GÜK300 is good to a few hundred metres: one ruled stroke per straight stretch
+RULER_TOL = 90    # a ruler laid along the mapped trace in short pieces (300 m read as too straight, owner)
+WOBBLE = 3        # m: the pencil does not follow the ruler perfectly
+# the owner's face as a pencil doodle under the sentence: top left of the photo frame (map m), metres per
+# photo pixel (the photo is 1280 px square), tilt
+DOODLE = (300, 560, 0.68, -2)
+# the sentence and the doodle live in their own small SVG pinned to the hero's top left corner (owner,
+# 2026-10-14), so they stay on screen however the map is cropped; same scale as the map (viewBox in map metres)
+CORNER = (2600, 1600)
 UD = (2050, 170)          # U / D beside the main fault at this y (map m), this far either side of it
 # Rock units from the same map (LGRB GÜK300 units, layer ms:gu300af_m; each point checked to lie inside the unit):
 # text per language, start of the baseline, tilt. Würm gravels on the Rhine plain, paragneiss in the Black Forest.
@@ -128,6 +138,7 @@ def build(lang, say):
             f'<path class="pc-line" d="{ring(x, y, r)}"/><circle cx="{x:.0f}" cy="{y:.0f}" r="{size * 0.06:.0f}"/>'
             f"{g}</g>"
         )
+    corner = []                                        # the sentence + doodle, pinned top left
     size = PLACES[0][3]
     space = hmtx[cmap[ord(" ")]][0] * size / UPM
     for sx0, sy0, step, wrap, srot, scls in SAY:
@@ -141,7 +152,19 @@ def build(lang, say):
         a = math.radians(srot)                             # lines step down along the tilted text
         say_g = "".join(words(ln, sx0 - i * step * math.sin(a), sy0 + i * step * math.cos(a), srot, size / UPM)[0]
                         for i, ln in enumerate(lines))
-        labels.append(f'<g class="pc pc-say {scls}">{say_g}</g>')
+        (corner if scls == "pc-corner" else labels).append(f'<g class="pc pc-say {scls}">{say_g}</g>')
+    ox, oy, ms, rot = DOODLE                              # the face, quick pencil strokes with a slight wobble
+    ca, sa = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+    tr = lambda x, y: (ox + (x * ca - y * sa) * ms, oy + (x * sa + y * ca) * ms)
+    strokes = []
+    for pts in STROKES.values():
+        q = [tr(x + rnd.uniform(-4, 4), y + rnd.uniform(-4, 4)) for x, y in smooth(pts)]
+        strokes.append("M" + " L".join(f"{x:.0f} {y:.0f}" for x, y in q))
+    for x, y, a in STUBBLE:
+        r = math.radians(a)
+        (x0, y0), (x1, y1) = tr(x, y), tr(x + 16 * math.cos(r), y + 16 * math.sin(r))
+        strokes.append(f"M{x0:.0f} {y0:.0f} L{x1:.0f} {y1:.0f}")
+    corner.append(f'<g class="pc pc-doodle"><path class="pc-line" d="{" ".join(strokes)}"/></g>')
     for text, tx, ty, rot, (ex, ey), cls, start in NOTES:
         g, width = words(text[lang], tx, ty, rot, size / UPM)
         a = math.radians(rot)                              # the (tilted) line's direction
@@ -202,6 +225,8 @@ def build(lang, say):
                 run, n = [], max(1, int(seg_len / 20))
                 for k in range(n + 1):                     # straight, but broken where pencil text sits
                     x, y = x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n
+                    if 0 < k < n:
+                        x, y = x + rnd.uniform(-WOBBLE, WOBBLE), y + rnd.uniform(-WOBBLE, WOBBLE)
                     if inbox(x, y) or not (-50 <= x <= 10050 and -50 <= y <= 5050):
                         if len(run) > 1:
                             out.append(run)
@@ -236,6 +261,8 @@ def build(lang, say):
         '<div class="pencil-box"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="pencil" '
         'viewBox="0 0 10000 5000" preserveAspectRatio="xMidYMid slice">'
         f"<defs>{defs}</defs>{''.join(labels)}</svg></div>"
+        '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="pencil pencil-corner" '
+        f'viewBox="0 0 {CORNER[0]} {CORNER[1]}">{"".join(corner)}</svg>'
     ), len(used)
 
 

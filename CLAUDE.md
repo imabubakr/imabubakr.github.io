@@ -228,8 +228,8 @@ behind URL switches; the owner took Claude's picks (2026-10-14), now default, sw
 - Folds 3 x 2 on the wide sheet (was 4 x 2; 3 x 1 was the other option). Phones keep 2 x 3. make_paper.py seeds
   each format on its own, so changing one leaves the other as it is.
 - The Upper Rhine Graben main border fault pencilled on, **ruled** (owner, 2026-10-14: "sketched with a ruler"):
-  straight strokes along the mapped trace (Douglas-Peucker, `RULER_TOL` 300 m; GÜK300 is good to a few hundred
-  metres), ticks on the downthrown west side, **D** / **U** beside it, gaps at pencil text, presumed faults
+  straight strokes along the mapped trace (Douglas-Peucker, `RULER_TOL` 90 m: 300 m read as "way too straight",
+  owner; plus a 3 m `WOBBLE`, the pencil does not follow the ruler perfectly), ticks on the downthrown west side, **D** / **U** beside it, gaps at pencil text, presumed faults
   (LGRB "Störung, vermutet") dashed (`.pc-presumed`); the gap under the Dreisam near Freiburg is not mapped by
   LGRB and stays empty (do not invent a concealed fault). Note "Rhine Graben fault: / the plain sank, the Black
   Forest rose" (DE "Rheingraben-Störung: / die Ebene sank, der Schwarzwald hob sich"). Rock units from the same
@@ -292,10 +292,14 @@ the mono labels and the flight background. Everything else is quiet. The user pr
   margin labels only (sheet number, longitudes, CRS), the old engraved style, in sepia map ink (owner, 2026-10-10).
 - Hero `h1`: the owner's sentence "Hello, I am Bakar, a geospatial professional with a passion for all things
   spatial." (DE: "Hallo, ich bin Bakar, Geoexperte mit Leidenschaft für alles Räumliche."; owner dropped "data",
-  2026-10-10). No big title, no red coordinates line (owner's wish). It sits on the map just above Freiburg
-  (owner, 2026-10-10: "a better place" than bottom-left). It is **drawn in the pencil SVG exactly like the place
-  names** (`SAY` in pencil_labels.py: text from the page's `<h1>`, wrapped, centred above Freiburg; phones get
-  their own copy `.pc-narrow` inside their cropped view); the real `<h1>` stays in the page, visually hidden, for
+  2026-10-10). No big title, no red coordinates line (owner's wish). Since 2026-10-14 it sits in the
+  hero's **top left corner** with a **pencil doodle of the owner's face** beneath it (owner's idea; earlier it sat
+  above Freiburg). Both live in their own small SVG `.pencil-corner` pinned to the hero's corner, at the map's
+  scale, so they stay on screen however the map is cropped (tablets in portrait crop the map's west edge away);
+  lowered below "Lehen" and the map hint. The doodle: hand-placed strokes over the portrait me.jpg in
+  `tools/hero/doodle.py` (backlit photo: line extraction fails), smoothed into curves. It is **drawn in pencil
+  exactly like the place names** (`SAY` in pencil_labels.py: text from the page's `<h1>`, wrapped; phones keep
+  their own copy `.pc-narrow` above Freiburg inside their cropped view, no doodle); the real `<h1>` stays in the page, visually hidden, for
   search engines and screen readers. The pencil layer sits above the fold-wear layer (pencil is written after the
   folds: creases shade it but do not rub it off). Arrows are light freehand strokes (`.pc-arrow`). The graphite
   grain is a static noise mask on `.pencil`: a live SVG filter (feTurbulence + displacement) on the pencil layer
