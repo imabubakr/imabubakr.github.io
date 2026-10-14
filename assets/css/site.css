@@ -1684,10 +1684,6 @@ html.arrive-live .backdrop {
   .cv-group:not(.print-personal) dl.cv-list .cv-row + .cv-row {
     margin-top: 1mm;
   }
-  /* the tool list after each skills sentence (PDF only), quieter than the sentence */
-  .cv-also {
-    color: #888;
-  }
   /* key-value lists (personal information, skills, languages): label, a bullet, the value */
   dl.cv-list .cv-row {
     align-items: baseline;

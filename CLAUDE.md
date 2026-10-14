@@ -413,8 +413,8 @@ the mono labels and the flight background. Everything else is quiet. The user pr
 - Skills (owner, 2026-10-14: the tool lists read "like 6 months of experience"): seven rows named by capability
   (Geospatial AI, LiDAR, Remote sensing, Spatial data, Data engineering, Programming, Geology; DE Geo-KI,
   LiDAR, Fernerkundung, Geodaten, Data Engineering, Programmierung, Geologie), each one present-tense sentence about
-  what he builds and owns, the main tool in blue (`.kw`); the full tool list follows in the PDF only
-  ("Also: …" / "Außerdem: …", `.cv-also`). Owner: "this is what we are talking about".
+  what he builds and owns, the main tool in blue (`.kw`). No extra tool lists (an "Also: …" list in the PDF was tried and
+  removed by the owner). Owner: "this is what we are talking about".
 - CV points and skills (owner, 2026-10-14): every point verb-first, about two lines, one point per project, AI
   visible, no model names or figures (he explains those in interviews); experience entries show all points on the
   page. Skills = tools and techniques only (satellites/sensors belong to the Orbit section), AI row first; each
