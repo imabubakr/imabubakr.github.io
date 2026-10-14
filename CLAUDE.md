@@ -104,7 +104,7 @@ Section [02] tells the owner's path: satellite data (from 2016) → aerial image
 (since 11/2025, Beagle Systems). Chapter texts (owner's brief, 2026-10-10): title, then the platforms / sensors worked
 with (from the CV, no project or employer names), then one sentence on what that resolution shows. The owner
 confirmed the sensor lists (2026-10-10; Planet, Sentinel-3, -5P and EO-1 Hyperion added 2026-10-14): satellite = Landsat 7/8,
-Sentinel-1/-2/-3/-5P, MODIS, ASTER, EO-1 Hyperion, TRMM, Planet; aerial = orthophotos; drone = cameras and LiDAR. Do not add sensors
+Sentinel-1/-2/-3/-5P, MODIS, ASTER, EO-1 Hyperion, TRMM, Planet; aerial = orthophotos at 5, 10 and 20 cm (incl. the open DOP10/DOP20) and airborne LiDAR (owner, 2026-10-14); drone = cameras and LiDAR. Do not add sensors
 without the owner. Three chapters (`.ds-ch`, EN/DE text in the HTML) scroll past on the left while the
 **page background itself** (`backdrop.js`) does the descent on the right (owner's pick, 2026-10-09: "you nailed it"):
 
@@ -170,7 +170,7 @@ without the owner. Three chapters (`.ds-ch`, EN/DE text in the HTML) scroll past
 - Freiburg is marked with the site's diamond (`--accent-mark`, as in the hero and the altimeter) while looking
   down from above 8 km (not at the aerial stop, see above); the owner disliked the earlier crosshair.
 - Labels never overlap the altimeter (`label()` guard). The figure numbers (frame size, overlap, swath, track angle)
-  are illustrative of typical surveys; the chapter spec lines (~705 km · 30 m, ~1 km · 20 cm, ~100 m · ~2 cm) are the
+  are illustrative of typical surveys; the chapter spec lines (~705 km · 30 m, ~1 km · 5–20 cm, ~100 m · ~2 cm) are the
   reference.
 - Data: `assets/topo/earth.json` (47 KB) from `python3 tools/orbit/build_earth.py <folder with Natural Earth 1:50m
   shapefiles>` (coastline + all admin-0 land borders; only coastline pieces under 1.2° dropped; multi-part lines are split). Credit in the footer ("Natural Earth").
