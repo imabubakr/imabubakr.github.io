@@ -238,8 +238,10 @@ behind URL switches; the owner took Claude's picks (2026-10-14), now default, sw
 - Rule of V's (owner, 2026-10-14; `VEE`): one contour's V traced over in pencil in the valley between the fault
   note and B (the sharpest V's on the sheet, checked against the DEM to be valleys, not spurs), note "rule of V's: /
   the V points upstream" (DE "V-Regel: / das V zeigt talaufwärts") just below the tip.
-- Not built yet: a cross-section A-A' across the fault. Owner and Claude agree it should be 2D (the classic
-  geology section: a line on the map, the profile with the fault beneath), not 3D.
+- Decided against (2026-10-14, owner left it to Claude): a cross-section across the fault. It would have been 2D
+  (not 3D); dropped because the sheet is full, the fault note already tells the story, and the owner could not
+  vouch for the subsurface (rocks from GÜK300 would be sourced, but the fault's dip near Freiburg has no solid
+  figure). Don't add more pencil to the hero without the owner asking.
 
 ## Legal notice (Impressum)
 
