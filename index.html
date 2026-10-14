@@ -155,11 +155,10 @@
                     <h4>Geospatial Data Specialist <span class="cv-org"><a href="https://beaglesystems.com/">Beagle Systems</a>, Hamburg</span></h4>
                     <p class="cv-about">Beagle Systems flies long-range drones beyond visual line of sight (BVLOS) to monitor pipelines, utilities and other infrastructure.</p>
                     <ul>
-                      <li>Built an open-source drone LiDAR pipeline that georeferences and classifies point clouds without ground control points and assigns risk categories to vegetation near power-line conductors; now extending it to tree-fall risk analysis.</li>
-                      <li>Built a right-of-way monitoring pipeline: georeferenced drone images by deep feature matching, fine-tuned a foundation model to detect construction activity, used an open-source VLM as gatekeeper for every detection, and added real-time heavy-machinery detection on an NVIDIA Jetson.</li>
-                      <li>Fine-tuned a building-segmentation foundation model and ran it on 10&nbsp;cm orthophotos of the Cologne area.</li>
-                      <li>Built PostGIS and TiTiler services to serve large GeoTIFFs.</li>
-                      <li>Ran pre-flight primary and duplicate checks; helped extend the flight-planning geodatabase.</li>
+                      <li>Developed an open-source drone LiDAR pipeline that georeferences point clouds with PPK and classifies them into ground, vegetation, buildings, conductors and towers. It rebuilds conductors where the scan has gaps by modeling their sag, rates vegetation near the wires by risk category, and is now being extended to tree-fall risk analysis.</li>
+                      <li>Built an AI-driven right-of-way and construction-site monitoring pipeline that georeferences drone images through deep feature matching and flags objects of different categories along pipelines. A fine-tuned foundation model detects the objects, an open-source VLM verifies each one, and an NVIDIA Jetson runs detection in real time.</li>
+                      <li>Fine-tuned a foundation model for building segmentation and applied it to 10&nbsp;cm orthophotos across the Cologne area.</li>
+                      <li>Built PostGIS and TiTiler services that serve large GeoTIFFs to the Beagle Systems frontend, ran pre-flight primary and duplicate checks, and helped expand the flight-planning geodatabase.</li>
                     </ul>
                   </div>
                 </li>
